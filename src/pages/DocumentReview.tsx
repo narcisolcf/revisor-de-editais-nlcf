@@ -3,6 +3,8 @@ import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/useTranslation";
+import { formatDate, formatFileSize } from "@/utils/formatters";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Upload, FileText, CheckCircle, AlertTriangle, Clock } from "lucide-react";
 import { DocumentService } from "@/services/documentService";
@@ -36,6 +38,7 @@ export default function DocumentReview() {
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -46,8 +49,8 @@ export default function DocumentReview() {
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (!allowedTypes.includes(file.type)) {
       toast({
-        title: "Tipo de arquivo não suportado",
-        description: "Por favor, envie apenas arquivos PDF ou DOCX.",
+        title: t('common.error'),
+        description: t('documents.invalidFileType'),
         variant: "destructive",
       });
       return;
@@ -56,8 +59,8 @@ export default function DocumentReview() {
     // Validar tamanho (máximo 10MB)
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: "Arquivo muito grande",
-        description: "O arquivo deve ter no máximo 10MB.",
+        title: t('common.error'),
+        description: t('documents.fileTooBig'),
         variant: "destructive",
       });
       return;
@@ -86,13 +89,13 @@ export default function DocumentReview() {
       setUploadedDocument(mockDocument);
       
       toast({
-        title: "Upload Concluído",
-        description: `Documento ${file.name} foi enviado com sucesso.`,
+        title: t('common.success'),
+        description: t('documents.uploadSuccess'),
       });
     } catch (error) {
       toast({
-        title: "Erro no Upload",
-        description: "Erro ao enviar documento. Tente novamente.",
+        title: t('common.error'),
+        description: t('documents.uploadError'),
         variant: "destructive",
       });
     } finally {
@@ -152,13 +155,13 @@ export default function DocumentReview() {
       setAnalysis(mockAnalysis);
       
       toast({
-        title: "Análise Concluída",
-        description: `Score de conformidade: ${mockAnalysis.scoreConformidade}%`,
+        title: t('common.success'),
+        description: t('documents.analysisComplete'),
       });
     } catch (error) {
       toast({
-        title: "Erro na Análise",
-        description: "Erro ao analisar documento. Tente novamente.",
+        title: t('common.error'),
+        description: t('documents.analysisError'),
         variant: "destructive",
       });
     } finally {
@@ -171,10 +174,10 @@ export default function DocumentReview() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            LicitaReview - Análise de Documentos
+            {t('documents.title')}
           </h1>
           <p className="text-lg text-gray-600">
-            Sistema de revisão automática de documentos licitatórios
+            {t('documents.subtitle')}
           </p>
         </div>
 
@@ -184,10 +187,10 @@ export default function DocumentReview() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                Upload de Documento
+                {t('documents.uploadArea')}
               </CardTitle>
               <CardDescription>
-                Envie arquivos PDF ou DOCX para análise (máx. 10MB)
+                {t('documents.supportedFormats')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -207,15 +210,15 @@ export default function DocumentReview() {
                   {loading ? (
                     <div className="space-y-2">
                       <Clock className="h-6 w-6 mx-auto animate-spin text-government-500" />
-                      <p className="text-government-600 font-medium">Enviando documento...</p>
+                      <p className="text-government-600 font-medium">{t('common.loading')}</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       <p className="text-lg font-medium text-gray-900">
-                        {isDragActive ? 'Solte o arquivo aqui' : 'Arraste e solte ou clique para selecionar'}
+                        {isDragActive ? 'Solte o arquivo aqui' : t('documents.uploadArea')}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Suporta PDF e DOCX até 10MB
+                        {t('documents.supportedFormats')}
                       </p>
                     </div>
                   )}
@@ -229,7 +232,7 @@ export default function DocumentReview() {
                     <div>
                       <p className="font-medium text-green-800">{uploadedDocument.nome}</p>
                       <p className="text-sm text-green-600">
-                        {uploadedDocument.tipo} • {(uploadedDocument.tamanho / 1024 / 1024).toFixed(2)} MB
+                        {uploadedDocument.tipo} • {formatFileSize(uploadedDocument.tamanho)}
                       </p>
                     </div>
                   </div>
@@ -238,7 +241,7 @@ export default function DocumentReview() {
                     disabled={analyzing}
                     className="w-full mt-3"
                   >
-                    {analyzing ? "Analisando Documento..." : "Iniciar Análise"}
+                    {analyzing ? t('documents.analyzing') : t('documents.analyze')}
                   </Button>
                 </div>
               )}
@@ -250,10 +253,10 @@ export default function DocumentReview() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  📊 Resultados da Análise
+                  📊 {t('documents.analysisResults')}
                 </CardTitle>
                 <CardDescription>
-                  Score de Conformidade: {analysis.scoreConformidade}%
+                  {t('documents.conformityScore')}: {analysis.scoreConformidade}%
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -368,10 +371,10 @@ export default function DocumentReview() {
         <Card className="mt-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              📋 Histórico de Documentos
+              📋 {t('documents.documentHistory')}
             </CardTitle>
             <CardDescription>
-              Documentos analisados anteriormente
+              {t('documents.historyDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
