@@ -25,12 +25,13 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        medical: {
-          50: "#F0FDF9",
-          100: "#CCFBF1",
-          500: "#4FD1C5",
-          600: "#319795",
-          700: "#2C7A7B",
+        government: {
+          "50": "hsl(var(--government-50))",
+          "100": "hsl(var(--government-100))",
+          "200": "hsl(var(--government-200))",
+          "500": "hsl(var(--government-500))",
+          "600": "hsl(var(--government-600))",
+          "700": "hsl(var(--government-700))",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",

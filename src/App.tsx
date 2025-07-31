@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
-import Symptoms from "./pages/Symptoms";
+import DocumentReview from "./pages/DocumentReview";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -22,7 +22,7 @@ function App() {
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/symptoms" element={<Symptoms />} />
+            <Route path="/documentos" element={<DocumentReview />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

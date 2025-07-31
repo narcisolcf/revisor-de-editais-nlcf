@@ -21,7 +21,7 @@ export default function LoginForm() {
         title: "Login successful",
         description: "Welcome back!",
       });
-      navigate("/symptoms");
+      navigate("/documentos");
     } else {
       toast({
         title: "Error",
@@ -134,7 +134,7 @@ export default function LoginForm() {
           <div className="text-center">
             <button
               onClick={() => navigate("/signup")}
-              className="text-medical-600 hover:text-medical-700 text-sm transition-colors"
+              className="text-government-600 hover:text-government-700 text-sm transition-colors"
             >
               Don't have an account? Sign up
             </button>
