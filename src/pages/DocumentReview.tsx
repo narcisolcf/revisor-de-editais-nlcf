@@ -80,7 +80,7 @@ export default function DocumentReview() {
         tamanho: file.size,
         urlStorage: 'mock-url',
         status: 'concluido',
-        tipoLicitacao: 'pregao',
+        documentType: 'edital' as any,
         descricao: 'Documento de teste',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -109,7 +109,8 @@ export default function DocumentReview() {
       'application/pdf': ['.pdf'],
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
     },
-    multiple: false
+    multiple: false,
+    disabled: false
   });
 
   const handleAnalyze = async () => {
@@ -124,8 +125,10 @@ export default function DocumentReview() {
       const mockAnalysis: DocumentAnalysis = {
         id: 'analysis_' + Date.now(),
         documentoId: uploadedDocument.id,
+        documentType: 'edital' as any,
         textoExtraido: 'Texto extraído do documento...',
         scoreConformidade: mockAnalysisResults.scoreGeral,
+        specificAnalysis: {},
         problemasEncontrados: [
           {
             tipo: 'prazo_inadequado',
