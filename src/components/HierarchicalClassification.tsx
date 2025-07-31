@@ -35,16 +35,31 @@ export function HierarchicalClassification({
   const documentos = currentClassification.tipoObjeto && currentClassification.modalidadePrincipal && currentClassification.subtipo ? 
     getDocumentosBySubtipo(currentClassification.tipoObjeto, currentClassification.modalidadePrincipal, currentClassification.subtipo) : [];
 
-  const isComplete = !!(
-    currentClassification.tipoObjeto && 
-    currentClassification.modalidadePrincipal && 
-    currentClassification.subtipo && 
-    currentClassification.tipoDocumento
-  );
+  // Validação mais inteligente: verifica se o caminho é válido baseado na estrutura disponível
+  const isComplete = () => {
+    if (!currentClassification.tipoObjeto || !currentClassification.modalidadePrincipal) {
+      return false;
+    }
+    
+    // Se não há subtipo selecionado, verifica se há subtipos disponíveis
+    if (!currentClassification.subtipo) {
+      return subtipos.length === 0; // Se não há subtipos, está completo no nível 2
+    }
+    
+    // Se há subtipo mas não há documento, verifica se há documentos disponíveis
+    if (!currentClassification.tipoDocumento) {
+      return documentos.length === 0; // Se não há documentos, está completo no nível 3
+    }
+    
+    // Se chegou aqui, tem todos os 4 níveis
+    return true;
+  };
+
+  const isValid = isComplete();
 
   useEffect(() => {
-    onValidationChange(isComplete);
-  }, [isComplete, onValidationChange]);
+    onValidationChange(isValid);
+  }, [isValid, onValidationChange]);
 
   useEffect(() => {
     onClassificationChange(currentClassification);
@@ -95,7 +110,7 @@ export function HierarchicalClassification({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           {t('classification.title')}
-          {isComplete && <Badge variant="secondary">{t('classification.complete')}</Badge>}
+          {isValid && <Badge variant="secondary">{t('classification.complete')}</Badge>}
         </CardTitle>
         {breadcrumb.length > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -116,7 +131,7 @@ export function HierarchicalClassification({
             <SelectTrigger>
               <SelectValue placeholder={t('classification.selectTipoObjeto')} />
             </SelectTrigger>
-            <SelectContent className="bg-background border border-border">
+            <SelectContent className="bg-background border border-border z-50">
               {tiposObjeto.map((tipo) => (
                 <SelectItem key={tipo.key} value={tipo.key}>
                   {tipo.nome}
@@ -137,7 +152,7 @@ export function HierarchicalClassification({
             <SelectTrigger>
               <SelectValue placeholder={t('classification.selectModalidade')} />
             </SelectTrigger>
-            <SelectContent className="bg-background border border-border">
+            <SelectContent className="bg-background border border-border z-50">
               {modalidades.map((modalidade) => (
                 <SelectItem key={modalidade.key} value={modalidade.key}>
                   {modalidade.nome}
@@ -148,46 +163,50 @@ export function HierarchicalClassification({
         </div>
 
         {/* Nível 3: Subtipo */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">{t('classification.subtipo')}</label>
-          <Select 
-            value={currentClassification.subtipo || ''} 
-            onValueChange={handleSubtipoChange}
-            disabled={!currentClassification.modalidadePrincipal}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t('classification.selectSubtipo')} />
-            </SelectTrigger>
-            <SelectContent className="bg-background border border-border">
-              {subtipos.map((subtipo) => (
-                <SelectItem key={subtipo.key} value={subtipo.key}>
-                  {subtipo.nome}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {subtipos.length > 0 && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium">{t('classification.subtipo')}</label>
+            <Select 
+              value={currentClassification.subtipo || ''} 
+              onValueChange={handleSubtipoChange}
+              disabled={!currentClassification.modalidadePrincipal}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t('classification.selectSubtipo')} />
+              </SelectTrigger>
+              <SelectContent className="bg-background border border-border z-50">
+                {subtipos.map((subtipo) => (
+                  <SelectItem key={subtipo.key} value={subtipo.key}>
+                    {subtipo.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Nível 4: Tipo de Documento */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">{t('classification.tipoDocumento')}</label>
-          <Select 
-            value={currentClassification.tipoDocumento || ''} 
-            onValueChange={handleDocumentoChange}
-            disabled={!currentClassification.subtipo}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t('classification.selectDocumento')} />
-            </SelectTrigger>
-            <SelectContent className="bg-background border border-border">
-              {documentos.map((documento) => (
-                <SelectItem key={documento.key} value={documento.key}>
-                  {documento.nome}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {documentos.length > 0 && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium">{t('classification.tipoDocumento')}</label>
+            <Select 
+              value={currentClassification.tipoDocumento || ''} 
+              onValueChange={handleDocumentoChange}
+              disabled={!currentClassification.subtipo}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t('classification.selectDocumento')} />
+              </SelectTrigger>
+              <SelectContent className="bg-background border border-border z-50">
+                {documentos.map((documento) => (
+                  <SelectItem key={documento.key} value={documento.key}>
+                    {documento.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

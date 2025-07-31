@@ -52,8 +52,8 @@ export default function DocumentReview() {
     // Validation
     if (!isClassificationValid) {
       toast({
-        title: t('upload.error'),
-        description: t('upload.completeClassification'),
+        title: t('common.error'),
+        description: t('documents.completeClassification'),
         variant: "destructive",
       });
       return;

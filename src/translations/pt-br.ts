@@ -147,6 +147,20 @@ export const ptBR = {
     completeClassification: "Complete a classificação do documento antes do upload"
   },
 
+  classification: {
+    title: "Classificação Hierárquica do Documento",
+    complete: "Completa",
+    incomplete: "Incompleta",
+    tipoObjeto: "Tipo de Objeto",
+    modalidadePrincipal: "Modalidade Principal", 
+    subtipo: "Subtipo",
+    tipoDocumento: "Tipo de Documento",
+    selectTipoObjeto: "Selecione o tipo de objeto",
+    selectModalidade: "Selecione a modalidade principal",
+    selectSubtipo: "Selecione o subtipo",
+    selectDocumento: "Selecione o tipo de documento"
+  },
+
   common: {
     loading: "Carregando...",
     error: "Erro",
