@@ -1,115 +1,112 @@
-import { 
-  collection, 
-  addDoc, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  updateDoc, 
-  query, 
-  where, 
-  orderBy 
-} from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, doc, getDoc, query, where, orderBy, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
-import { DocumentUpload, DocumentAnalysis, Prefeitura, DocumentType } from '@/types/document';
+import { DocumentUpload, DocumentAnalysis, DocumentClassification } from '@/types/document';
 
 export class DocumentService {
-  // Upload de documento
+  private static documentsCollection = 'documentos';
+  private static analysisCollection = 'analises';
+
   static async uploadDocument(
     file: File, 
     prefeituraId: string, 
-    documentType: DocumentType,
+    classification: DocumentClassification, 
     descricao?: string
   ): Promise<DocumentUpload> {
     try {
-      // Upload do arquivo para Storage
-      const fileName = `${Date.now()}_${file.name}`;
-      const storageRef = ref(storage, `documentos/${prefeituraId}/${fileName}`);
+      const timestamp = Date.now();
+      const fileName = `${prefeituraId}/${timestamp}_${file.name}`;
+      const storageRef = ref(storage, `documents/${fileName}`);
+      
       const uploadResult = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(uploadResult.ref);
-
-      // Salvar metadados no Firestore
+      const urlStorage = await getDownloadURL(uploadResult.ref);
+      
       const documentData = {
         prefeituraId,
         nome: file.name,
         tipo: file.type.includes('pdf') ? 'PDF' as const : 'DOCX' as const,
-        documentType,
+        classification,
         tamanho: file.size,
-        urlStorage: downloadURL,
+        urlStorage,
         status: 'pendente' as const,
-        descricao,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        descricao: descricao || '',
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now()
       };
-
-      const docRef = await addDoc(collection(db, 'documentos'), documentData);
+      
+      const docRef = await addDoc(collection(db, this.documentsCollection), documentData);
       
       return {
         id: docRef.id,
-        ...documentData
+        ...documentData,
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
     } catch (error) {
-      console.error('Erro ao fazer upload do documento:', error);
-      throw new Error('Falha no upload do documento');
+      console.error('Error uploading document:', error);
+      throw new Error('Falha ao fazer upload do documento');
     }
   }
 
-  // Buscar documentos de uma prefeitura
   static async getDocumentosByPrefeitura(prefeituraId: string): Promise<DocumentUpload[]> {
     try {
       const q = query(
-        collection(db, 'documentos'),
+        collection(db, this.documentsCollection),
         where('prefeituraId', '==', prefeituraId),
         orderBy('createdAt', 'desc')
       );
       
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as DocumentUpload));
+      const documents: DocumentUpload[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        documents.push({
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt.toDate(),
+          updatedAt: data.updatedAt.toDate()
+        } as DocumentUpload);
+      });
+      
+      return documents;
     } catch (error) {
-      console.error('Erro ao buscar documentos:', error);
+      console.error('Error fetching documents:', error);
       throw new Error('Falha ao buscar documentos');
     }
   }
 
-  // Atualizar status do documento
-  static async updateDocumentStatus(
-    documentId: string, 
-    status: DocumentUpload['status']
-  ): Promise<void> {
+  static async updateDocumentStatus(documentId: string, status: DocumentUpload['status']): Promise<void> {
     try {
-      const docRef = doc(db, 'documentos', documentId);
+      const docRef = doc(db, this.documentsCollection, documentId);
       await updateDoc(docRef, {
         status,
-        updatedAt: new Date()
+        updatedAt: Timestamp.now()
       });
     } catch (error) {
-      console.error('Erro ao atualizar status:', error);
+      console.error('Error updating document status:', error);
       throw new Error('Falha ao atualizar status do documento');
     }
   }
 
-  // Buscar análise de um documento
   static async getAnalysisById(documentId: string): Promise<DocumentAnalysis | null> {
     try {
-      const q = query(
-        collection(db, 'analises'),
-        where('documentoId', '==', documentId)
-      );
+      const docRef = doc(db, this.analysisCollection, documentId);
+      const docSnap = await getDoc(docRef);
       
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) return null;
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          ...data,
+          createdAt: data.createdAt.toDate()
+        } as DocumentAnalysis;
+      }
       
-      const doc = querySnapshot.docs[0];
-      return {
-        id: doc.id,
-        ...doc.data()
-      } as DocumentAnalysis;
-    } catch (error) {
-      console.error('Erro ao buscar análise:', error);
       return null;
+    } catch (error) {
+      console.error('Error fetching analysis:', error);
+      throw new Error('Falha ao buscar análise');
     }
   }
 }

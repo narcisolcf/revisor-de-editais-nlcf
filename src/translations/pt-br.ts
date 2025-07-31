@@ -55,27 +55,6 @@ export const ptBR = {
     documentTypeRequired: "Tipo de documento é obrigatório",
     modalidadeRequired: "Modalidade de licitação é obrigatória",
     
-    // Tipos de documento
-    documentTypes: {
-      edital: "Edital",
-      termo_referencia: "Termo de Referência",
-      minuta_contrato: "Minuta de Contrato",
-      projeto_basico: "Projeto Básico",
-      ata_registro_precos: "Ata de Registro de Preços",
-      parecer_tecnico: "Parecer Técnico"
-    },
-    
-    // Modalidades de licitação
-    modalidades: {
-      pregao_eletronico: "Pregão Eletrônico",
-      pregao_presencial: "Pregão Presencial",
-      concorrencia: "Concorrência",
-      tomada_precos: "Tomada de Preços",
-      convite: "Convite",
-      dispensa: "Dispensa de Licitação",
-      inexigibilidade: "Inexigibilidade"
-    },
-    
     // Campos específicos
     specificFields: {
       // Edital
@@ -164,7 +143,8 @@ export const ptBR = {
     fileTooBig: "Arquivo muito grande. Máximo 10MB.",
     invalidFileType: "Tipo de arquivo inválido. Use PDF ou DOCX.",
     analysisComplete: "Análise concluída com sucesso",
-    analysisError: "Erro durante a análise"
+    analysisError: "Erro durante a análise",
+    completeClassification: "Complete a classificação do documento antes do upload"
   },
 
   common: {

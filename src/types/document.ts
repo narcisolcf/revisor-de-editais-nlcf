@@ -1,32 +1,55 @@
-// Tipos específicos de documentos licitatórios
-export type DocumentType = 
-  | 'edital'
-  | 'termo_referencia'
-  | 'minuta_contrato'
-  | 'projeto_basico'
-  | 'ata_registro_precos'
-  | 'parecer_juridico'
-  | 'parecer_tecnico'
-  | 'planilha_orcamentaria'
-  | 'cronograma'
-  | 'memorial_descritivo';
+// Nova estrutura hierárquica de classificação - Lei 14.133/21
 
-// Modalidades de licitação
-export type ModalidadeLicitacao = 
-  | 'pregao_eletronico'
-  | 'pregao_presencial'
-  | 'concorrencia'
-  | 'tomada_precos'
-  | 'convite'
-  | 'concurso'
-  | 'leilao'
-  | 'rdc'
+// Nível 1: Tipo de Objeto
+export type TipoObjeto = 
+  | 'aquisicao'
+  | 'servico'
+  | 'obra_servicos_eng';
+
+// Nível 2: Modalidade Principal
+export type ModalidadePrincipal = 
+  | 'contratacao_direta'
+  | 'processo_licitatorio'
+  | 'alteracoes_contratuais';
+
+// Nível 3: Subtipo
+export type Subtipo = 
   | 'dispensa'
-  | 'inexigibilidade';
+  | 'adesao'
+  | 'processo_licitatorio'
+  | 'aditivo_quantitativo'
+  | 'aditivo_qualitativo'
+  | 'aditivo_vigencia';
 
-// Configuração específica por tipo de documento
-export interface DocumentTypeConfig {
-  documentType: DocumentType;
+// Nível 4: Tipo de Documento
+export type TipoDocumento = 
+  | 'etp'
+  | 'tr'
+  | 'mapa_riscos'
+  | 'edital'
+  | 'minuta_contrato'
+  | 'impugnacao'
+  | 'projeto_basico';
+
+// Interface para representar a classificação completa
+export interface DocumentClassification {
+  tipoObjeto: TipoObjeto;
+  modalidadePrincipal: ModalidadePrincipal;
+  subtipo: Subtipo;
+  tipoDocumento: TipoDocumento;
+}
+
+// Interface para estrutura hierárquica
+export interface ClassificationNode {
+  nivel: number;
+  nome: string;
+  key: string;
+  filhos: ClassificationNode[];
+}
+
+// Configuração específica por classificação
+export interface DocumentClassificationConfig {
+  classification: DocumentClassification;
   requiredFields: string[];
   analysisParameters: string[];
   validationRules: ValidationRule[];
@@ -43,7 +66,7 @@ export interface ValidationRule {
 // Campos específicos por tipo de documento
 export interface DocumentSpecificFields {
   // Para editais
-  modalidade?: ModalidadeLicitacao;
+  modalidade?: string;
   objetoLicitacao?: string;
   prazoEntregaProposta?: Date;
   criterioJulgamento?: 'menor_preco' | 'melhor_tecnica' | 'tecnica_preco';
@@ -78,11 +101,10 @@ export interface DocumentUpload {
   prefeituraId: string;
   nome: string;
   tipo: 'PDF' | 'DOCX';
-  documentType: DocumentType;
+  classification: DocumentClassification;
   tamanho: number;
   urlStorage: string;
   status: 'pendente' | 'processando' | 'concluido' | 'erro';
-  modalidadeLicitacao?: ModalidadeLicitacao;
   specificFields?: DocumentSpecificFields;
   descricao?: string;
   createdAt: Date;
@@ -92,18 +114,18 @@ export interface DocumentUpload {
 export interface DocumentAnalysis {
   id: string;
   documentoId: string;
-  documentType: DocumentType;
+  classification: DocumentClassification;
   textoExtraido: string;
   scoreConformidade: number;
   problemasEncontrados: Problem[];
   recomendacoes: string[];
   metricas: AnalysisMetrics;
-  specificAnalysis: DocumentTypeSpecificAnalysis;
+  specificAnalysis: DocumentClassificationSpecificAnalysis;
   createdAt: Date;
 }
 
-// Análise específica por tipo de documento
-export interface DocumentTypeSpecificAnalysis {
+// Análise específica por classificação de documento
+export interface DocumentClassificationSpecificAnalysis {
   // Para editais
   prazosAdequados?: boolean;
   modalidadeCorreta?: boolean;
@@ -147,7 +169,7 @@ export interface Problem {
   gravidade: 'baixa' | 'media' | 'alta' | 'critica';
   localizacao?: string;
   sugestaoCorrecao?: string;
-  documentType?: DocumentType;
+  classification?: DocumentClassification;
   categoria?: 'juridico' | 'tecnico' | 'orcamentario' | 'formal';
 }
 
