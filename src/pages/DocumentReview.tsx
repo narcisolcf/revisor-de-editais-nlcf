@@ -2,13 +2,15 @@ import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
 import { formatDate, formatFileSize } from "@/utils/formatters";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { Upload, FileText, CheckCircle, AlertTriangle, Clock } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertTriangle, Clock, FileCheck } from "lucide-react";
 import { DocumentService } from "@/services/documentService";
-import { DocumentUpload, DocumentAnalysis } from "@/types/document";
+import { DocumentUpload, DocumentAnalysis, DocumentType, ModalidadeLicitacao, DocumentSpecificFields } from "@/types/document";
+import { DocumentTypeForm } from "@/components/DocumentTypeForm";
 
 // Mock licitação analysis data
 const mockAnalysisResults = {
@@ -37,6 +39,9 @@ export default function DocumentReview() {
   const [analysis, setAnalysis] = useState<DocumentAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [documentType, setDocumentType] = useState<DocumentType | null>(null);
+  const [modalidade, setModalidade] = useState<ModalidadeLicitacao | null>(null);
+  const [specificFields, setSpecificFields] = useState<DocumentSpecificFields>({});
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -44,6 +49,26 @@ export default function DocumentReview() {
     const file = acceptedFiles[0];
     
     if (!file) return;
+    
+    // Validar se tipo de documento foi selecionado
+    if (!documentType) {
+      toast({
+        title: t('common.error'),
+        description: t('documents.documentTypeRequired'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar se modalidade foi selecionada
+    if (!modalidade) {
+      toast({
+        title: t('common.error'),
+        description: t('documents.modalidadeRequired'),
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Validar tipo de arquivo
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
@@ -80,7 +105,7 @@ export default function DocumentReview() {
         tamanho: file.size,
         urlStorage: 'mock-url',
         status: 'concluido',
-        documentType: 'edital' as any,
+        documentType,
         descricao: 'Documento de teste',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -101,7 +126,7 @@ export default function DocumentReview() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, documentType, modalidade, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -110,7 +135,7 @@ export default function DocumentReview() {
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
     },
     multiple: false,
-    disabled: false
+    disabled: !documentType || !modalidade || loading
   });
 
   const handleAnalyze = async () => {
@@ -125,7 +150,7 @@ export default function DocumentReview() {
       const mockAnalysis: DocumentAnalysis = {
         id: 'analysis_' + Date.now(),
         documentoId: uploadedDocument.id,
-        documentType: 'edital' as any,
+        documentType: documentType!,
         textoExtraido: 'Texto extraído do documento...',
         scoreConformidade: mockAnalysisResults.scoreGeral,
         specificAnalysis: {},
@@ -184,9 +209,75 @@ export default function DocumentReview() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Upload Section */}
+        <div className="grid lg:grid-cols-1 gap-8">
+          {/* Document Classification Section */}
           <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileCheck className="h-5 w-5" />
+                {t('documents.documentClassification')}
+              </CardTitle>
+              <CardDescription>
+                Primeiro, classifique o tipo de documento e modalidade antes do upload
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t('documents.selectDocumentType')} *
+                  </label>
+                  <Select value={documentType || ''} onValueChange={(value) => setDocumentType(value as DocumentType)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('documents.selectDocumentType')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="edital">{t('documents.documentTypes.edital')}</SelectItem>
+                      <SelectItem value="termo_referencia">{t('documents.documentTypes.termo_referencia')}</SelectItem>
+                      <SelectItem value="minuta_contrato">{t('documents.documentTypes.minuta_contrato')}</SelectItem>
+                      <SelectItem value="projeto_basico">{t('documents.documentTypes.projeto_basico')}</SelectItem>
+                      <SelectItem value="ata_registro_precos">{t('documents.documentTypes.ata_registro_precos')}</SelectItem>
+                      <SelectItem value="parecer_tecnico">{t('documents.documentTypes.parecer_tecnico')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t('documents.selectModalidade')} *
+                  </label>
+                  <Select value={modalidade || ''} onValueChange={(value) => setModalidade(value as ModalidadeLicitacao)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('documents.selectModalidade')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pregao_eletronico">{t('documents.modalidades.pregao_eletronico')}</SelectItem>
+                      <SelectItem value="pregao_presencial">{t('documents.modalidades.pregao_presencial')}</SelectItem>
+                      <SelectItem value="concorrencia">{t('documents.modalidades.concorrencia')}</SelectItem>
+                      <SelectItem value="tomada_precos">{t('documents.modalidades.tomada_precos')}</SelectItem>
+                      <SelectItem value="convite">{t('documents.modalidades.convite')}</SelectItem>
+                      <SelectItem value="dispensa">{t('documents.modalidades.dispensa')}</SelectItem>
+                      <SelectItem value="inexigibilidade">{t('documents.modalidades.inexigibilidade')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {documentType && (
+                <DocumentTypeForm
+                  documentType={documentType}
+                  specificFields={specificFields}
+                  modalidade={modalidade}
+                  onSpecificFieldsChange={setSpecificFields}
+                  onModalidadeChange={setModalidade}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Upload Section */}
+            <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
@@ -202,6 +293,8 @@ export default function DocumentReview() {
                 className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
                   isDragActive 
                     ? 'border-government-500 bg-government-50' 
+                    : !documentType || !modalidade
+                    ? 'border-gray-200 bg-gray-50 cursor-not-allowed' 
                     : 'border-gray-300 hover:border-government-400'
                 }`}
               >
@@ -214,6 +307,15 @@ export default function DocumentReview() {
                     <div className="space-y-2">
                       <Clock className="h-6 w-6 mx-auto animate-spin text-government-500" />
                       <p className="text-government-600 font-medium">{t('common.loading')}</p>
+                    </div>
+                  ) : !documentType || !modalidade ? (
+                    <div className="space-y-2">
+                      <p className="text-lg font-medium text-gray-400">
+                        {t('documents.uploadArea')}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Primeiro selecione o tipo de documento e modalidade
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -385,8 +487,9 @@ export default function DocumentReview() {
               Em breve você poderá visualizar o histórico completo de documentos analisados.
             </p>
           </CardContent>
-        </Card>
-      </div>
+            </Card>
+          </div>
+        </div>
     </div>
   );
 }

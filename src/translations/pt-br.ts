@@ -48,6 +48,97 @@ export const ptBR = {
     documentHistory: "Histórico de Documentos",
     historyDesc: "Visualize e gerencie todos os documentos analisados anteriormente",
     
+    // Classificação de documentos
+    documentClassification: "Classificação do Documento",
+    selectDocumentType: "Selecione o tipo de documento",
+    selectModalidade: "Selecione a modalidade de licitação",
+    documentTypeRequired: "Tipo de documento é obrigatório",
+    modalidadeRequired: "Modalidade de licitação é obrigatória",
+    
+    // Tipos de documento
+    documentTypes: {
+      edital: "Edital",
+      termo_referencia: "Termo de Referência",
+      minuta_contrato: "Minuta de Contrato",
+      projeto_basico: "Projeto Básico",
+      ata_registro_precos: "Ata de Registro de Preços",
+      parecer_tecnico: "Parecer Técnico"
+    },
+    
+    // Modalidades de licitação
+    modalidades: {
+      pregao_eletronico: "Pregão Eletrônico",
+      pregao_presencial: "Pregão Presencial",
+      concorrencia: "Concorrência",
+      tomada_precos: "Tomada de Preços",
+      convite: "Convite",
+      dispensa: "Dispensa de Licitação",
+      inexigibilidade: "Inexigibilidade"
+    },
+    
+    // Campos específicos
+    specificFields: {
+      // Edital
+      numeroEdital: "Número do Edital",
+      objetoLicitacao: "Objeto da Licitação",
+      dataAberturaPropostas: "Data de Abertura das Propostas",
+      localAberturaPropostas: "Local de Abertura das Propostas",
+      criterioJulgamento: "Critério de Julgamento",
+      valorEstimado: "Valor Estimado",
+      tipoContratacao: "Tipo de Contratação",
+      
+      // Termo de Referência
+      especificacoesTecnicas: "Especificações Técnicas",
+      quantitativos: "Quantitativos",
+      unidadeMedida: "Unidade de Medida",
+      periodicidadeEntrega: "Periodicidade de Entrega",
+      localEntrega: "Local de Entrega",
+      garantiaMinima: "Garantia Mínima",
+      certificacoesExigidas: "Certificações Exigidas",
+      
+      // Minuta de Contrato
+      prazoVigencia: "Prazo de Vigência",
+      formaPagamento: "Forma de Pagamento",
+      clausulasPenalidades: "Cláusulas de Penalidades",
+      garantiaContratual: "Garantia Contratual",
+      clausulasRescisao: "Cláusulas de Rescisão",
+      obrigacoesContratante: "Obrigações do Contratante",
+      obrigacoesContratado: "Obrigações do Contratado",
+      
+      // Projeto Básico
+      justificativa: "Justificativa",
+      metodologia: "Metodologia",
+      cronogramaExecucao: "Cronograma de Execução",
+      custoBeneficio: "Análise Custo-Benefício",
+      impactoAmbiental: "Impacto Ambiental",
+      normastecnicas: "Normas Técnicas Aplicáveis",
+      
+      // Ata de Registro de Preços
+      prazoValidade: "Prazo de Validade",
+      orgaoGerenciador: "Órgão Gerenciador",
+      orgaosParticipantes: "Órgãos Participantes",
+      condicoesUtilizacao: "Condições de Utilização",
+      itemsRegistrados: "Itens Registrados",
+      precoUnitario: "Preço Unitário",
+      
+      // Parecer Técnico
+      autorParecer: "Autor do Parecer",
+      dataElaboracao: "Data de Elaboração",
+      fundamentacaoLegal: "Fundamentação Legal",
+      analiseDocumentacao: "Análise da Documentação",
+      conclusao: "Conclusão",
+      recomendacoesParecer: "Recomendações"
+    },
+    
+    // Critérios de julgamento
+    criteriosJulgamento: {
+      menor_preco: "Menor Preço",
+      melhor_tecnica: "Melhor Técnica",
+      tecnica_preco: "Técnica e Preço",
+      maior_lance: "Maior Lance",
+      maior_desconto: "Maior Desconto"
+    },
+    
     // Análise específica
     conformityChart: "Distribuição de Conformidade",
     conforming: "Conforme",
