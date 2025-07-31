@@ -1,12 +1,8 @@
-import { collection, addDoc, getDocs, updateDoc, doc, getDoc, query, where, orderBy, Timestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '@/lib/firebase';
+import supabase from '@/lib/supabase';
 import { DocumentUpload, DocumentAnalysis, DocumentClassification } from '@/types/document';
 
 export class DocumentService {
-  private static documentsCollection = 'documentos';
-  private static analysisCollection = 'analises';
-
+  
   static async uploadDocument(
     file: File, 
     prefeituraId: string, 
@@ -16,31 +12,56 @@ export class DocumentService {
     try {
       const timestamp = Date.now();
       const fileName = `${prefeituraId}/${timestamp}_${file.name}`;
-      const storageRef = ref(storage, `documents/${fileName}`);
       
-      const uploadResult = await uploadBytes(storageRef, file);
-      const urlStorage = await getDownloadURL(uploadResult.ref);
+      // Upload file to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(fileName);
       
       const documentData = {
-        prefeituraId,
+        prefeitura_id: prefeituraId,
         nome: file.name,
         tipo: file.type.includes('pdf') ? 'PDF' as const : 'DOCX' as const,
         classification,
         tamanho: file.size,
-        urlStorage,
+        url_storage: publicUrl,
         status: 'pendente' as const,
         descricao: descricao || '',
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
       
-      const docRef = await addDoc(collection(db, this.documentsCollection), documentData);
+      const { data, error } = await supabase
+        .from('documents')
+        .insert([documentData])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
       
       return {
-        id: docRef.id,
-        ...documentData,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        id: data.id,
+        prefeituraId: data.prefeitura_id,
+        nome: data.nome,
+        tipo: data.tipo,
+        classification: data.classification,
+        tamanho: data.tamanho,
+        urlStorage: data.url_storage,
+        status: data.status,
+        descricao: data.descricao,
+        createdAt: new Date(data.created_at),
+        updatedAt: new Date(data.updated_at)
       };
     } catch (error) {
       console.error('Error uploading document:', error);
@@ -50,26 +71,29 @@ export class DocumentService {
 
   static async getDocumentosByPrefeitura(prefeituraId: string): Promise<DocumentUpload[]> {
     try {
-      const q = query(
-        collection(db, this.documentsCollection),
-        where('prefeituraId', '==', prefeituraId),
-        orderBy('createdAt', 'desc')
-      );
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('prefeitura_id', prefeituraId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
       
-      const querySnapshot = await getDocs(q);
-      const documents: DocumentUpload[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        documents.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt.toDate(),
-          updatedAt: data.updatedAt.toDate()
-        } as DocumentUpload);
-      });
-      
-      return documents;
+      return data.map(doc => ({
+        id: doc.id,
+        prefeituraId: doc.prefeitura_id,
+        nome: doc.nome,
+        tipo: doc.tipo,
+        classification: doc.classification,
+        tamanho: doc.tamanho,
+        urlStorage: doc.url_storage,
+        status: doc.status,
+        descricao: doc.descricao,
+        createdAt: new Date(doc.created_at),
+        updatedAt: new Date(doc.updated_at)
+      }));
     } catch (error) {
       console.error('Error fetching documents:', error);
       throw new Error('Falha ao buscar documentos');
@@ -78,11 +102,17 @@ export class DocumentService {
 
   static async updateDocumentStatus(documentId: string, status: DocumentUpload['status']): Promise<void> {
     try {
-      const docRef = doc(db, this.documentsCollection, documentId);
-      await updateDoc(docRef, {
-        status,
-        updatedAt: Timestamp.now()
-      });
+      const { error } = await supabase
+        .from('documents')
+        .update({ 
+          status, 
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', documentId);
+
+      if (error) {
+        throw error;
+      }
     } catch (error) {
       console.error('Error updating document status:', error);
       throw new Error('Falha ao atualizar status do documento');
@@ -91,19 +121,28 @@ export class DocumentService {
 
   static async getAnalysisById(documentId: string): Promise<DocumentAnalysis | null> {
     try {
-      const docRef = doc(db, this.analysisCollection, documentId);
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        return {
-          id: docSnap.id,
-          ...data,
-          createdAt: data.createdAt.toDate()
-        } as DocumentAnalysis;
+      const { data, error } = await supabase
+        .from('document_analyses')
+        .select('*')
+        .eq('document_id', documentId)
+        .single();
+
+      if (error || !data) {
+        return null;
       }
-      
-      return null;
+
+      return {
+        id: data.id,
+        documentoId: data.document_id,
+        classification: data.classification,
+        textoExtraido: data.extracted_text,
+        scoreConformidade: data.conformity_score,
+        problemasEncontrados: data.problems,
+        recomendacoes: data.recommendations,
+        metricas: data.metrics,
+        specificAnalysis: data.specific_analysis,
+        createdAt: new Date(data.created_at)
+      };
     } catch (error) {
       console.error('Error fetching analysis:', error);
       throw new Error('Falha ao buscar análise');

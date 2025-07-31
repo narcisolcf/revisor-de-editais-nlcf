@@ -8,6 +8,7 @@ import { formatDate, formatFileSize } from "@/utils/formatters";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Upload, FileText, CheckCircle, AlertTriangle, Clock, FileCheck } from "lucide-react";
 import { DocumentService } from "@/services/documentService";
+import { DocumentAnalysisService } from "@/services/documentAnalysisService";
 import { DocumentUpload, DocumentAnalysis, DocumentClassification, DocumentSpecificFields } from "@/types/document";
 import { HierarchicalClassification } from "@/components/HierarchicalClassification";
 
@@ -133,49 +134,33 @@ export default function DocumentReview() {
     setAnalyzing(true);
     
     try {
-      // Simular análise (em produção chamaria API do Firebase Functions)
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Extract text from document
+      const mockFile = new File(
+        [new Blob(['Mock file content for analysis'])], 
+        uploadedDocument.nome, 
+        { type: uploadedDocument.tipo.toLowerCase().includes('pdf') ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }
+      );
       
-      const mockAnalysis: DocumentAnalysis = {
-        id: 'analysis_' + Date.now(),
-        documentoId: uploadedDocument.id,
-        classification: uploadedDocument.classification,
-        textoExtraido: 'Texto extraído do documento...',
-        scoreConformidade: mockAnalysisResults.scoreGeral,
-        specificAnalysis: {},
-        problemasEncontrados: [
-          {
-            tipo: 'prazo_inadequado',
-            descricao: 'Prazo de entrega muito curto para o tipo de produto',
-            gravidade: 'alta',
-            localizacao: 'Cláusula 5.2',
-            sugestaoCorrecao: 'Aumentar prazo para 30 dias'
-          },
-          {
-            tipo: 'clausula_faltante',
-            descricao: 'Falta especificação de garantia mínima',
-            gravidade: 'media',
-            localizacao: 'Seção de especificações técnicas'
-          }
-        ],
-        recomendacoes: mockAnalysisResults.recomendacoes,
-        metricas: {
-          totalClauses: 45,
-          validClauses: 35,
-          missingClauses: 5,
-          inconsistencies: 5,
-          processingTime: 2.5
-        },
-        createdAt: new Date()
-      };
+      const textResult = await DocumentAnalysisService.extractTextFromFile(mockFile);
       
-      setAnalysis(mockAnalysis);
+      // Analyze document
+      const analysisResult = await DocumentAnalysisService.analyzeDocument(uploadedDocument, textResult.text);
+      
+      setAnalysis(analysisResult);
+      
+      // Update document status
+      await DocumentService.updateDocumentStatus(uploadedDocument.id, 'concluido');
+      setUploadedDocument(prev => prev ? {
+        ...prev,
+        status: 'concluido'
+      } : null);
       
       toast({
         title: t('common.success'),
-        description: t('documents.analysisComplete'),
+        description: `Análise concluída! Score: ${analysisResult.scoreConformidade}%`,
       });
     } catch (error) {
+      console.error('Erro na análise:', error);
       toast({
         title: t('common.error'),
         description: t('documents.analysisError'),
