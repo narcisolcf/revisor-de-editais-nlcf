@@ -11,14 +11,14 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
-import { DocumentUpload, DocumentAnalysis, Prefeitura } from '@/types/document';
+import { DocumentUpload, DocumentAnalysis, Prefeitura, DocumentType } from '@/types/document';
 
 export class DocumentService {
   // Upload de documento
   static async uploadDocument(
     file: File, 
     prefeituraId: string, 
-    tipoLicitacao: string,
+    documentType: DocumentType,
     descricao?: string
   ): Promise<DocumentUpload> {
     try {
@@ -33,10 +33,10 @@ export class DocumentService {
         prefeituraId,
         nome: file.name,
         tipo: file.type.includes('pdf') ? 'PDF' as const : 'DOCX' as const,
+        documentType,
         tamanho: file.size,
         urlStorage: downloadURL,
         status: 'pendente' as const,
-        tipoLicitacao: tipoLicitacao as DocumentUpload['tipoLicitacao'],
         descricao,
         createdAt: new Date(),
         updatedAt: new Date()
