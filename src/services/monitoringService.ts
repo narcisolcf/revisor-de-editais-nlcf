@@ -1,11 +1,13 @@
-import { ErrorRecord, ErrorContext } from '@/types/error';
-import { createErrorRecord, sanitizeErrorForLogging } from '@/utils/errorUtils';
+import { ErrorRecord, ErrorContext, ConsoleRecord } from '@/types/error';
+import { createErrorRecord, sanitizeErrorForLogging, createConsoleRecord, shouldReportConsoleMessage } from '@/utils/errorUtils';
 import { ErrorReportData } from '@/hooks/useErrorReport';
 
 class MonitoringService {
   private errorQueue: ErrorRecord[] = [];
+  private consoleQueue: ConsoleRecord[] = [];
   private readonly maxQueueSize = 50;
   private readonly isDevelopment = import.meta.env.DEV;
+  private consoleInterceptorInitialized = false;
 
   async reportError(error: Error, context?: ErrorContext): Promise<void> {
     const errorRecord = createErrorRecord(error, undefined, context);
@@ -106,6 +108,81 @@ class MonitoringService {
     this.errorQueue = [];
   }
 
+  initializeConsoleInterceptor(): void {
+    if (this.consoleInterceptorInitialized) return;
+    
+    const originalConsole = {
+      warn: console.warn,
+      error: console.error,
+      log: console.log,
+    };
+
+    // Intercept console.warn
+    console.warn = (...args) => {
+      originalConsole.warn(...args);
+      this.captureConsoleMessage('warn', args);
+    };
+
+    // Intercept console.error
+    console.error = (...args) => {
+      originalConsole.error(...args);
+      this.captureConsoleMessage('error', args);
+    };
+
+    // Optionally intercept console.log in development
+    if (this.isDevelopment) {
+      console.log = (...args) => {
+        originalConsole.log(...args);
+        this.captureConsoleMessage('log', args);
+      };
+    }
+
+    this.consoleInterceptorInitialized = true;
+  }
+
+  private captureConsoleMessage(type: 'warn' | 'error' | 'log', args: any[]): void {
+    const message = args.map(arg => 
+      typeof arg === 'string' ? arg : JSON.stringify(arg)
+    ).join(' ');
+    
+    const record = createConsoleRecord(type, message, args);
+    
+    // Only process if it should be reported
+    if (shouldReportConsoleMessage(record)) {
+      this.addToConsoleQueue(record);
+      
+      if (this.isDevelopment) {
+        console.group(`📊 Console ${type.toUpperCase()} captured`);
+        console.log('Record:', record);
+        console.groupEnd();
+      }
+    }
+  }
+
+  private addToConsoleQueue(record: ConsoleRecord): void {
+    this.consoleQueue.unshift(record);
+    
+    if (this.consoleQueue.length > this.maxQueueSize) {
+      this.consoleQueue = this.consoleQueue.slice(0, this.maxQueueSize);
+    }
+  }
+
+  getConsoleStats(): { total: number; byCategory: Record<string, number>; byType: Record<string, number> } {
+    const byCategory: Record<string, number> = {};
+    const byType: Record<string, number> = {};
+    
+    this.consoleQueue.forEach(record => {
+      byCategory[record.category] = (byCategory[record.category] || 0) + 1;
+      byType[record.type] = (byType[record.type] || 0) + 1;
+    });
+
+    return {
+      total: this.consoleQueue.length,
+      byCategory,
+      byType,
+    };
+  }
+
   getErrorStats(): { total: number; byCategory: Record<string, number> } {
     const byCategory: Record<string, number> = {};
     
@@ -118,6 +195,14 @@ class MonitoringService {
       total: this.errorQueue.length,
       byCategory,
     };
+  }
+
+  getConsoleQueue(): ConsoleRecord[] {
+    return [...this.consoleQueue];
+  }
+
+  clearConsoleQueue(): void {
+    this.consoleQueue = [];
   }
 }
 

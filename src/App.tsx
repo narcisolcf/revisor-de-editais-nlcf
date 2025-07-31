@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ErrorBoundary } from "@/components/error";
+import { ErrorBoundary, ConsoleInterceptor } from "@/components/error";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import DocumentReview from "./pages/DocumentReview";
@@ -20,6 +20,7 @@ function App() {
 
   return (
     <ErrorBoundary onError={handleGlobalError}>
+      <ConsoleInterceptor />
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />

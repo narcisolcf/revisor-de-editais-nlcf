@@ -25,8 +25,20 @@ export function useMonitoring() {
     return monitoringService.getErrorStats();
   }, []);
 
+  const getConsoleStats = useCallback(() => {
+    return monitoringService.getConsoleStats();
+  }, []);
+
   const clearErrors = useCallback(() => {
     monitoringService.clearErrorQueue();
+  }, []);
+
+  const clearConsole = useCallback(() => {
+    monitoringService.clearConsoleQueue();
+  }, []);
+
+  const initializeConsoleCapture = useCallback(() => {
+    monitoringService.initializeConsoleInterceptor();
   }, []);
 
   return {
@@ -34,6 +46,9 @@ export function useMonitoring() {
     trackEvent,
     setUserContext,
     getErrorStats,
+    getConsoleStats,
     clearErrors,
+    clearConsole,
+    initializeConsoleCapture,
   };
 }

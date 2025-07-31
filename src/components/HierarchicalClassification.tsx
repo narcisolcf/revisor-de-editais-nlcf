@@ -115,10 +115,10 @@ export function HierarchicalClassification({
         {breadcrumb.length > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             {breadcrumb.map((item, index) => (
-              <React.Fragment key={index}>
+              <div key={`breadcrumb-${index}`} className="flex items-center gap-2">
                 <span>{item}</span>
                 {index < breadcrumb.length - 1 && <ChevronRight className="h-4 w-4" />}
-              </React.Fragment>
+              </div>
             ))}
           </div>
         )}

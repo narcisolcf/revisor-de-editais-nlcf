@@ -1,5 +1,5 @@
 import { ErrorInfo } from 'react';
-import { ErrorRecord, ErrorContext, ErrorCategory, ErrorSeverity } from '@/types/error';
+import { ErrorRecord, ErrorContext, ErrorCategory, ErrorSeverity, ConsoleRecord, ConsoleCategory } from '@/types/error';
 
 export function generateErrorId(): string {
   const timestamp = Date.now().toString(36);
@@ -96,4 +96,81 @@ export function getErrorDisplayMessage(error: Error): string {
     default:
       return 'Algo deu errado. Nossa equipe foi notificada.';
   }
+}
+
+export function classifyConsoleMessage(type: string, message: string, args: any[]): ConsoleCategory {
+  const msg = message.toLowerCase();
+  
+  // React warnings
+  if (msg.includes('react') || msg.includes('warning:') || msg.includes('validatedomnesting')) {
+    return 'react_warning';
+  }
+  
+  // Performance warnings
+  if (msg.includes('preload') || msg.includes('performance') || msg.includes('loading')) {
+    return 'performance_warning';
+  }
+  
+  // Developer logs
+  if (type === 'log' || msg.includes('debug') || msg.includes('info')) {
+    return 'developer_log';
+  }
+  
+  // Generic console warnings
+  if (type === 'warn') {
+    return 'console_warning';
+  }
+  
+  return 'unknown';
+}
+
+export function getConsoleSeverity(category: ConsoleCategory, type: string): ErrorSeverity {
+  switch (category) {
+    case 'react_warning':
+      return 'medium';
+    case 'performance_warning':
+      return 'low';
+    case 'console_warning':
+      return 'medium';
+    case 'developer_log':
+      return 'low';
+    default:
+      return type === 'error' ? 'high' : 'low';
+  }
+}
+
+export function createConsoleRecord(
+  type: 'warn' | 'error' | 'log',
+  message: string,
+  args: any[]
+): ConsoleRecord {
+  const category = classifyConsoleMessage(type, message, args);
+  const severity = getConsoleSeverity(category, type);
+  
+  return {
+    id: generateErrorId(),
+    type,
+    message,
+    args,
+    timestamp: new Date(),
+    url: window.location.href,
+    userAgent: navigator.userAgent,
+    stack: type === 'error' ? new Error().stack : undefined,
+    category,
+    severity,
+  };
+}
+
+export function shouldReportConsoleMessage(record: ConsoleRecord): boolean {
+  // Don't report known non-critical warnings
+  const ignoredPatterns = [
+    'data-lov-id', // Known Lovable internal attribute
+    'preload but not used', // Performance warnings
+    '[UTS]', // User tracking scripts
+    'hiring!', // Lovable recruitment message
+  ];
+  
+  return !ignoredPatterns.some(pattern => 
+    record.message.toLowerCase().includes(pattern.toLowerCase())
+  );
 }

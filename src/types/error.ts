@@ -11,6 +11,19 @@ export interface ErrorRecord {
   context?: ErrorContext;
 }
 
+export interface ConsoleRecord {
+  id: string;
+  type: 'warn' | 'error' | 'log';
+  message: string;
+  args: any[];
+  timestamp: Date;
+  url: string;
+  userAgent: string;
+  stack?: string;
+  category: ConsoleCategory;
+  severity: ErrorSeverity;
+}
+
 export interface ErrorContext {
   component?: string;
   action?: string;
@@ -46,4 +59,11 @@ export type ErrorCategory =
   | 'authentication'
   | 'business_logic'
   | 'ui_rendering'
+  | 'unknown';
+
+export type ConsoleCategory = 
+  | 'react_warning'
+  | 'performance_warning'
+  | 'console_warning'
+  | 'developer_log'
   | 'unknown';
