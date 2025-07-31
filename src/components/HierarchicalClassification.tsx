@@ -56,6 +56,14 @@ export function HierarchicalClassification({
   };
 
   const isValid = isComplete();
+  
+  // Debug logs
+  console.log('🔍 Classification Debug:', {
+    currentClassification,
+    subtipos: subtipos.length,
+    documentos: documentos.length,
+    isValid
+  });
 
   useEffect(() => {
     onValidationChange(isValid);
