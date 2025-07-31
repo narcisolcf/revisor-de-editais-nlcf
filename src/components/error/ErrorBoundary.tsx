@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo } from 'react';
 import { ErrorBoundaryProps, ErrorBoundaryState } from '@/types/error';
 import { createErrorRecord, sanitizeErrorForLogging } from '@/utils/errorUtils';
+import { monitoringService } from '@/services/monitoringService';
 import ErrorFallback from './ErrorFallback';
 
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -28,6 +29,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     this.setState({
       errorId: errorRecord.id,
       errorInfo,
+    });
+
+    // Report to monitoring service
+    monitoringService.reportError(error, {
+      component: 'ErrorBoundary',
+      action: 'componentDidCatch',
+      metadata: {
+        componentStack: errorInfo.componentStack,
+        errorBoundary: true,
+      },
     });
 
     // Log error to console with structured data

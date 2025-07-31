@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ErrorFallbackProps } from '@/types/error';
 import { getErrorDisplayMessage } from '@/utils/errorUtils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, RefreshCw, Home, MessageCircle } from 'lucide-react';
+import ErrorReportDialog from './ErrorReportDialog';
 
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   error,
@@ -11,6 +12,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   resetError,
   onReport,
 }) => {
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const displayMessage = error ? getErrorDisplayMessage(error) : 'Algo deu errado inesperadamente.';
 
   const handleGoHome = () => {
@@ -18,6 +20,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   };
 
   const handleReport = () => {
+    setIsReportDialogOpen(true);
     if (onReport) {
       onReport(errorId);
     }
@@ -109,6 +112,13 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
           )}
         </CardContent>
       </Card>
+      
+      <ErrorReportDialog
+        open={isReportDialogOpen}
+        onOpenChange={setIsReportDialogOpen}
+        errorId={errorId}
+        error={error}
+      />
     </div>
   );
 };
