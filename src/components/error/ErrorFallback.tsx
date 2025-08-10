@@ -99,7 +99,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
           </div>
 
           {/* Development info */}
-          {process.env.NODE_ENV === 'development' && error && (
+          {import.meta.env.DEV && error && (
             <details className="mt-4">
               <summary className="text-xs text-muted-foreground cursor-pointer">
                 Detalhes técnicos (desenvolvimento)
