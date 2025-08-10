@@ -1,16 +1,21 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
-// Firebase Web config é pública por design. Substitua pelos valores do seu projeto.
+// Seus valores reais do Firebase substituindo os exemplos.
 const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_PROJECT_ID.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: "AIzaSyBzH6WFt7wnRInLih0FuKNoSeE6zKrjJ_U",
+  authDomain: "analisador-de-editais.firebaseapp.com",
+  projectId: "analisador-de-editais",
+  storageBucket: "analisador-de-editais.firebasestorage.app",
+  messagingSenderId: "339989657396",
+  appId: "1:339989657396:web:0620c29b426c5c8394d761",
 };
 
+// Lógica para evitar reinicialização do app (está ótima, pode manter)
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+
+// Exporta a conexão com o banco de dados Firestore
 export const db = getFirestore(app);
+
+// Exporta o app do Firebase para outros usos
 export default app;
