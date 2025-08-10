@@ -220,7 +220,7 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.tipoObjeto')}</label>
           <Select
-            key={`tipo-${classificationTree.length}`}
+            
             value={selectedNodes.tipoObjeto?.key || ''}
             onValueChange={handleTipoObjetoChange}
             disabled={loadingTree || classificationTree.length === 0}
@@ -242,7 +242,7 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.modalidadePrincipal')}</label>
           <Select 
-            key={`modalidade-${selectedNodes.tipoObjeto?.key || 'none'}-${modalidades.length}`}
+            
             value={selectedNodes.modalidadePrincipal?.key || ''}
             onValueChange={handleModalidadeChange}
             disabled={!selectedNodes.tipoObjeto || modalidades.length === 0}
@@ -264,7 +264,7 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.subtipo')}</label>
           <Select 
-            key={`subtipo-${selectedNodes.modalidadePrincipal?.key || 'none'}-${subtipos.length}`}
+            
             value={selectedNodes.subtipo?.key || ''}
             onValueChange={handleSubtipoChange}
             disabled={!selectedNodes.modalidadePrincipal || subtipos.length === 0}
@@ -286,7 +286,7 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.tipoDocumento')}</label>
           <Select 
-            key={`documento-${selectedNodes.subtipo?.key || 'none'}-${documentos.length}`}
+            
             value={selectedNodes.tipoDocumento?.key || ''}
             onValueChange={handleDocumentoChange}
             disabled={!selectedNodes.subtipo || documentos.length === 0}
