@@ -214,35 +214,15 @@ export function isValidClassificationPath(
 }
 
 export function getClassificationBreadcrumb(
-  tipoObjeto?: TipoObjeto,
-  modalidade?: ModalidadePrincipal,
-  subtipo?: Subtipo,
-  documento?: TipoDocumento
+  tipoObjeto?: ClassificationNode,
+  modalidade?: ClassificationNode,
+  subtipo?: ClassificationNode,
+  documento?: ClassificationNode
 ): string[] {
   const breadcrumb: string[] = [];
-  
-  if (tipoObjeto) {
-    const tipo = classificationTree.find(node => node.key === tipoObjeto);
-    if (tipo) breadcrumb.push(tipo.nome);
-  }
-  
-  if (modalidade && tipoObjeto) {
-    const modalidades = getModalidadesByTipo(tipoObjeto);
-    const modalidadeNode = modalidades.find(node => node.key === modalidade);
-    if (modalidadeNode) breadcrumb.push(modalidadeNode.nome);
-  }
-  
-  if (subtipo && tipoObjeto && modalidade) {
-    const subtipos = getSubtiposByModalidade(tipoObjeto, modalidade);
-    const subtipoNode = subtipos.find(node => node.key === subtipo);
-    if (subtipoNode) breadcrumb.push(subtipoNode.nome);
-  }
-  
-  if (documento && tipoObjeto && modalidade && subtipo) {
-    const documentos = getDocumentosBySubtipo(tipoObjeto, modalidade, subtipo);
-    const documentoNode = documentos.find(node => node.key === documento);
-    if (documentoNode) breadcrumb.push(documentoNode.nome);
-  }
-  
+  if (tipoObjeto) breadcrumb.push(tipoObjeto.nome);
+  if (modalidade) breadcrumb.push(modalidade.nome);
+  if (subtipo) breadcrumb.push(subtipo.nome);
+  if (documento) breadcrumb.push(documento.nome);
   return breadcrumb;
 }

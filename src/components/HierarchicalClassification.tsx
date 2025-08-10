@@ -131,7 +131,52 @@ export function HierarchicalClassification({
           </Select>
         </div>
         
-        {/* Adicione os outros níveis (Subtipo, Documento) aqui se necessário, seguindo o mesmo padrão */}
+        {/* Nível 3: Subtipo */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">{t('classification.subtipo')}</label>
+          <Select 
+            value={currentClassification.subtipo?.key || ''}
+            onValueChange={handleSubtipoChange}
+            disabled={!currentClassification.modalidadePrincipal || subtipos.length === 0}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('classification.selectSubtipo')} />
+            </SelectTrigger>
+            <SelectContent>
+              {subtipos.map((subtipo) => (<SelectItem key={subtipo.key} value={subtipo.key}>{subtipo.nome}</SelectItem>))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Nível 4: Tipo de Documento */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">{t('classification.tipoDocumento')}</label>
+          <Select 
+            value={currentClassification.tipoDocumento?.key || ''}
+            onValueChange={handleDocumentoChange}
+            disabled={!currentClassification.subtipo || documentos.length === 0}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('classification.selectDocumento')} />
+            </SelectTrigger>
+            <SelectContent>
+              {documentos.map((documento) => (<SelectItem key={documento.key} value={documento.key}>{documento.nome}</SelectItem>))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Breadcrumb */}
+        {breadcrumb.length > 0 && (
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-4 p-3 bg-muted/50 rounded-lg">
+            {breadcrumb.map((item, index) => (
+              <React.Fragment key={index}>
+                <span>{item}</span>
+                {index < breadcrumb.length - 1 && <ChevronRight className="w-4 h-4" />}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
+
       </CardContent>
     </Card>
   );
