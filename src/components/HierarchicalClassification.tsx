@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight } from 'lucide-react';
 import { DocumentClassification, TipoObjeto, ModalidadePrincipal, Subtipo, TipoDocumento } from '@/types/document';
-import { 
-  getTiposObjeto, 
-  getModalidadesByTipo, 
-  getSubtiposByModalidade, 
+import {
+  getModalidadesByTipo,
+  getSubtiposByModalidade,
   getDocumentosBySubtipo,
   getClassificationBreadcrumb
 } from '@/data/classification';
+import { useTiposObjeto } from '@/hooks/useClassificationData';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface HierarchicalClassificationProps {
@@ -26,8 +26,11 @@ export function HierarchicalClassification({
 }: HierarchicalClassificationProps) {
   const { t } = useTranslation();
   const [currentClassification, setCurrentClassification] = useState<Partial<DocumentClassification>>(classification);
+  const [openTipo, setOpenTipo] = useState(false);
 
-  const tiposObjeto = getTiposObjeto();
+  // Tipos de Objeto vindos do Firebase com fallback local
+  const { data: tiposObjeto = [], isLoading: loadingTipos } = useTiposObjeto();
+
   const modalidades = currentClassification.tipoObjeto ? 
     getModalidadesByTipo(currentClassification.tipoObjeto) : [];
   const subtipos = currentClassification.tipoObjeto && currentClassification.modalidadePrincipal ? 
@@ -135,9 +138,15 @@ export function HierarchicalClassification({
         {/* Nível 1: Tipo de Objeto */}
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.tipoObjeto')}</label>
-          <Select value={currentClassification.tipoObjeto || ''} onValueChange={handleTipoObjetoChange}>
+          <Select
+            open={openTipo}
+            onOpenChange={setOpenTipo}
+            value={currentClassification.tipoObjeto || ''}
+            onValueChange={handleTipoObjetoChange}
+            disabled={loadingTipos}
+          >
             <SelectTrigger>
-              <SelectValue placeholder={t('classification.selectTipoObjeto')} />
+              <SelectValue placeholder={loadingTipos ? t('common.loading') : t('classification.selectTipoObjeto')} />
             </SelectTrigger>
             <SelectContent className="bg-background border border-border z-50">
               {tiposObjeto.map((tipo) => (
