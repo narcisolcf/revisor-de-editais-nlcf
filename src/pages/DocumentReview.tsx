@@ -5,34 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
 import { formatDate, formatFileSize } from "@/utils/formatters";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { Upload, FileText, CheckCircle, AlertTriangle, Clock, FileCheck } from "lucide-react";
+import { Upload, FileText, CheckCircle, Clock } from "lucide-react";
 import { DocumentService } from "@/services/documentService";
 import { DocumentAnalysisService } from "@/services/documentAnalysisService";
 import { DocumentUpload, DocumentAnalysis, DocumentClassification, DocumentSpecificFields } from "@/types/document";
 import { HierarchicalClassification } from "@/components/HierarchicalClassification";
+import AnalysisCharts from '@/components/documents/AnalysisCharts';
+import ProblemsList from '@/components/documents/ProblemsList';
 
-// Mock licitação analysis data
-const mockAnalysisResults = {
-  conformidade: [
-    { name: "Conforme", value: 75, color: "#22C55E" },
-    { name: "Atenção", value: 15, color: "#F59E0B" },
-    { name: "Não Conforme", value: 10, color: "#EF4444" }
-  ],
-  problemas: [
-    { categoria: "Prazos", quantidade: 3, gravidade: "alta", color: "#EF4444" },
-    { categoria: "Cláusulas", quantidade: 5, gravidade: "media", color: "#F59E0B" },
-    { categoria: "Critérios", quantidade: 2, gravidade: "baixa", color: "#22C55E" },
-    { categoria: "Documentação", quantidade: 1, gravidade: "critica", color: "#DC2626" }
-  ],
-  scoreGeral: 78,
-  recomendacoes: [
-    "Revisar prazos de entrega especificados no edital",
-    "Incluir cláusula sobre garantia dos produtos",
-    "Detalhar critérios de julgamento técnico",
-    "Verificar documentação de habilitação exigida"
-  ]
-};
+// Dados de mock movidos para src/data/mockAnalysis.ts
 
 export default function DocumentReview() {
   const [uploadedDocument, setUploadedDocument] = useState<DocumentUpload | null>(null);
@@ -293,86 +274,9 @@ export default function DocumentReview() {
                       <div className="text-sm text-gray-600">Conformidade Geral</div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Conformidade Chart */}
-                      <div>
-                        <h4 className="font-semibold mb-2">Distribuição de Conformidade</h4>
-                        <div className="h-48">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={mockAnalysisResults.conformidade}
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={60}
-                                fill="#8884d8"
-                                dataKey="value"
-                                isAnimationActive={false}
-                                label={({ name, value }) => `${name}: ${value}%`}
-                              >
-                                {mockAnalysisResults.conformidade.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                              </Pie>
-                              <Tooltip />
-                            </PieChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </div>
+<AnalysisCharts />
 
-                      {/* Problems Chart */}
-                      <div>
-                        <h4 className="font-semibold mb-2">Problemas por Categoria</h4>
-                        <div className="h-48">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={mockAnalysisResults.problemas}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="categoria" />
-                              <YAxis />
-                              <Tooltip />
-                              <Bar dataKey="quantidade" fill="#8884d8" isAnimationActive={false}>
-                                {mockAnalysisResults.problemas.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                              </Bar>
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Problems Found */}
-                    <div>
-                      <h4 className="font-semibold mb-2 flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4 text-orange-500" />
-                        Problemas Encontrados
-                      </h4>
-                      <div className="space-y-2">
-                        {analysis.problemasEncontrados.map((problema, index) => (
-                          <div key={index} className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                            <div className="flex items-start gap-2">
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                problema.gravidade === 'critica' ? 'bg-red-600 text-white' :
-                                problema.gravidade === 'alta' ? 'bg-red-500 text-white' :
-                                problema.gravidade === 'media' ? 'bg-orange-500 text-white' :
-                                'bg-yellow-500 text-white'
-                              }`}>
-                                {problema.gravidade}
-                              </span>
-                              <div>
-                                <p className="font-medium text-red-800">{problema.descricao}</p>
-                                {problema.localizacao && (
-                                  <p className="text-sm text-red-600">Local: {problema.localizacao}</p>
-                                )}
-                                {problema.sugestaoCorrecao && (
-                                  <p className="text-sm text-green-700 mt-1">💡 {problema.sugestaoCorrecao}</p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+<ProblemsList problems={analysis.problemasEncontrados} />
 
                     {/* Recommendations */}
                     <div>
