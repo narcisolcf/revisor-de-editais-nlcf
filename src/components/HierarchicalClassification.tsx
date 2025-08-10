@@ -103,7 +103,7 @@ export function HierarchicalClassification({
     <Card>
       <CardHeader>
         <CardTitle>{t('classification.title')}</CardTitle>
-        {breadcrumb.length > 0 && ( /* ...código do breadcrumb... */ )}
+        {breadcrumb.length > 0 && null}
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Nível 1: Tipo de Objeto */}
