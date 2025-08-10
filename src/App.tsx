@@ -10,6 +10,7 @@ import SignUp from "./pages/SignUp";
 import DocumentReview from "./pages/DocumentReview";
 import NotFound from "./pages/NotFound";
 import QAClassification from "./pages/QAClassification";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   const queryClient = new QueryClient();
@@ -28,7 +29,7 @@ function App() {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/documentos" element={<DocumentReview />} />
