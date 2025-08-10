@@ -91,7 +91,7 @@ ${errorInfo.componentStack}
 ADDITIONAL INFO:
 ${JSON.stringify({
   name: error.name,
-  cause: (error as any)?.cause,
+  cause: error.cause,
 }, null, 2)}
     `.trim();
 
