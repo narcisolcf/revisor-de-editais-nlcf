@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import DocumentReview from "./pages/DocumentReview";
 import NotFound from "./pages/NotFound";
+import QAClassification from "./pages/QAClassification";
 
 function App() {
   const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/documentos" element={<DocumentReview />} />
+              <Route path="/qa/classification" element={<QAClassification />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
