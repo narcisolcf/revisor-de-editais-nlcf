@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ChevronRight } from 'lucide-react';
-import { DocumentClassification, TipoObjeto, ModalidadePrincipal, Subtipo, TipoDocumento } from '@/types/document';
+import { DocumentClassification } from '@/types/document';
 import {
   getModalidadesByTipo,
   getSubtiposByModalidade,
@@ -15,16 +14,8 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 interface HierarchicalClassificationProps {
   classification?: Partial<DocumentClassification>;
-  onClassificationChange: (classification: Partial<{ [K in keyof DocumentClassification]: string | undefined }>) => void;
+  onClassificationChange: (classification: Partial<DocumentClassification>) => void;
   onValidationChange: (isValid: boolean) => void;
-}
-
-// Definição local para usar objetos completos no estado
-type LocalClassification = {
-  tipoObjeto?: TipoObjeto;
-  modalidadePrincipal?: ModalidadePrincipal;
-  subtipo?: Subtipo;
-  tipoDocumento?: TipoDocumento;
 }
 
 export function HierarchicalClassification({ 
@@ -33,12 +24,13 @@ export function HierarchicalClassification({
   onValidationChange 
 }: HierarchicalClassificationProps) {
   const { t } = useTranslation();
-  const [currentClassification, setCurrentClassification] = useState<LocalClassification>({});
-  const [openTipo, setOpenTipo] = useState(false);
-
+  
+  // O estado guarda apenas as chaves (strings), como foi originalmente desenhado.
+  const [currentClassification, setCurrentClassification] = useState<Partial<DocumentClassification>>(classification);
+  
   const { data: tiposObjeto = [], isLoading: loadingTipos } = useTiposObjeto();
 
-  // DERIVAÇÃO DE DADOS: Sempre a partir do estado atual com objetos completos
+  // As funções de derivação agora funcionam, pois o estado contém as chaves que elas esperam.
   const modalidades = currentClassification.tipoObjeto ? 
     getModalidadesByTipo(currentClassification.tipoObjeto) : [];
     
@@ -48,47 +40,36 @@ export function HierarchicalClassification({
   const documentos = currentClassification.tipoObjeto && currentClassification.modalidadePrincipal && currentClassification.subtipo ? 
     getDocumentosBySubtipo(currentClassification.tipoObjeto, currentClassification.modalidadePrincipal, currentClassification.subtipo) : [];
 
-  // FUNÇÕES DE ATUALIZAÇÃO DE ESTADO: Garantem que sempre salvamos o objeto completo
-  const handleTipoObjetoChange = (key: string) => {
-    const selected = tiposObjeto.find(item => item.key === key);
+  // As funções de 'change' voltam a ser simples: apenas salvam a chave (string) no estado.
+  const handleTipoObjetoChange = (value: string) => {
     setCurrentClassification({
-      tipoObjeto: selected,
+      tipoObjeto: value,
       modalidadePrincipal: undefined,
       subtipo: undefined,
       tipoDocumento: undefined,
     });
   };
 
-  const handleModalidadeChange = (key: string) => {
-    const selected = modalidades.find(item => item.key === key);
-    setCurrentClassification(prev => ({ ...prev, modalidadePrincipal: selected, subtipo: undefined, tipoDocumento: undefined }));
+  const handleModalidadeChange = (value: string) => {
+    setCurrentClassification(prev => ({ ...prev, modalidadePrincipal: value, subtipo: undefined, tipoDocumento: undefined }));
   };
 
-  const handleSubtipoChange = (key: string) => {
-    const selected = subtipos.find(item => item.key === key);
-    setCurrentClassification(prev => ({ ...prev, subtipo: selected, tipoDocumento: undefined }));
+  const handleSubtipoChange = (value: string) => {
+    setCurrentClassification(prev => ({ ...prev, subtipo: value, tipoDocumento: undefined }));
   };
 
-  const handleDocumentoChange = (key: string) => {
-    const selected = documentos.find(item => item.key === key);
-    setCurrentClassification(prev => ({ ...prev, tipoDocumento: selected }));
+  const handleDocumentoChange = (value: string) => {
+    setCurrentClassification(prev => ({ ...prev, tipoDocumento: value }));
   };
-
-  // EFEITOS COLATERAIS: Notificam o componente pai sobre mudanças
+  
+  // Efeitos para notificar o componente pai
   useEffect(() => {
     const isValid = !!(currentClassification.tipoObjeto && currentClassification.modalidadePrincipal);
     onValidationChange(isValid);
   }, [currentClassification, onValidationChange]);
 
   useEffect(() => {
-    // Envia apenas as 'keys' para o componente pai, para manter o contrato original
-    const outgoing = {
-      tipoObjeto: currentClassification.tipoObjeto?.key,
-      modalidadePrincipal: currentClassification.modalidadePrincipal?.key,
-      subtipo: currentClassification.subtipo?.key,
-      tipoDocumento: currentClassification.tipoDocumento?.key,
-    };
-    onClassificationChange(outgoing);
+    onClassificationChange(currentClassification);
   }, [currentClassification, onClassificationChange]);
 
   const breadcrumb = getClassificationBreadcrumb(
@@ -118,9 +99,7 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.tipoObjeto')}</label>
           <Select
-            open={openTipo}
-            onOpenChange={setOpenTipo}
-            value={currentClassification.tipoObjeto?.key || ''}
+            value={currentClassification.tipoObjeto || ''}
             onValueChange={handleTipoObjetoChange}
             disabled={loadingTipos}
           >
@@ -141,7 +120,7 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.modalidadePrincipal')}</label>
           <Select 
-            value={currentClassification.modalidadePrincipal?.key || ''}
+            value={currentClassification.modalidadePrincipal || ''}
             onValueChange={handleModalidadeChange}
             disabled={!currentClassification.tipoObjeto || modalidades.length === 0}
           >
@@ -158,7 +137,8 @@ export function HierarchicalClassification({
           </Select>
         </div>
         
-        {/* Renderiza os próximos níveis se houver dados */}
+        {/* Adicione os outros níveis (Subtipo, Documento) aqui se necessário, seguindo o mesmo padrão */}
+
       </CardContent>
     </Card>
   );
