@@ -10,14 +10,18 @@ interface TextExtractionResult {
 export class DocumentAnalysisService {
   
   static async extractTextFromFile(file: File): Promise<TextExtractionResult> {
-    const fileType = file.type;
+    const fileType = file.type || '';
+    const fileName = (file as any).name ? String((file as any).name).toLowerCase() : '';
     
-    if (fileType === 'application/pdf') {
+    if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
       return await this.extractTextFromPDF(file);
-    } else if (fileType.includes('document') || fileType.includes('word')) {
+    } else if (
+      fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      fileName.endsWith('.docx')
+    ) {
       return await this.extractTextFromWord(file);
     } else {
-      throw new Error('Tipo de arquivo não suportado para extração de texto');
+      throw new Error('Formato não suportado. Envie PDF ou DOCX (.docx).');
     }
   }
 
@@ -53,8 +57,12 @@ export class DocumentAnalysisService {
       const arrayBuffer = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer });
       return { text: result.value };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro na extração de texto do Word:', error);
+      const message = String(error?.message || '');
+      if (message.includes('central directory') || message.includes('zip file')) {
+        throw new Error('Arquivo .docx inválido ou corrompido. Certifique-se de enviar um .docx válido (não .doc).');
+      }
       throw new Error('Falha ao extrair texto do documento Word');
     }
   }

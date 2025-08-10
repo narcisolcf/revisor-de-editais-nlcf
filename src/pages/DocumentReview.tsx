@@ -42,6 +42,7 @@ export default function DocumentReview() {
   const [classification, setClassification] = useState<Partial<DocumentClassification>>({});
   const [isClassificationValid, setIsClassificationValid] = useState(false);
   const [specificFields, setSpecificFields] = useState<DocumentSpecificFields>({});
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -101,6 +102,7 @@ export default function DocumentReview() {
         updatedAt: new Date()
       };
       
+      setUploadedFile(file);
       setUploadedDocument(mockDocument);
       
       toast({
@@ -129,19 +131,20 @@ export default function DocumentReview() {
   });
 
   const handleAnalyze = async () => {
-    if (!uploadedDocument) return;
+    if (!uploadedDocument || !uploadedFile) {
+      toast({
+        title: t('common.error'),
+        description: t('documents.uploadError'),
+        variant: "destructive",
+      });
+      return;
+    }
     
     setAnalyzing(true);
     
     try {
-      // Extract text from document
-      const mockFile = new File(
-        [new Blob(['Mock file content for analysis'])], 
-        uploadedDocument.nome, 
-        { type: uploadedDocument.tipo.toLowerCase().includes('pdf') ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }
-      );
-      
-      const textResult = await DocumentAnalysisService.extractTextFromFile(mockFile);
+      // Extract text from document (arquivo real)
+      const textResult = await DocumentAnalysisService.extractTextFromFile(uploadedFile);
       
       // Analyze document
       const analysisResult = await DocumentAnalysisService.analyzeDocument(uploadedDocument, textResult.text);
