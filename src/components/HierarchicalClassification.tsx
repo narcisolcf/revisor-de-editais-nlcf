@@ -84,83 +84,92 @@ export function HierarchicalClassification({
     });
   }, [classificationTree, classification]);
 
-  // Handlers simplificados
+  // Handlers simplificados com debounce e guards robustos
   const handleTipoObjetoChange = (key: string) => {
-    if (!key || !classificationTree.length) return;
+    if (!key || !classificationTree.length || loadingTree) return;
     
-    const selected = classificationTree.find(item => item.key === key);
-    if (!selected) {
-      console.warn(`TipoObjeto not found for key: ${key}`);
-      return;
-    }
-    
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Selected tipoObjeto:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
-    }
-    
-    setSelectedNodes({
-      tipoObjeto: selected,
-      modalidadePrincipal: undefined,
-      subtipo: undefined,
-      tipoDocumento: undefined,
-    });
+    // Aguardar próximo tick para garantir que DOM está estável
+    setTimeout(() => {
+      const selected = classificationTree.find(item => item.key === key);
+      if (!selected) {
+        console.warn(`TipoObjeto not found for key: ${key}`);
+        return;
+      }
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Selected tipoObjeto:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
+      }
+      
+      setSelectedNodes({
+        tipoObjeto: selected,
+        modalidadePrincipal: undefined,
+        subtipo: undefined,
+        tipoDocumento: undefined,
+      });
+    }, 0);
   };
 
   const handleModalidadeChange = (key: string) => {
-    if (!key || !modalidades.length) return;
+    if (!key || !modalidades.length || !selectedNodes.tipoObjeto) return;
     
-    const selected = modalidades.find(item => item.key === key);
-    if (!selected) {
-      console.warn(`Modalidade not found for key: ${key}`);
-      return;
-    }
-    
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Selected modalidade:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
-    }
-    
-    setSelectedNodes(prev => ({ 
-      ...prev, 
-      modalidadePrincipal: selected, 
-      subtipo: undefined, 
-      tipoDocumento: undefined 
-    }));
+    setTimeout(() => {
+      const selected = modalidades.find(item => item.key === key);
+      if (!selected) {
+        console.warn(`Modalidade not found for key: ${key}`);
+        return;
+      }
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Selected modalidade:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
+      }
+      
+      setSelectedNodes(prev => ({ 
+        ...prev, 
+        modalidadePrincipal: selected, 
+        subtipo: undefined, 
+        tipoDocumento: undefined 
+      }));
+    }, 0);
   };
 
   const handleSubtipoChange = (key: string) => {
-    if (!key || !subtipos.length) return;
+    if (!key || !subtipos.length || !selectedNodes.modalidadePrincipal) return;
     
-    const selected = subtipos.find(item => item.key === key);
-    if (!selected) {
-      console.warn(`Subtipo not found for key: ${key}`);
-      return;
-    }
-    
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Selected subtipo:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
-    }
-    
-    setSelectedNodes(prev => ({ 
-      ...prev, 
-      subtipo: selected, 
-      tipoDocumento: undefined 
-    }));
+    setTimeout(() => {
+      const selected = subtipos.find(item => item.key === key);
+      if (!selected) {
+        console.warn(`Subtipo not found for key: ${key}`);
+        return;
+      }
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Selected subtipo:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
+      }
+      
+      setSelectedNodes(prev => ({ 
+        ...prev, 
+        subtipo: selected, 
+        tipoDocumento: undefined 
+      }));
+    }, 0);
   };
 
   const handleDocumentoChange = (key: string) => {
-    if (!key || !documentos.length) return;
+    if (!key || !documentos.length || !selectedNodes.subtipo) return;
     
-    const selected = documentos.find(item => item.key === key);
-    if (!selected) {
-      console.warn(`Documento not found for key: ${key}`);
-      return;
-    }
-    
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Selected documento:', { key, nome: selected.nome });
-    }
-    
-    setSelectedNodes(prev => ({ ...prev, tipoDocumento: selected }));
+    setTimeout(() => {
+      const selected = documentos.find(item => item.key === key);
+      if (!selected) {
+        console.warn(`Documento not found for key: ${key}`);
+        return;
+      }
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Selected documento:', { key, nome: selected.nome });
+      }
+      
+      setSelectedNodes(prev => ({ ...prev, tipoDocumento: selected }));
+    }, 0);
   };
   
   // Efeitos para notificar o componente pai
@@ -211,15 +220,20 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.tipoObjeto')}</label>
           <Select
+            key={`tipo-${classificationTree.length}`}
             value={selectedNodes.tipoObjeto?.key || ''}
             onValueChange={handleTipoObjetoChange}
-            disabled={loadingTree}
+            disabled={loadingTree || classificationTree.length === 0}
           >
             <SelectTrigger>
               <SelectValue placeholder={loadingTree ? t('common.loading') : t('classification.selectTipoObjeto')} />
             </SelectTrigger>
             <SelectContent>
-              {classificationTree.map((tipo) => (<SelectItem key={tipo.key} value={tipo.key}>{tipo.nome}</SelectItem>))}
+              {classificationTree.map((tipo) => (
+                <SelectItem key={`tipo-item-${tipo.key}`} value={tipo.key}>
+                  {tipo.nome}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -228,6 +242,7 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.modalidadePrincipal')}</label>
           <Select 
+            key={`modalidade-${selectedNodes.tipoObjeto?.key || 'none'}-${modalidades.length}`}
             value={selectedNodes.modalidadePrincipal?.key || ''}
             onValueChange={handleModalidadeChange}
             disabled={!selectedNodes.tipoObjeto || modalidades.length === 0}
@@ -236,7 +251,11 @@ export function HierarchicalClassification({
               <SelectValue placeholder={t('classification.selectModalidade')} />
             </SelectTrigger>
             <SelectContent>
-              {modalidades.map((modalidade) => (<SelectItem key={modalidade.key} value={modalidade.key}>{modalidade.nome}</SelectItem>))}
+              {modalidades.map((modalidade) => (
+                <SelectItem key={`modalidade-item-${modalidade.key}`} value={modalidade.key}>
+                  {modalidade.nome}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -245,6 +264,7 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.subtipo')}</label>
           <Select 
+            key={`subtipo-${selectedNodes.modalidadePrincipal?.key || 'none'}-${subtipos.length}`}
             value={selectedNodes.subtipo?.key || ''}
             onValueChange={handleSubtipoChange}
             disabled={!selectedNodes.modalidadePrincipal || subtipos.length === 0}
@@ -253,7 +273,11 @@ export function HierarchicalClassification({
               <SelectValue placeholder={t('classification.selectSubtipo')} />
             </SelectTrigger>
             <SelectContent>
-              {subtipos.map((subtipo) => (<SelectItem key={subtipo.key} value={subtipo.key}>{subtipo.nome}</SelectItem>))}
+              {subtipos.map((subtipo) => (
+                <SelectItem key={`subtipo-item-${subtipo.key}`} value={subtipo.key}>
+                  {subtipo.nome}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -262,6 +286,7 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.tipoDocumento')}</label>
           <Select 
+            key={`documento-${selectedNodes.subtipo?.key || 'none'}-${documentos.length}`}
             value={selectedNodes.tipoDocumento?.key || ''}
             onValueChange={handleDocumentoChange}
             disabled={!selectedNodes.subtipo || documentos.length === 0}
@@ -270,7 +295,11 @@ export function HierarchicalClassification({
               <SelectValue placeholder={t('classification.selectDocumento')} />
             </SelectTrigger>
             <SelectContent>
-              {documentos.map((documento) => (<SelectItem key={documento.key} value={documento.key}>{documento.nome}</SelectItem>))}
+              {documentos.map((documento) => (
+                <SelectItem key={`documento-item-${documento.key}`} value={documento.key}>
+                  {documento.nome}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
