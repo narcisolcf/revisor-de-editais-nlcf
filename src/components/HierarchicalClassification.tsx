@@ -13,6 +13,7 @@ interface HierarchicalClassificationProps {
 }
 
 export function HierarchicalClassification({ 
+  classification,
   onClassificationChange, 
   onValidationChange 
 }: HierarchicalClassificationProps) {
@@ -30,6 +31,43 @@ export function HierarchicalClassification({
   const modalidades = selectedNodes.tipoObjeto?.filhos || [];
   const subtipos = selectedNodes.modalidadePrincipal?.filhos || [];
   const documentos = selectedNodes.subtipo?.filhos || [];
+
+  // Hidratacao inicial a partir de props.classification e dados do Firebase
+  useEffect(() => {
+    if (!classification || !classificationTree?.length) return;
+    setSelectedNodes((prev) => {
+      let next = { ...prev };
+      // Nivel 1: tipoObjeto
+      if (!prev.tipoObjeto && classification.tipoObjeto) {
+        const tipo = classificationTree.find((n) => n.key === classification.tipoObjeto);
+        if (tipo) {
+          next = { tipoObjeto: tipo, modalidadePrincipal: undefined, subtipo: undefined, tipoDocumento: undefined };
+        }
+      }
+      // Nivel 2: modalidadePrincipal
+      if (!prev.modalidadePrincipal && next.tipoObjeto && classification.modalidadePrincipal) {
+        const modalidade = next.tipoObjeto.filhos?.find((n) => n.key === classification.modalidadePrincipal);
+        if (modalidade) {
+          next = { ...next, modalidadePrincipal: modalidade, subtipo: undefined, tipoDocumento: undefined };
+        }
+      }
+      // Nivel 3: subtipo
+      if (!prev.subtipo && next.modalidadePrincipal && classification.subtipo) {
+        const subtipo = next.modalidadePrincipal.filhos?.find((n) => n.key === classification.subtipo);
+        if (subtipo) {
+          next = { ...next, subtipo, tipoDocumento: undefined };
+        }
+      }
+      // Nivel 4: tipoDocumento
+      if (!prev.tipoDocumento && next.subtipo && classification.tipoDocumento) {
+        const documento = next.subtipo.filhos?.find((n) => n.key === classification.tipoDocumento);
+        if (documento) {
+          next = { ...next, tipoDocumento: documento };
+        }
+      }
+      return next;
+    });
+  }, [classificationTree, classification]);
 
   // Handlers simplificados
   const handleTipoObjetoChange = (key: string) => {
@@ -68,7 +106,12 @@ export function HierarchicalClassification({
   
   // Efeitos para notificar o componente pai
   useEffect(() => {
-    const isValid = !!(selectedNodes.tipoObjeto && selectedNodes.modalidadePrincipal);
+    const consistent = (
+      (!selectedNodes.modalidadePrincipal || selectedNodes.tipoObjeto?.filhos?.some(n => n.key === selectedNodes.modalidadePrincipal?.key)) &&
+      (!selectedNodes.subtipo || selectedNodes.modalidadePrincipal?.filhos?.some(n => n.key === selectedNodes.subtipo?.key)) &&
+      (!selectedNodes.tipoDocumento || selectedNodes.subtipo?.filhos?.some(n => n.key === selectedNodes.tipoDocumento?.key))
+    );
+    const isValid = !!(selectedNodes.tipoObjeto && selectedNodes.modalidadePrincipal && consistent);
     onValidationChange(isValid);
   }, [selectedNodes, onValidationChange]);
 
