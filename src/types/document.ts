@@ -63,6 +63,34 @@ export interface ValidationRule {
   message: string;
 }
 
+// Regras de análise de conteúdo (parâmetros de avaliação)
+export type RuleSeverity = 'baixa' | 'media' | 'alta' | 'critica';
+export type RuleCategory = 'juridico' | 'tecnico' | 'orcamentario' | 'formal';
+export type AnalysisRuleType = 'keyword_presence' | 'keyword_any' | 'pattern';
+
+export interface AnalysisRule {
+  id: string;
+  description: string;
+  type: AnalysisRuleType;
+  // Para 'keyword_presence', todos devem existir
+  keywordsAll?: string[];
+  // Para 'keyword_any', pelo menos um deve existir
+  keywordsAny?: string[];
+  // Para 'pattern', regex em string (será compilada)
+  pattern?: string;
+  severity: RuleSeverity;
+  category: RuleCategory;
+  suggestion?: string;
+  // Tipo de problema gerado quando a regra falhar
+  problemType?: Problem['tipo'];
+}
+
+export interface AnalysisRuleSet {
+  requiredKeywords?: string[];
+  optionalKeywords?: string[];
+  rules?: AnalysisRule[];
+}
+
 // Campos específicos por tipo de documento
 export interface DocumentSpecificFields {
   // Para editais

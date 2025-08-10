@@ -1,7 +1,7 @@
 import { DocumentUpload, DocumentAnalysis, DocumentClassification, Problem } from '@/types/document';
 import supabase from '@/lib/supabase';
 import mammoth from 'mammoth';
-
+import { getRulesForClassification } from '@/data/analysisRules';
 interface TextExtractionResult {
   text: string;
   pages?: number;
@@ -92,37 +92,34 @@ export class DocumentAnalysisService {
     return analysis;
   }
 
-  private static async analyzeConformity(text: string, classification: DocumentClassification): Promise<Problem[]> {
-    const problems: Problem[] = [];
-    const textLower = text.toLowerCase();
+private static async analyzeConformity(text: string, classification: DocumentClassification): Promise<Problem[]> {
+  const textLower = text.toLowerCase();
 
-    // Generic validations
-    if (!textLower.includes('prazo')) {
-      problems.push({
-        tipo: 'clausula_faltante',
-        descricao: 'Documento não especifica claramente os prazos',
-        gravidade: 'alta',
-        localizacao: 'Documento geral',
-        sugestaoCorrecao: 'Incluir cláusula específica sobre prazos de entrega e execução',
-        classification,
-        categoria: 'juridico'
-      });
-    }
+  // 1) Executa regras centralizadas
+  let problems: Problem[] = await this.evaluateRules(textLower, classification);
 
-    // Classification-specific validations
-    if (classification.tipoDocumento === 'edital') {
-      await this.validateEdital(textLower, problems, classification);
-    } else if (classification.tipoDocumento === 'tr') {
-      await this.validateTermoReferencia(textLower, problems, classification);
-    }
-
-    // Modalidade-specific validations
-    if (classification.modalidadePrincipal === 'processo_licitatorio') {
-      await this.validateProcessoLicitatorio(textLower, problems, classification);
-    }
-
-    return problems;
+  // 2) Regras específicas existentes (mantidas como hooks adicionais)
+  if (classification.tipoDocumento === 'edital') {
+    await this.validateEdital(textLower, problems, classification);
+  } else if (classification.tipoDocumento === 'tr') {
+    await this.validateTermoReferencia(textLower, problems, classification);
   }
+
+  if (classification.modalidadePrincipal === 'processo_licitatorio') {
+    await this.validateProcessoLicitatorio(textLower, problems, classification);
+  }
+
+  // 3) Deduplicação básica por (tipo|descrição)
+  const seen = new Set<string>();
+  problems = problems.filter((p) => {
+    const key = `${p.tipo}|${p.descricao}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return problems;
+}
 
   private static async validateEdital(text: string, problems: Problem[], classification: DocumentClassification): Promise<void> {
     if (!text.includes('objeto') && !text.includes('finalidade')) {
@@ -176,6 +173,51 @@ export class DocumentAnalysisService {
         categoria: 'formal'
       });
     }
+  }
+
+  private static async evaluateRules(textLower: string, classification: DocumentClassification): Promise<Problem[]> {
+    const rules = getRulesForClassification(classification);
+    const problems: Problem[] = [];
+
+    for (const rule of rules) {
+      let failed = false;
+
+      if (rule.type === 'keyword_presence') {
+        const list = rule.keywordsAll ?? [];
+        if (list.length > 0) {
+          failed = list.some((kw) => !textLower.includes(kw.toLowerCase()));
+        }
+      } else if (rule.type === 'keyword_any') {
+        const list = rule.keywordsAny ?? [];
+        if (list.length > 0) {
+          failed = !list.some((kw) => textLower.includes(kw.toLowerCase()));
+        }
+      } else if (rule.type === 'pattern') {
+        if (rule.pattern) {
+          try {
+            const regex = new RegExp(rule.pattern, 'i');
+            failed = !regex.test(textLower);
+          } catch (e) {
+            // Se regex inválida, ignora a regra
+            failed = false;
+          }
+        }
+      }
+
+      if (failed) {
+        problems.push({
+          tipo: rule.problemType ?? 'inconsistencia',
+          descricao: rule.description,
+          gravidade: rule.severity,
+          localizacao: 'Documento geral',
+          sugestaoCorrecao: rule.suggestion,
+          classification,
+          categoria: rule.category,
+        });
+      }
+    }
+
+    return problems;
   }
 
   private static calculateConformityScore(problems: Problem[]): number {
