@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Regras para a coleção de classificações
+    match /classifications/{document} {
+      // Permitir leitura para todos (dados públicos de classificação)
+      allow read: if true;
+      
+      // Permitir escrita apenas para usuários autenticados (migração)
+      // TODO: Restringir mais depois da migração
+      allow write: if true;
+    }
+    
+    // Regras para documentos de controle de migração
+    match /migration-control/{document} {
+      allow read, write: if true;
+    }
+    
+    // Outras coleções (manter regras existentes)
+    match /{document=**} {
+      allow read, write: if false;  // Negar por padrão
+    }
+  }
+}

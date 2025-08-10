@@ -1,4 +1,4 @@
-import { ClassificationNode, TipoObjeto, ModalidadePrincipal, Subtipo, TipoDocumento } from '@/types/document';
+import { ClassificationNode } from '@/types/document';
 
 // Estrutura hierárquica completa baseada na classificação AGU
 export const classificationTree: ClassificationNode[] = [
@@ -175,54 +175,21 @@ export const classificationTree: ClassificationNode[] = [
   }
 ];
 
-// Funções utilitárias para navegar na estrutura hierárquica
+// Funções utilitárias mantidas apenas para compatibilidade durante transição
 
 export function getTiposObjeto(): ClassificationNode[] {
   return classificationTree;
 }
 
-export function getModalidadesByTipo(tipoObjeto: TipoObjeto): ClassificationNode[] {
-  const tipo = classificationTree.find(node => node.key === tipoObjeto);
-  return tipo?.filhos || [];
-}
-
-export function getSubtiposByModalidade(tipoObjeto: TipoObjeto, modalidade: ModalidadePrincipal): ClassificationNode[] {
-  const tipo = classificationTree.find(node => node.key === tipoObjeto);
-  const modalidadeNode = tipo?.filhos.find(node => node.key === modalidade);
-  return modalidadeNode?.filhos || [];
-}
-
-export function getDocumentosBySubtipo(
-  tipoObjeto: TipoObjeto, 
-  modalidade: ModalidadePrincipal, 
-  subtipo: Subtipo
-): ClassificationNode[] {
+// Função para validação de caminhos de classificação
+export function isValidClassificationPath(
+  tipoObjeto: string,
+  modalidade: string,
+  subtipo: string,
+  documento: string
+): boolean {
   const tipo = classificationTree.find(node => node.key === tipoObjeto);
   const modalidadeNode = tipo?.filhos.find(node => node.key === modalidade);
   const subtipoNode = modalidadeNode?.filhos.find(node => node.key === subtipo);
-  return subtipoNode?.filhos || [];
-}
-
-export function isValidClassificationPath(
-  tipoObjeto: TipoObjeto,
-  modalidade: ModalidadePrincipal,
-  subtipo: Subtipo,
-  documento: TipoDocumento
-): boolean {
-  const documentos = getDocumentosBySubtipo(tipoObjeto, modalidade, subtipo);
-  return documentos.some(doc => doc.key === documento);
-}
-
-export function getClassificationBreadcrumb(
-  tipoObjeto?: ClassificationNode,
-  modalidade?: ClassificationNode,
-  subtipo?: ClassificationNode,
-  documento?: ClassificationNode
-): string[] {
-  const breadcrumb: string[] = [];
-  if (tipoObjeto) breadcrumb.push(tipoObjeto.nome);
-  if (modalidade) breadcrumb.push(modalidade.nome);
-  if (subtipo) breadcrumb.push(subtipo.nome);
-  if (documento) breadcrumb.push(documento.nome);
-  return breadcrumb;
+  return subtipoNode?.filhos.some(doc => doc.key === documento) || false;
 }

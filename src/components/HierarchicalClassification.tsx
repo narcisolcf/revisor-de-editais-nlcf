@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronRight } from 'lucide-react';
-import { DocumentClassification, ClassificationNode, TipoObjeto, ModalidadePrincipal, Subtipo, TipoDocumento } from '@/types/document';
-import { getClassificationBreadcrumb } from '@/data/classification';
-import { useTiposObjeto } from '@/hooks/useClassificationData';
+import { DocumentClassification, ClassificationNode } from '@/types/document';
+import { useClassificationTree } from '@/hooks/useClassificationData';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface HierarchicalClassificationProps {
@@ -13,37 +12,29 @@ interface HierarchicalClassificationProps {
   onValidationChange: (isValid: boolean) => void;
 }
 
-type LocalClassificationState = {
-  tipoObjeto?: ClassificationNode;
-  modalidadePrincipal?: ClassificationNode;
-  subtipo?: ClassificationNode;
-  tipoDocumento?: ClassificationNode;
-}
-
 export function HierarchicalClassification({ 
-  classification = {}, 
   onClassificationChange, 
   onValidationChange 
 }: HierarchicalClassificationProps) {
   const { t } = useTranslation();
-  const [currentClassification, setCurrentClassification] = useState<LocalClassificationState>({});
+  const [selectedNodes, setSelectedNodes] = useState<{
+    tipoObjeto?: ClassificationNode;
+    modalidadePrincipal?: ClassificationNode;
+    subtipo?: ClassificationNode;
+    tipoDocumento?: ClassificationNode;
+  }>({});
   
-  const { data: tiposObjeto = [], isLoading: loadingTipos } = useTiposObjeto();
+  const { data: classificationTree = [], isLoading: loadingTree } = useClassificationTree();
 
-  // <<< AQUI ESTÁ A LÓGICA FINAL E SIMPLIFICADA >>>
-  // As modalidades são simplesmente os filhos do Tipo de Objeto selecionado.
-  const modalidades = currentClassification.tipoObjeto?.filhos || [];
-    
-  // Os subtipos são simplesmente os filhos da Modalidade selecionada.
-  const subtipos = currentClassification.modalidadePrincipal?.filhos || [];
+  // Estrutura hierárquica simplificada - navegar diretamente pelos filhos
+  const modalidades = selectedNodes.tipoObjeto?.filhos || [];
+  const subtipos = selectedNodes.modalidadePrincipal?.filhos || [];
+  const documentos = selectedNodes.subtipo?.filhos || [];
 
-  // Os documentos são simplesmente os filhos do Subtipo selecionado.
-  const documentos = currentClassification.subtipo?.filhos || [];
-
-  // As funções de 'change' encontram o objeto completo e o salvam no estado.
+  // Handlers simplificados
   const handleTipoObjetoChange = (key: string) => {
-    const selected = tiposObjeto.find(item => item.key === key);
-    setCurrentClassification({
+    const selected = classificationTree.find(item => item.key === key);
+    setSelectedNodes({
       tipoObjeto: selected,
       modalidadePrincipal: undefined,
       subtipo: undefined,
@@ -53,63 +44,80 @@ export function HierarchicalClassification({
 
   const handleModalidadeChange = (key: string) => {
     const selected = modalidades.find(item => item.key === key);
-    setCurrentClassification(prev => ({ ...prev, modalidadePrincipal: selected, subtipo: undefined, tipoDocumento: undefined }));
+    setSelectedNodes(prev => ({ 
+      ...prev, 
+      modalidadePrincipal: selected, 
+      subtipo: undefined, 
+      tipoDocumento: undefined 
+    }));
   };
 
   const handleSubtipoChange = (key: string) => {
     const selected = subtipos.find(item => item.key === key);
-    setCurrentClassification(prev => ({ ...prev, subtipo: selected, tipoDocumento: undefined }));
+    setSelectedNodes(prev => ({ 
+      ...prev, 
+      subtipo: selected, 
+      tipoDocumento: undefined 
+    }));
   };
 
   const handleDocumentoChange = (key: string) => {
     const selected = documentos.find(item => item.key === key);
-    setCurrentClassification(prev => ({ ...prev, tipoDocumento: selected }));
+    setSelectedNodes(prev => ({ ...prev, tipoDocumento: selected }));
   };
   
   // Efeitos para notificar o componente pai
   useEffect(() => {
-    const isValid = !!(currentClassification.tipoObjeto && currentClassification.modalidadePrincipal);
+    const isValid = !!(selectedNodes.tipoObjeto && selectedNodes.modalidadePrincipal);
     onValidationChange(isValid);
-  }, [currentClassification, onValidationChange]);
+  }, [selectedNodes, onValidationChange]);
 
   useEffect(() => {
-    const outgoing: Partial<DocumentClassification> = {
-      tipoObjeto: currentClassification.tipoObjeto?.key as TipoObjeto,
-      modalidadePrincipal: currentClassification.modalidadePrincipal?.key as ModalidadePrincipal,
-      subtipo: currentClassification.subtipo?.key as Subtipo,
-      tipoDocumento: currentClassification.tipoDocumento?.key as TipoDocumento,
-    };
+    const outgoing: Partial<DocumentClassification> = {};
+    
+    if (selectedNodes.tipoObjeto?.key) {
+      outgoing.tipoObjeto = selectedNodes.tipoObjeto.key as DocumentClassification['tipoObjeto'];
+    }
+    if (selectedNodes.modalidadePrincipal?.key) {
+      outgoing.modalidadePrincipal = selectedNodes.modalidadePrincipal.key as DocumentClassification['modalidadePrincipal'];
+    }
+    if (selectedNodes.subtipo?.key) {
+      outgoing.subtipo = selectedNodes.subtipo.key as DocumentClassification['subtipo'];
+    }
+    if (selectedNodes.tipoDocumento?.key) {
+      outgoing.tipoDocumento = selectedNodes.tipoDocumento.key as DocumentClassification['tipoDocumento'];
+    }
+    
     onClassificationChange(outgoing);
-  }, [currentClassification, onClassificationChange]);
+  }, [selectedNodes, onClassificationChange]);
 
-  // Esta função agora precisa receber os objetos para funcionar corretamente.
-  const breadcrumb = getClassificationBreadcrumb(
-    currentClassification.tipoObjeto,
-    currentClassification.modalidadePrincipal,
-    currentClassification.subtipo,
-    currentClassification.tipoDocumento
-  );
+  // Criar breadcrumb diretamente dos nós selecionados
+  const breadcrumb = [
+    selectedNodes.tipoObjeto?.nome,
+    selectedNodes.modalidadePrincipal?.nome,
+    selectedNodes.subtipo?.nome,
+    selectedNodes.tipoDocumento?.nome
+  ].filter(Boolean);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>{t('classification.title')}</CardTitle>
-        {/* ... código do breadcrumb ... */}
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Nível 1: Tipo de Objeto */}
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.tipoObjeto')}</label>
           <Select
-            value={currentClassification.tipoObjeto?.key || ''}
+            value={selectedNodes.tipoObjeto?.key || ''}
             onValueChange={handleTipoObjetoChange}
-            disabled={loadingTipos}
+            disabled={loadingTree}
           >
             <SelectTrigger>
-              <SelectValue placeholder={loadingTipos ? t('common.loading') : t('classification.selectTipoObjeto')} />
+              <SelectValue placeholder={loadingTree ? t('common.loading') : t('classification.selectTipoObjeto')} />
             </SelectTrigger>
             <SelectContent>
-              {tiposObjeto.map((tipo) => (<SelectItem key={tipo.key} value={tipo.key}>{tipo.nome}</SelectItem>))}
+              {classificationTree.map((tipo) => (<SelectItem key={tipo.key} value={tipo.key}>{tipo.nome}</SelectItem>))}
             </SelectContent>
           </Select>
         </div>
@@ -118,9 +126,9 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.modalidadePrincipal')}</label>
           <Select 
-            value={currentClassification.modalidadePrincipal?.key || ''}
+            value={selectedNodes.modalidadePrincipal?.key || ''}
             onValueChange={handleModalidadeChange}
-            disabled={!currentClassification.tipoObjeto || modalidades.length === 0}
+            disabled={!selectedNodes.tipoObjeto || modalidades.length === 0}
           >
             <SelectTrigger>
               <SelectValue placeholder={t('classification.selectModalidade')} />
@@ -135,9 +143,9 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.subtipo')}</label>
           <Select 
-            value={currentClassification.subtipo?.key || ''}
+            value={selectedNodes.subtipo?.key || ''}
             onValueChange={handleSubtipoChange}
-            disabled={!currentClassification.modalidadePrincipal || subtipos.length === 0}
+            disabled={!selectedNodes.modalidadePrincipal || subtipos.length === 0}
           >
             <SelectTrigger>
               <SelectValue placeholder={t('classification.selectSubtipo')} />
@@ -152,9 +160,9 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.tipoDocumento')}</label>
           <Select 
-            value={currentClassification.tipoDocumento?.key || ''}
+            value={selectedNodes.tipoDocumento?.key || ''}
             onValueChange={handleDocumentoChange}
-            disabled={!currentClassification.subtipo || documentos.length === 0}
+            disabled={!selectedNodes.subtipo || documentos.length === 0}
           >
             <SelectTrigger>
               <SelectValue placeholder={t('classification.selectDocumento')} />
