@@ -8,6 +8,12 @@ class MonitoringService {
   private readonly maxQueueSize = 50;
   private readonly isDevelopment = import.meta.env.DEV;
   private consoleInterceptorInitialized = false;
+  private originalConsole = {
+    warn: console.warn.bind(console),
+    error: console.error.bind(console),
+    log: console.log.bind(console),
+  };
+  private isCapturingConsole = false;
 
   async reportError(error: Error, context?: ErrorContext): Promise<void> {
     const errorRecord = createErrorRecord(error, undefined, context);
@@ -108,37 +114,51 @@ class MonitoringService {
     this.errorQueue = [];
   }
 
-  initializeConsoleInterceptor(): void {
-    if (this.consoleInterceptorInitialized) return;
-    
-    const originalConsole = {
-      warn: console.warn,
-      error: console.error,
-      log: console.log,
-    };
+initializeConsoleInterceptor(): void {
+  if (this.consoleInterceptorInitialized) return;
 
-    // Intercept console.warn
-    console.warn = (...args) => {
-      originalConsole.warn(...args);
+  const oc = this.originalConsole;
+
+  // Intercept console.warn
+  console.warn = (...args: any[]) => {
+    oc.warn(...args);
+    if (this.isCapturingConsole) return;
+    this.isCapturingConsole = true;
+    try {
       this.captureConsoleMessage('warn', args);
-    };
-
-    // Intercept console.error
-    console.error = (...args) => {
-      originalConsole.error(...args);
-      this.captureConsoleMessage('error', args);
-    };
-
-    // Optionally intercept console.log in development
-    if (this.isDevelopment) {
-      console.log = (...args) => {
-        originalConsole.log(...args);
-        this.captureConsoleMessage('log', args);
-      };
+    } finally {
+      this.isCapturingConsole = false;
     }
+  };
 
-    this.consoleInterceptorInitialized = true;
+  // Intercept console.error
+  console.error = (...args: any[]) => {
+    oc.error(...args);
+    if (this.isCapturingConsole) return;
+    this.isCapturingConsole = true;
+    try {
+      this.captureConsoleMessage('error', args);
+    } finally {
+      this.isCapturingConsole = false;
+    }
+  };
+
+  // Optionally intercept console.log in development
+  if (this.isDevelopment) {
+    console.log = (...args: any[]) => {
+      oc.log(...args);
+      if (this.isCapturingConsole) return;
+      this.isCapturingConsole = true;
+      try {
+        this.captureConsoleMessage('log', args);
+      } finally {
+        this.isCapturingConsole = false;
+      }
+    };
   }
+
+  this.consoleInterceptorInitialized = true;
+}
 
   private captureConsoleMessage(type: 'warn' | 'error' | 'log', args: any[]): void {
     const message = args.map(arg => 
@@ -151,11 +171,11 @@ class MonitoringService {
     if (shouldReportConsoleMessage(record)) {
       this.addToConsoleQueue(record);
       
-      if (this.isDevelopment) {
-        console.group(`📊 Console ${type.toUpperCase()} captured`);
-        console.log('Record:', record);
-        console.groupEnd();
-      }
+if (this.isDevelopment) {
+  console.group(`📊 Console ${type.toUpperCase()} captured`);
+  this.originalConsole.log('Record:', record);
+  console.groupEnd();
+}
     }
   }
 

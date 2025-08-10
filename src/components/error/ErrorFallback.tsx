@@ -113,12 +113,14 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
         </CardContent>
       </Card>
       
-      <ErrorReportDialog
-        open={isReportDialogOpen}
-        onOpenChange={setIsReportDialogOpen}
-        errorId={errorId}
-        error={error}
-      />
+      {isReportDialogOpen && (
+        <ErrorReportDialog
+          open={isReportDialogOpen}
+          onOpenChange={setIsReportDialogOpen}
+          errorId={errorId}
+          error={error}
+        />
+      )}
     </div>
   );
 };

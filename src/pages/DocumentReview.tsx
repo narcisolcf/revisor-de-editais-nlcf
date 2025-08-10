@@ -307,6 +307,7 @@ export default function DocumentReview() {
                                 outerRadius={60}
                                 fill="#8884d8"
                                 dataKey="value"
+                                isAnimationActive={false}
                                 label={({ name, value }) => `${name}: ${value}%`}
                               >
                                 {mockAnalysisResults.conformidade.map((entry, index) => (
@@ -329,7 +330,7 @@ export default function DocumentReview() {
                               <XAxis dataKey="categoria" />
                               <YAxis />
                               <Tooltip />
-                              <Bar dataKey="quantidade" fill="#8884d8">
+                              <Bar dataKey="quantidade" fill="#8884d8" isAnimationActive={false}>
                                 {mockAnalysisResults.problemas.map((entry, index) => (
                                   <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
