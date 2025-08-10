@@ -25,7 +25,22 @@ export function HierarchicalClassification({
     tipoDocumento?: ClassificationNode;
   }>({});
   
-  const { data: classificationTree = [], isLoading: loadingTree } = useClassificationTree();
+  const { data: classificationTree = [], isLoading: loadingTree, error } = useClassificationTree();
+
+  // Debug logging (development only)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 HierarchicalClassification state:', {
+        loadingTree,
+        hasError: !!error,
+        treeLength: classificationTree.length,
+        selectedNodes: Object.keys(selectedNodes).reduce((acc, key) => {
+          acc[key] = selectedNodes[key as keyof typeof selectedNodes]?.nome || 'none';
+          return acc;
+        }, {} as Record<string, string>)
+      });
+    }
+  }, [classificationTree, loadingTree, error, selectedNodes]);
 
   // Estrutura hierárquica simplificada - navegar diretamente pelos filhos
   const modalidades = selectedNodes.tipoObjeto?.filhos || [];
@@ -71,7 +86,18 @@ export function HierarchicalClassification({
 
   // Handlers simplificados
   const handleTipoObjetoChange = (key: string) => {
+    if (!key || !classificationTree.length) return;
+    
     const selected = classificationTree.find(item => item.key === key);
+    if (!selected) {
+      console.warn(`TipoObjeto not found for key: ${key}`);
+      return;
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Selected tipoObjeto:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
+    }
+    
     setSelectedNodes({
       tipoObjeto: selected,
       modalidadePrincipal: undefined,
@@ -81,7 +107,18 @@ export function HierarchicalClassification({
   };
 
   const handleModalidadeChange = (key: string) => {
+    if (!key || !modalidades.length) return;
+    
     const selected = modalidades.find(item => item.key === key);
+    if (!selected) {
+      console.warn(`Modalidade not found for key: ${key}`);
+      return;
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Selected modalidade:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
+    }
+    
     setSelectedNodes(prev => ({ 
       ...prev, 
       modalidadePrincipal: selected, 
@@ -91,7 +128,18 @@ export function HierarchicalClassification({
   };
 
   const handleSubtipoChange = (key: string) => {
+    if (!key || !subtipos.length) return;
+    
     const selected = subtipos.find(item => item.key === key);
+    if (!selected) {
+      console.warn(`Subtipo not found for key: ${key}`);
+      return;
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Selected subtipo:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
+    }
+    
     setSelectedNodes(prev => ({ 
       ...prev, 
       subtipo: selected, 
@@ -100,7 +148,18 @@ export function HierarchicalClassification({
   };
 
   const handleDocumentoChange = (key: string) => {
+    if (!key || !documentos.length) return;
+    
     const selected = documentos.find(item => item.key === key);
+    if (!selected) {
+      console.warn(`Documento not found for key: ${key}`);
+      return;
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Selected documento:', { key, nome: selected.nome });
+    }
+    
     setSelectedNodes(prev => ({ ...prev, tipoDocumento: selected }));
   };
   

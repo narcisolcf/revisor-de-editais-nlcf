@@ -32,8 +32,29 @@ export async function fetchClassificationTree(): Promise<ClassificationNode[]> {
     const nodeMap = new Map<string, FirebaseClassificationNode>();
     
     snap.docs.forEach(doc => {
-      const data = doc.data() as FirebaseClassificationNode;
-      nodeMap.set(doc.id, data);
+      const data = doc.data();
+      
+      // Validar se o documento tem os campos necessários
+      if (
+        typeof data.nivel === 'number' &&
+        typeof data.nome === 'string' &&
+        typeof data.key === 'string' &&
+        (data.parentPath === null || typeof data.parentPath === 'string') &&
+        typeof data.hasChildren === 'boolean' &&
+        Array.isArray(data.childrenKeys)
+      ) {
+        const validNode: FirebaseClassificationNode = {
+          nivel: data.nivel,
+          nome: data.nome,
+          key: data.key,
+          parentPath: data.parentPath,
+          hasChildren: data.hasChildren,
+          childrenKeys: data.childrenKeys
+        };
+        nodeMap.set(doc.id, validNode);
+      } else {
+        console.warn(`Skipping invalid document: ${doc.id}`, data);
+      }
     });
 
     // Construir árvore hierárquica recursivamente
@@ -57,6 +78,11 @@ export async function fetchClassificationTree(): Promise<ClassificationNode[]> {
     }
 
     const tree = buildHierarchy();
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`✅ Firebase: Built classification tree with ${tree.length} root nodes`);
+      console.log('Root nodes:', tree.map(n => ({ key: n.key, nome: n.nome, filhos: n.filhos.length })));
+    }
     
     if (tree.length === 0) {
       throw new Error('Failed to build classification tree from Firebase data');

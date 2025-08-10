@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "migrate:classification": "tsx src/scripts/migrateClassificationData.ts",
-    "verify:migration": "tsx src/scripts/verifyMigrationData.ts"
+    "verify:migration": "tsx src/scripts/verifyMigrationData.ts",
+    "debug:firebase": "tsx src/scripts/debugFirebaseConnection.ts",
+    "test:classification": "tsx src/scripts/testClassificationComponent.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

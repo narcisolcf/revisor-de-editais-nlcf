@@ -45,7 +45,6 @@ export default function QAClassification() {
 
   useEffect(() => {
     if (debug) {
-      // eslint-disable-next-line no-console
       console.debug("[QA] classification:", classification, "valid:", isValid);
     }
   }, [classification, isValid, debug]);

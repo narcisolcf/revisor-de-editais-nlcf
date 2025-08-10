@@ -10,6 +10,7 @@ import { DocumentService } from "@/services/documentService";
 import { DocumentAnalysisService } from "@/services/documentAnalysisService";
 import { DocumentUpload, DocumentAnalysis, DocumentClassification, DocumentSpecificFields } from "@/types/document";
 import { HierarchicalClassification } from "@/components/HierarchicalClassification";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import AnalysisCharts from '@/components/documents/AnalysisCharts';
 import ProblemsList from '@/components/documents/ProblemsList';
 
@@ -169,11 +170,19 @@ export default function DocumentReview() {
 
         <div className="grid lg:grid-cols-1 gap-8">
           {/* Document Classification Section */}
-          <HierarchicalClassification
-            classification={classification}
-            onClassificationChange={setClassification}
-            onValidationChange={setIsClassificationValid}
-          />
+          <ErrorBoundary
+            onError={(error, errorInfo) => {
+              console.error('Error in HierarchicalClassification:', error, errorInfo);
+              // Opcional: Enviar erro para serviço de monitoramento
+              // reportError('HierarchicalClassification', error, errorInfo);
+            }}
+          >
+            <HierarchicalClassification
+              classification={classification}
+              onClassificationChange={setClassification}
+              onValidationChange={setIsClassificationValid}
+            />
+          </ErrorBoundary>
 
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Upload Section */}

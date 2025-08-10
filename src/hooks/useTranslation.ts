@@ -3,13 +3,13 @@ import { ptBR } from '@/translations/pt-br';
 export function useTranslation() {
   const t = (key: string): string => {
     const keys = key.split('.');
-    let value: any = ptBR;
+    let value: Record<string, unknown> = ptBR;
     
     for (const k of keys) {
-      value = value?.[k];
+      value = value?.[k] as Record<string, unknown>;
     }
     
-    return value || key;
+    return (typeof value === 'string' ? value : key);
   };
 
   return { t };
