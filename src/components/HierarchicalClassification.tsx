@@ -76,9 +76,14 @@ export function HierarchicalClassification({
     onClassificationChange(currentClassification);
   }, [currentClassification, onClassificationChange]);
 
-  const handleTipoObjetoChange = (value: TipoObjeto) => {
+  // <<< AQUI ESTÁ A CORREÇÃO PRINCIPAL >>>
+  const handleTipoObjetoChange = (value: string) => { // 'value' é o texto-chave que recebemos, ex: "edital_pregao"
+    
+    // Usamos o 'value' para encontrar o objeto completo na lista 'tiposObjeto'
+    const selectedTipo = tiposObjeto.find(tipo => tipo.key === value);
+  
     setCurrentClassification({
-      tipoObjeto: value,
+      tipoObjeto: selectedTipo, // Agora salvamos o objeto inteiro no estado!
       modalidadePrincipal: undefined,
       subtipo: undefined,
       tipoDocumento: undefined
@@ -141,7 +146,7 @@ export function HierarchicalClassification({
           <Select
             open={openTipo}
             onOpenChange={setOpenTipo}
-            value={currentClassification.tipoObjeto || ''}
+            value={currentClassification.tipoObjeto?.key || ''} // Ajuste para ler a propriedade 'key' do objeto
             onValueChange={handleTipoObjetoChange}
             disabled={loadingTipos}
           >
@@ -162,7 +167,7 @@ export function HierarchicalClassification({
         <div className="space-y-2">
           <label className="text-sm font-medium">{t('classification.modalidadePrincipal')}</label>
           <Select 
-            value={currentClassification.modalidadePrincipal || ''} 
+            value={currentClassification.modalidadePrincipal?.key || ''} // Ajuste para ler a propriedade 'key' do objeto
             onValueChange={handleModalidadeChange}
             disabled={!currentClassification.tipoObjeto}
           >
@@ -184,7 +189,7 @@ export function HierarchicalClassification({
           <div className="space-y-2">
             <label className="text-sm font-medium">{t('classification.subtipo')}</label>
             <Select 
-              value={currentClassification.subtipo || ''} 
+              value={currentClassification.subtipo?.key || ''} // Ajuste para ler a propriedade 'key' do objeto
               onValueChange={handleSubtipoChange}
               disabled={!currentClassification.modalidadePrincipal}
             >
@@ -207,13 +212,13 @@ export function HierarchicalClassification({
           <div className="space-y-2">
             <label className="text-sm font-medium">{t('classification.tipoDocumento')}</label>
             <Select 
-              value={currentClassification.tipoDocumento || ''} 
+              value={currentClassification.tipoDocumento?.key || ''} // Ajuste para ler a propriedade 'key' do objeto
               onValueChange={handleDocumentoChange}
               disabled={!currentClassification.subtipo}
             >
               <SelectTrigger>
                 <SelectValue placeholder={t('classification.selectDocumento')} />
-              </SelectTrigger>
+              </TselectTrigger>
               <SelectContent className="bg-background border border-border z-50">
                 {documentos.map((documento) => (
                   <SelectItem key={documento.key} value={documento.key}>
