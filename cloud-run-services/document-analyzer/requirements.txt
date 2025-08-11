@@ -1,0 +1,41 @@
+# LicitaReview - Document Analyzer Service Requirements
+# Core dependencies for Python/Flask Cloud Run service
+
+# Web Framework
+flask==2.3.3
+flask-cors==4.0.0
+
+# Data Validation and Serialization
+pydantic==2.4.2
+pydantic[email]==2.4.2
+
+# Date and Time
+python-dateutil==2.8.2
+
+# JSON handling
+orjson==3.9.7
+
+# Type hints support
+typing-extensions==4.8.0
+
+# UUID support
+uuid==1.30
+
+# Development and Testing (optional)
+pytest==7.4.2
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+
+# Linting and Code Quality
+flake8==6.1.0
+black==23.9.1
+mypy==1.6.0
+
+# Documentation
+pydantic[dotenv]==2.4.2
+
+# Production WSGI Server
+gunicorn==21.2.0
+
+# Environment Variables
+python-dotenv==1.0.0
