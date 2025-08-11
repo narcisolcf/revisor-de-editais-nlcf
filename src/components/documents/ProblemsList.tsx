@@ -1,6 +1,7 @@
 import React from 'react';
 import { Problem } from '@/types/document';
 import { AlertTriangle } from 'lucide-react';
+import { TruncatedText } from '@/components/ui/truncated-text';
 
 interface ProblemsListProps {
   problems: Problem[];
@@ -25,13 +26,21 @@ const ProblemsList: React.FC<ProblemsListProps> = ({ problems }) => {
               }`}>
                 {problema.gravidade}
               </span>
-              <div>
-                <p className="font-medium text-red-800">{problema.descricao}</p>
+              <div className="flex-1">
+                <TruncatedText 
+                  text={problema.descricao}
+                  lines={2}
+                  className="font-medium text-red-800"
+                />
                 {problema.localizacao && (
-                  <p className="text-sm text-red-600">Local: {problema.localizacao}</p>
+                  <p className="text-sm text-red-600 mt-1">Local: {problema.localizacao}</p>
                 )}
                 {problema.sugestaoCorrecao && (
-                  <p className="text-sm text-green-700 mt-1">💡 {problema.sugestaoCorrecao}</p>
+                  <TruncatedText
+                    text={`💡 ${problema.sugestaoCorrecao}`}
+                    lines={2}
+                    className="text-sm text-green-700 mt-1"
+                  />
                 )}
               </div>
             </div>

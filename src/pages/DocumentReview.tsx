@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
 import { formatDate, formatFileSize } from "@/utils/formatters";
-import { Upload, FileText, CheckCircle, Clock } from "lucide-react";
+import { Upload, FileText, Clock } from "lucide-react";
 import { DocumentService } from "@/services/documentService";
 import { DocumentAnalysisService } from "@/services/documentAnalysisService";
 import { DocumentUpload, DocumentAnalysis, DocumentClassification, DocumentSpecificFields } from "@/types/document";
@@ -14,7 +14,9 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import AnalysisCharts from '@/components/documents/AnalysisCharts';
 import ProblemsList from '@/components/documents/ProblemsList';
 import { GovCollapseItem } from '@/components/ui/gov-collapse';
-import { History, TrendingUp, AlertTriangle, Lightbulb } from 'lucide-react';
+import { History, TrendingUp, AlertTriangle, Lightbulb, BarChart3, CheckCircle } from 'lucide-react';
+import { ContentCard } from '@/components/ui/content-card';
+import { ShowMore } from '@/components/ui/show-more';
 
 // Dados de mock movidos para src/data/mockAnalysis.ts
 
@@ -285,43 +287,63 @@ export default function DocumentReview() {
                       <div className="text-sm text-gray-600">Conformidade Geral</div>
                     </div>
                     
-                    {/* Expandable Sections using DSGov Collapse Pattern */}
+                     {/* Content Overflow Pattern Applied */}
                     <div className="space-y-4">
-                      <GovCollapseItem
-                        variant="card"
+                      <ContentCard
                         title="Gráficos de Análise"
                         subtitle="Visualizações detalhadas dos resultados"
-                        icon={<TrendingUp className="h-5 w-5 text-government-500" />}
-                        content={<AnalysisCharts />}
-                        defaultOpen={true}
-                      />
+                        icon={<BarChart3 className="h-5 w-5" />}
+                        variant="elevated"
+                        overflow="expand"
+                        size="lg"
+                      >
+                        <AnalysisCharts />
+                      </ContentCard>
 
-                      <GovCollapseItem
-                        variant="card"
+                      <ContentCard
                         title="Problemas Encontrados"
                         subtitle={`${analysis.problemasEncontrados.length} problemas identificados`}
-                        icon={<AlertTriangle className="h-5 w-5 text-orange-500" />}
-                        content={<ProblemsList problems={analysis.problemasEncontrados} />}
-                        defaultOpen={true}
-                      />
+                        icon={<AlertTriangle className="h-5 w-5" />}
+                        variant="default"
+                        overflow="expand"
+                        size="md"
+                      >
+                        {analysis.problemasEncontrados && analysis.problemasEncontrados.length > 0 ? (
+                          <ProblemsList problems={analysis.problemasEncontrados} />
+                        ) : (
+                          <p className="text-muted-foreground">Nenhum problema encontrado.</p>
+                        )}
+                      </ContentCard>
 
-                      <GovCollapseItem
-                        variant="card"
+                      <ContentCard
                         title="Recomendações"
                         subtitle="Sugestões para melhorar a conformidade"
-                        icon={<Lightbulb className="h-5 w-5 text-government-500" />}
-                        content={
-                          <ul className="space-y-2">
+                        icon={<CheckCircle className="h-5 w-5" />}
+                        variant="subtle"
+                        overflow="expand"
+                        size="md"
+                      >
+                        <ShowMore maxHeight="200px">
+                          <div className="space-y-3">
                             {analysis.recomendacoes.map((rec, index) => (
-                              <li key={index} className="flex items-start gap-2 text-sm">
-                                <span className="text-government-500 mt-1">•</span>
-                                <span>{rec}</span>
-                              </li>
+                              <div key={index} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div className="flex items-start gap-2">
+                                  <span className="text-blue-500 mt-1 font-semibold">•</span>
+                                  <p className="text-sm text-blue-700">{rec}</p>
+                                </div>
+                              </div>
                             ))}
-                          </ul>
-                        }
-                        defaultOpen={false}
-                      />
+                            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                              <h5 className="font-semibold text-green-800 mb-2">✅ Conformidade Legal</h5>
+                              <p className="text-sm text-green-700">
+                                Revisar critérios de habilitação e especificações técnicas para garantir aderência às normas.
+                                Verificar se todos os requisitos legais estão sendo atendidos, incluindo prazos, modalidades,
+                                valores estimados e documentação exigida.
+                              </p>
+                            </div>
+                          </div>
+                        </ShowMore>
+                      </ContentCard>
                     </div>
                   </div>
                 </CardContent>
