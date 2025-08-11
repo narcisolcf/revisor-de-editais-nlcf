@@ -58,7 +58,7 @@ const Footer: React.FC<FooterProps> = ({
             {links.map((link, index) => (
               <a
                 key={index}
-                className="text-[#4e6397] text-base font-normal leading-normal min-w-40"
+                className="text-mutedInk text-base font-normal leading-normal min-w-40"
                 href={link.href}
               >
                 {link.label}
@@ -68,13 +68,13 @@ const Footer: React.FC<FooterProps> = ({
           <div className="flex flex-wrap justify-center gap-4">
             {socialLinks.map((social, index) => (
               <a key={index} href={social.href}>
-                <div className="text-[#4e6397]">
+                <div className="text-mutedInk">
                   {getSocialIcon(social.platform)}
                 </div>
               </a>
             ))}
           </div>
-          <p className="text-[#4e6397] text-base font-normal leading-normal">
+          <p className="text-mutedInk text-base font-normal leading-normal">
             {copyrightText}
           </p>
         </footer>

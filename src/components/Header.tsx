@@ -17,7 +17,7 @@ export function Header({ onRequestAnalysis }: HeaderProps) {
   };
 
   return (
-    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-borderSubtle px-10 py-3">
+    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-mutedSurface px-10 py-3">
       <div className="flex items-center gap-4 text-ink">
         <Link to="/" className="flex items-center gap-4 text-ink hover:opacity-80 transition-opacity">
           <div className="size-4">

@@ -7,9 +7,9 @@ interface StatCardProps {
 
 const StatCard: React.FC<StatCardProps> = ({ title, value }) => {
   return (
-    <div className="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 bg-[#e7ebf3]">
-      <p className="text-[#0e121b] text-base font-medium leading-normal">{title}</p>
-      <p className="text-[#0e121b] tracking-light text-2xl font-bold leading-tight">{value}</p>
+    <div className="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 bg-mutedSurface">
+      <p className="text-ink text-base font-medium leading-normal">{title}</p>
+      <p className="text-ink tracking-light text-2xl font-bold leading-tight">{value}</p>
     </div>
   );
 };
