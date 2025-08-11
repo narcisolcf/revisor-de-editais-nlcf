@@ -207,7 +207,8 @@ if (this.isDevelopment) {
     const byCategory: Record<string, number> = {};
     
     this.errorQueue.forEach(record => {
-      const category = record.context?.metadata?.category || 'unknown';
+      const rawCategory = record.context?.metadata?.category;
+      const category = typeof rawCategory === 'string' ? rawCategory : 'unknown';
       byCategory[category] = (byCategory[category] || 0) + 1;
     });
 

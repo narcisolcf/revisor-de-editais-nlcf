@@ -1,12 +1,23 @@
 import { classificationTree } from '../data/classification';
 import type { ClassificationNode } from '../types/document';
 
+interface MigrationNode {
+  docId: string;
+  nivel: number;
+  nome: string;
+  key: string;
+  parentPath: string | null;
+  hasChildren: boolean;
+  childrenKeys: string[];
+}
+
+
 // Script para verificar a estrutura de dados antes da migração
 function verifyClassificationData() {
   console.log('🔍 Verificando estrutura de dados de classificação...\n');
 
   // Simular a estrutura que será migrada para o Firebase
-  const migrationData: Record<string, unknown>[] = [];
+  const migrationData: MigrationNode[] = [];
   
   function processNode(node: ClassificationNode, parentPath: string = '') {
     const docId = parentPath ? `${parentPath}_${node.key}` : node.key;

@@ -17,41 +17,41 @@ export function Header({ onRequestAnalysis }: HeaderProps) {
   };
 
   return (
-    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7ebf3] px-10 py-3">
-      <div className="flex items-center gap-4 text-[#0e121b]">
-        <Link to="/" className="flex items-center gap-4 text-[#0e121b] hover:opacity-80 transition-opacity">
+    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-borderSubtle px-10 py-3">
+      <div className="flex items-center gap-4 text-ink">
+        <Link to="/" className="flex items-center gap-4 text-ink hover:opacity-80 transition-opacity">
           <div className="size-4">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor"></path>
             </svg>
           </div>
-          <h2 className="text-[#0e121b] text-lg font-bold leading-tight tracking-[-0.015em]">GovDocs</h2>
+          <h2 className="text-ink text-lg font-bold leading-tight tracking-[-0.015em]">GovDocs</h2>
         </Link>
       </div>
       <div className="flex flex-1 justify-end gap-8">
         <nav className="flex items-center gap-9">
           <Link 
             to="/servicos" 
-            className="text-[#0e121b] text-sm font-medium leading-normal hover:text-[#1543b7] transition-colors"
+            className="text-ink text-sm font-medium leading-normal hover:text-cta transition-colors"
           >
             Serviços
           </Link>
           <Link 
             to="/sobre" 
-            className="text-[#0e121b] text-sm font-medium leading-normal hover:text-[#1543b7] transition-colors"
+            className="text-ink text-sm font-medium leading-normal hover:text-cta transition-colors"
           >
             Sobre nós
           </Link>
           <Link 
             to="/contato" 
-            className="text-[#0e121b] text-sm font-medium leading-normal hover:text-[#1543b7] transition-colors"
+            className="text-ink text-sm font-medium leading-normal hover:text-cta transition-colors"
           >
             Contato
           </Link>
         </nav>
         <Button
           onClick={handleRequestAnalysis}
-          className="min-w-[84px] max-w-[480px] h-10 px-4 bg-[#1543b7] text-[#f8f9fc] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1543b7]/90"
+          className="min-w-[84px] max-w-[480px] h-10 px-4 bg-cta text-cta-foreground text-sm font-bold leading-normal tracking-[0.015em] hover:bg-cta/90"
         >
           <span className="truncate">Solicitar Análise</span>
         </Button>

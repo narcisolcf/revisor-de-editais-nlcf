@@ -63,6 +63,15 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        surface: "hsl(var(--surface))",
+        mutedSurface: "hsl(var(--muted-surface))",
+        ink: "hsl(var(--ink))",
+        mutedInk: "hsl(var(--muted-ink))",
+        borderSubtle: "hsl(var(--border-subtle))",
+        cta: {
+          DEFAULT: "hsl(var(--cta))",
+          foreground: "hsl(var(--cta-foreground))",
+        },
       },
       keyframes: {
         fadeIn: {

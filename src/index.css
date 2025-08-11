@@ -29,12 +29,22 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.75rem;
+
+    /* Government palette */
     --government-50: 214 100% 97%;
     --government-100: 214 95% 93%;
     --government-200: 213 97% 87%;
     --government-500: 217 91% 60%;
     --government-600: 221 83% 53%;
     --government-700: 224 76% 48%;
+
+    /* Layout tokens for landing page */
+    --surface: 225 29% 98%; /* #f8f9fc */
+    --muted-surface: 220 40% 92%; /* #e7ebf3 */
+    --ink: 222 30% 10%; /* #0e121b */
+    --muted-ink: 222 33% 46%; /* #4e6397 */
+    --cta: 224 79% 40%; /* #1543b7 */
+    --cta-foreground: 225 29% 98%; /* #f8f9fc */
   }
 }
 
