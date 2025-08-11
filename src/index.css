@@ -46,7 +46,7 @@
     --cta: 224 79% 40%; /* #1543b7 */
     --cta-foreground: 225 29% 98%; /* #f8f9fc */
 
-    /* DSGov Dropdown Tokens */
+    /* DSGov Dropdown and Form Tokens */
     --select-border: 214.3 31.8% 91.4%;
     --select-border-focus: 221.2 83.2% 53.3%;
     --select-background: 0 0% 100%;
@@ -58,6 +58,29 @@
     --select-item-focus: 221.2 83.2% 96%;
     --select-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
     --select-radius: 4px;
+
+    /* Form Elements - DSGov Standards */
+    --form-input-height: 48px;
+    --form-input-padding-x: 12px;
+    --form-input-padding-y: 14px;
+    --form-border-radius: 4px;
+    --form-border-width: 1px;
+    --form-label-size: 14px;
+    --form-help-size: 12px;
+    --form-spacing: 16px;
+    
+    /* Form States */
+    --form-border-default: hsl(var(--border));
+    --form-border-focus: hsl(var(--primary));
+    --form-border-error: hsl(var(--destructive));
+    --form-border-success: hsl(142, 76%, 36%);
+    --form-bg-disabled: hsl(var(--muted));
+    --form-text-disabled: hsl(var(--muted-foreground));
+    
+    /* Form Focus States */
+    --form-focus-shadow: 0 0 0 2px hsla(var(--primary), 0.2);
+    --form-error-shadow: 0 0 0 2px hsla(var(--destructive), 0.2);
+    --form-success-shadow: 0 0 0 2px hsla(142, 76%, 36%, 0.2);
   }
 }
 
@@ -69,6 +92,7 @@
     @apply bg-background text-foreground antialiased;
     font-family: 'Public Sans', 'Noto Sans', sans-serif;
   }
+
 }
 
 .glass-card {
