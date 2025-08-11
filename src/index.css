@@ -2,6 +2,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.cdnfonts.com/css/rawline');
 
 @tailwind base;
 @tailwind components;
@@ -112,6 +114,38 @@
     --text-truncate-lines-1: 1;
     --text-truncate-lines-2: 2;
     --text-truncate-lines-3: 3;
+
+    /* Tipografia Rawline - DSGov Standards */
+    --font-family-base: 'Rawline', 'Raleway', sans-serif;
+    
+    /* Font Weights - Rawline */
+    --font-weight-thin: 100;
+    --font-weight-extra-light: 200;
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semi-bold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extra-bold: 800;
+    --font-weight-black: 900;
+    
+    /* Escala Tipográfica Minor Third (1.2) - Base 14px */
+    --font-size-scale-up-07: 3.583rem; /* 50.16px */
+    --font-size-scale-up-06: 2.986rem; /* 41.8px */
+    --font-size-scale-up-05: 2.488rem; /* 34.84px */
+    --font-size-scale-up-04: 2.074rem; /* 29.03px */
+    --font-size-scale-up-03: 1.728rem; /* 24.19px */
+    --font-size-scale-up-02: 1.44rem;  /* 20.16px */
+    --font-size-scale-up-01: 1.2rem;   /* 16.8px */
+    --font-size-scale-base: 1rem;      /* 14px */
+    --font-size-scale-down-01: 0.833rem; /* 11.67px */
+    --font-size-scale-down-02: 0.694rem; /* 9.72px */
+    --font-size-scale-down-03: 0.579rem; /* 8.10px */
+    
+    /* Line Heights - DSGov Standards */
+    --font-lineheight-low: 1.15;    /* Para títulos grandes */
+    --font-lineheight-medium: 1.45; /* Para texto base */
+    --font-lineheight-high: 1.85;   /* Para texto densso */
   }
 }
 
@@ -121,7 +155,9 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Public Sans', 'Noto Sans', sans-serif;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-scale-base);
+    line-height: var(--font-lineheight-medium);
   }
 
 }
@@ -225,4 +261,70 @@ html {
 
 .show-more-trigger {
   @apply inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer;
+}
+
+/* Tipografia Rawline - Utility Classes */
+.font-rawline {
+  font-family: var(--font-family-base);
+}
+
+/* Escala Tipográfica DSGov */
+.text-scale-up-07 { font-size: var(--font-size-scale-up-07); line-height: var(--font-lineheight-low); }
+.text-scale-up-06 { font-size: var(--font-size-scale-up-06); line-height: var(--font-lineheight-low); }
+.text-scale-up-05 { font-size: var(--font-size-scale-up-05); line-height: var(--font-lineheight-low); }
+.text-scale-up-04 { font-size: var(--font-size-scale-up-04); line-height: var(--font-lineheight-low); }
+.text-scale-up-03 { font-size: var(--font-size-scale-up-03); line-height: var(--font-lineheight-low); }
+.text-scale-up-02 { font-size: var(--font-size-scale-up-02); line-height: var(--font-lineheight-medium); }
+.text-scale-up-01 { font-size: var(--font-size-scale-up-01); line-height: var(--font-lineheight-medium); }
+.text-scale-base { font-size: var(--font-size-scale-base); line-height: var(--font-lineheight-medium); }
+.text-scale-down-01 { font-size: var(--font-size-scale-down-01); line-height: var(--font-lineheight-medium); }
+.text-scale-down-02 { font-size: var(--font-size-scale-down-02); line-height: var(--font-lineheight-medium); }
+.text-scale-down-03 { font-size: var(--font-size-scale-down-03); line-height: var(--font-lineheight-medium); }
+
+/* Pesos da Fonte Rawline */
+.font-thin { font-weight: var(--font-weight-thin); }
+.font-extra-light { font-weight: var(--font-weight-extra-light); }
+.font-light { font-weight: var(--font-weight-light); }
+.font-regular { font-weight: var(--font-weight-regular); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semi-bold { font-weight: var(--font-weight-semi-bold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+.font-extra-bold { font-weight: var(--font-weight-extra-bold); }
+.font-black { font-weight: var(--font-weight-black); }
+
+/* Estilos de Títulos DSGov */
+.title-h1 {
+  font-size: var(--font-size-scale-up-06);
+  line-height: var(--font-lineheight-low);
+  font-weight: var(--font-weight-bold);
+}
+
+.title-h2 {
+  font-size: var(--font-size-scale-up-05);
+  line-height: var(--font-lineheight-low);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.title-h3 {
+  font-size: var(--font-size-scale-up-04);
+  line-height: var(--font-lineheight-low);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.title-h4 {
+  font-size: var(--font-size-scale-up-03);
+  line-height: var(--font-lineheight-medium);
+  font-weight: var(--font-weight-medium);
+}
+
+.title-h5 {
+  font-size: var(--font-size-scale-up-02);
+  line-height: var(--font-lineheight-medium);
+  font-weight: var(--font-weight-medium);
+}
+
+.title-h6 {
+  font-size: var(--font-size-scale-up-01);
+  line-height: var(--font-lineheight-medium);
+  font-weight: var(--font-weight-medium);
 }
