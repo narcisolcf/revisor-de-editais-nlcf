@@ -45,6 +45,19 @@
     --muted-ink: 222 33% 46%; /* #4e6397 */
     --cta: 224 79% 40%; /* #1543b7 */
     --cta-foreground: 225 29% 98%; /* #f8f9fc */
+
+    /* DSGov Dropdown Tokens */
+    --select-border: 214.3 31.8% 91.4%;
+    --select-border-focus: 221.2 83.2% 53.3%;
+    --select-background: 0 0% 100%;
+    --select-background-hover: 210 40% 96%;
+    --select-background-disabled: 210 40% 96%;
+    --select-foreground: 222.2 84% 4.9%;
+    --select-foreground-disabled: 215.4 16.3% 46.9%;
+    --select-item-hover: 210 40% 96%;
+    --select-item-focus: 221.2 83.2% 96%;
+    --select-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    --select-radius: 4px;
   }
 }
 
