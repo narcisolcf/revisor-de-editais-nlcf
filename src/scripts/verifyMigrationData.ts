@@ -6,7 +6,7 @@ function verifyClassificationData() {
   console.log('🔍 Verificando estrutura de dados de classificação...\n');
 
   // Simular a estrutura que será migrada para o Firebase
-  const migrationData: any[] = [];
+  const migrationData: Record<string, unknown>[] = [];
   
   function processNode(node: ClassificationNode, parentPath: string = '') {
     const docId = parentPath ? `${parentPath}_${node.key}` : node.key;

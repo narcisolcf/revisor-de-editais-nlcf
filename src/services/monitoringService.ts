@@ -89,7 +89,7 @@ class MonitoringService {
     }
   }
 
-  private async sendUserReportToBackend(reportRecord: any): Promise<void> {
+  private async sendUserReportToBackend(reportRecord: Record<string, unknown>): Promise<void> {
     // Future implementation for user report submission
     try {
       // Simulate API call
@@ -120,7 +120,7 @@ initializeConsoleInterceptor(): void {
   const oc = this.originalConsole;
 
   // Intercept console.warn
-  console.warn = (...args: any[]) => {
+  console.warn = (...args: unknown[]) => {
     oc.warn(...args);
     if (this.isCapturingConsole) return;
     this.isCapturingConsole = true;
@@ -132,7 +132,7 @@ initializeConsoleInterceptor(): void {
   };
 
   // Intercept console.error
-  console.error = (...args: any[]) => {
+  console.error = (...args: unknown[]) => {
     oc.error(...args);
     if (this.isCapturingConsole) return;
     this.isCapturingConsole = true;
@@ -145,7 +145,7 @@ initializeConsoleInterceptor(): void {
 
   // Optionally intercept console.log in development
   if (this.isDevelopment) {
-    console.log = (...args: any[]) => {
+    console.log = (...args: unknown[]) => {
       oc.log(...args);
       if (this.isCapturingConsole) return;
       this.isCapturingConsole = true;
@@ -160,7 +160,7 @@ initializeConsoleInterceptor(): void {
   this.consoleInterceptorInitialized = true;
 }
 
-  private captureConsoleMessage(type: 'warn' | 'error' | 'log', args: any[]): void {
+  private captureConsoleMessage(type: 'warn' | 'error' | 'log', args: unknown[]): void {
     const message = args.map(arg => 
       typeof arg === 'string' ? arg : JSON.stringify(arg)
     ).join(' ');

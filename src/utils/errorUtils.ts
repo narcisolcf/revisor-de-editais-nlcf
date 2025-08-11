@@ -69,7 +69,7 @@ export function createErrorRecord(
   };
 }
 
-export function sanitizeErrorForLogging(error: Error): Record<string, any> {
+export function sanitizeErrorForLogging(error: Error): Record<string, unknown> {
   return {
     name: error.name,
     message: error.message,
@@ -98,7 +98,7 @@ export function getErrorDisplayMessage(error: Error): string {
   }
 }
 
-export function classifyConsoleMessage(type: string, message: string, args: any[]): ConsoleCategory {
+export function classifyConsoleMessage(type: string, message: string, args: unknown[]): ConsoleCategory {
   const msg = message.toLowerCase();
   
   // React warnings
@@ -142,7 +142,7 @@ export function getConsoleSeverity(category: ConsoleCategory, type: string): Err
 export function createConsoleRecord(
   type: 'warn' | 'error' | 'log',
   message: string,
-  args: any[]
+  args: unknown[]
 ): ConsoleRecord {
   const category = classifyConsoleMessage(type, message, args);
   const severity = getConsoleSeverity(category, type);

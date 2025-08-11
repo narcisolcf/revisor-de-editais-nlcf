@@ -43,7 +43,7 @@ export function useErrorHandler() {
     };
   }, [toast]);
 
-  const wrapAsync = useCallback(<TArgs extends any[], TReturn>(
+  const wrapAsync = useCallback(<TArgs extends unknown[], TReturn>(
     fn: (...args: TArgs) => Promise<TReturn>,
     context?: ErrorContext,
     customErrorMessage?: string

@@ -59,7 +59,7 @@ export interface DocumentClassificationConfig {
 export interface ValidationRule {
   field: string;
   rule: 'required' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
-  value?: any;
+  value?: string | number | RegExp;
   message: string;
 }
 

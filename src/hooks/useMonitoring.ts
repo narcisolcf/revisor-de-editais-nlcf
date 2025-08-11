@@ -7,14 +7,14 @@ export function useMonitoring() {
     monitoringService.reportError(error, context);
   }, []);
 
-  const trackEvent = useCallback((eventName: string, properties?: Record<string, any>) => {
+  const trackEvent = useCallback((eventName: string, properties?: Record<string, unknown>) => {
     // Future: Track custom events
     if (import.meta.env.DEV) {
       console.log('📊 Event tracked:', { eventName, properties });
     }
   }, []);
 
-  const setUserContext = useCallback((userId: string, userInfo?: Record<string, any>) => {
+  const setUserContext = useCallback((userId: string, userInfo?: Record<string, unknown>) => {
     // Future: Set user context for monitoring
     if (import.meta.env.DEV) {
       console.log('👤 User context set:', { userId, userInfo });

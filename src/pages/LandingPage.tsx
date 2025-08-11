@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Header } from '@/components/Header';
 
 interface LandingPageProps {
   onRequestAnalysis?: () => void;
@@ -23,36 +24,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRequestAnalysis }) => {
       style={{ fontFamily: '"Public Sans", "Noto Sans", sans-serif' }}
     >
       <div className="layout-container flex h-full grow flex-col">
-        {/* Header */}
-        <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7ebf3] px-10 py-3">
-          <div className="flex items-center gap-4 text-[#0e121b]">
-            <div className="size-4">
-              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor"></path>
-              </svg>
-            </div>
-            <h2 className="text-[#0e121b] text-lg font-bold leading-tight tracking-[-0.015em]">GovDocs</h2>
-          </div>
-          <div className="flex flex-1 justify-end gap-8">
-            <div className="flex items-center gap-9">
-              <a className="text-[#0e121b] text-sm font-medium leading-normal" href="#">Serviços</a>
-              <a className="text-[#0e121b] text-sm font-medium leading-normal" href="#">Sobre nós</a>
-              <a className="text-[#0e121b] text-sm font-medium leading-normal" href="#">Contato</a>
-            </div>
-            <button
-              onClick={handleRequestAnalysis}
-              className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1543b7] text-[#f8f9fc] text-sm font-bold leading-normal tracking-[0.015em]"
-            >
-              <span className="truncate">Solicitar Análise</span>
-            </button>
-            <div
-              className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-              style={{
-                backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBmiJ_fCM6a-iYJAHAs1kSs2huqY4Zulx4YMBGnDBNQ-llRWRA6cfpMD03T_LEdMougBwyTOdI_G5JTKKOWgtjIwlGzQxoJt3T7uQ3S3bsub17A9T72VSGEIthKXQxSu8L1MLzj-u0XpYEwthXhh0gKnnLAY3y2QSEdhjuXwoH4z4gtQPsMW8Kha3Pbye29cy9CwWp_2X24r8o-WbFmVDljiwUso71ProZT3jS68M-P7ax_mXVJhfjQAd2T2v8Ytfi6xofk5W0PrQ")'
-              }}
-            ></div>
-          </div>
-        </header>
+        <Header onRequestAnalysis={handleRequestAnalysis} />
 
         {/* Main Content */}
         <div className="px-40 flex flex-1 justify-center py-5">

@@ -76,10 +76,10 @@ async function migrateClassificationData() {
     console.log('📊 Documento de controle criado');
     console.log(`🎯 Total de ${getTotalNodeCount(classificationTree)} nós migrados`);
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Erro na migração:', error);
     
-    if (error?.code === 'permission-denied') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'permission-denied') {
       console.log('\n🚨 ERRO DE PERMISSÃO:');
       console.log('1. Acesse o Firebase Console: https://console.firebase.google.com');
       console.log('2. Vá para Firestore Database > Rules');

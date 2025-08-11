@@ -11,7 +11,7 @@ export class DocumentAnalysisService {
   
   static async extractTextFromFile(file: File): Promise<TextExtractionResult> {
     const fileType = file.type || '';
-    const fileName = (file as any).name ? String((file as any).name).toLowerCase() : '';
+    const fileName = file.name ? String(file.name).toLowerCase() : '';
     
     if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
       return await this.extractTextFromPDF(file);
@@ -57,9 +57,9 @@ export class DocumentAnalysisService {
       const arrayBuffer = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer });
       return { text: result.value };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro na extração de texto do Word:', error);
-      const message = String(error?.message || '');
+      const message = error instanceof Error ? error.message : '';
       if (message.includes('central directory') || message.includes('zip file')) {
         throw new Error('Arquivo .docx inválido ou corrompido. Certifique-se de enviar um .docx válido (não .doc).');
       }
