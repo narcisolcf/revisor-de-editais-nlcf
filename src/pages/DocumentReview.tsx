@@ -13,6 +13,8 @@ import { HierarchicalClassification } from "@/components/HierarchicalClassificat
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import AnalysisCharts from '@/components/documents/AnalysisCharts';
 import ProblemsList from '@/components/documents/ProblemsList';
+import { GovCollapseItem } from '@/components/ui/gov-collapse';
+import { History, TrendingUp, AlertTriangle, Lightbulb } from 'lucide-react';
 
 // Dados de mock movidos para src/data/mockAnalysis.ts
 
@@ -283,21 +285,43 @@ export default function DocumentReview() {
                       <div className="text-sm text-gray-600">Conformidade Geral</div>
                     </div>
                     
-<AnalysisCharts />
+                    {/* Expandable Sections using DSGov Collapse Pattern */}
+                    <div className="space-y-4">
+                      <GovCollapseItem
+                        variant="card"
+                        title="Gráficos de Análise"
+                        subtitle="Visualizações detalhadas dos resultados"
+                        icon={<TrendingUp className="h-5 w-5 text-government-500" />}
+                        content={<AnalysisCharts />}
+                        defaultOpen={true}
+                      />
 
-<ProblemsList problems={analysis.problemasEncontrados} />
+                      <GovCollapseItem
+                        variant="card"
+                        title="Problemas Encontrados"
+                        subtitle={`${analysis.problemasEncontrados.length} problemas identificados`}
+                        icon={<AlertTriangle className="h-5 w-5 text-orange-500" />}
+                        content={<ProblemsList problems={analysis.problemasEncontrados} />}
+                        defaultOpen={true}
+                      />
 
-                    {/* Recommendations */}
-                    <div>
-                      <h4 className="font-semibold mb-2">Recomendações</h4>
-                      <ul className="space-y-1">
-                        {analysis.recomendacoes.map((rec, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm">
-                            <span className="text-government-500 mt-1">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <GovCollapseItem
+                        variant="card"
+                        title="Recomendações"
+                        subtitle="Sugestões para melhorar a conformidade"
+                        icon={<Lightbulb className="h-5 w-5 text-government-500" />}
+                        content={
+                          <ul className="space-y-2">
+                            {analysis.recomendacoes.map((rec, index) => (
+                              <li key={index} className="flex items-start gap-2 text-sm">
+                                <span className="text-government-500 mt-1">•</span>
+                                <span>{rec}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        }
+                        defaultOpen={false}
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -305,22 +329,41 @@ export default function DocumentReview() {
             )}
           </div>
 
-          {/* Document History */}
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                📋 {t('documents.documentHistory')}
-              </CardTitle>
-              <CardDescription>
-                {t('documents.historyDesc')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-500">
-                Em breve você poderá visualizar o histórico completo de documentos analisados.
-              </p>
-            </CardContent>
-          </Card>
+          {/* Document History with DSGov Collapse */}
+          <div className="mt-8">
+            <GovCollapseItem
+              variant="card"
+              title={t('documents.documentHistory')}
+              subtitle={t('documents.historyDesc')}
+              icon={<History className="h-5 w-5 text-government-500" />}
+              content={
+                <div className="space-y-4">
+                  <p className="text-gray-500">
+                    Em breve você poderá visualizar o histórico completo de documentos analisados.
+                  </p>
+                  {uploadedDocument && (
+                    <div className="p-4 bg-government-50 border border-government-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-5 w-5 text-government-600" />
+                        <div>
+                          <p className="font-medium text-government-800">{uploadedDocument.nome}</p>
+                          <p className="text-sm text-government-600">
+                            Analisado em {formatDate(uploadedDocument.updatedAt)} • {uploadedDocument.tipo} • {formatFileSize(uploadedDocument.tamanho)}
+                          </p>
+                          {analysis && (
+                            <p className="text-sm text-government-600 mt-1">
+                              Score de Conformidade: {analysis.scoreConformidade}%
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              }
+              defaultOpen={false}
+            />
+          </div>
         </div>
       </div>
     </div>

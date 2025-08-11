@@ -81,6 +81,25 @@
     --form-focus-shadow: 0 0 0 2px hsla(var(--primary), 0.2);
     --form-error-shadow: 0 0 0 2px hsla(var(--destructive), 0.2);
     --form-success-shadow: 0 0 0 2px hsla(142, 76%, 36%, 0.2);
+
+    /* Collapse tokens - DSGov Standards */
+    --collapse-trigger-height: 48px;
+    --collapse-trigger-padding-x: 16px;
+    --collapse-trigger-padding-y: 12px;
+    --collapse-border-radius: 4px;
+    --collapse-border-width: 1px;
+    --collapse-transition: all 200ms ease-in-out;
+    --collapse-icon-size: 16px;
+    
+    /* Collapse colors */
+    --collapse-border-default: hsl(var(--border));
+    --collapse-border-hover: hsl(var(--government-300));
+    --collapse-border-focus: hsl(var(--government-500));
+    --collapse-bg-default: hsl(var(--background));
+    --collapse-bg-hover: hsl(var(--government-50));
+    --collapse-bg-focus: hsl(var(--government-50));
+    --collapse-text-default: hsl(var(--foreground));
+    --collapse-text-secondary: hsl(var(--muted-foreground));
   }
 }
 
