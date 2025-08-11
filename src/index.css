@@ -7,6 +7,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@theme {
+  --font-sans: InterVariable, sans-serif;
+  --font-sans--font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -53,8 +58,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'Public Sans', 'Noto Sans', sans-serif;
+    @apply bg-background text-foreground antialiased font-sans;
   }
 }
 
