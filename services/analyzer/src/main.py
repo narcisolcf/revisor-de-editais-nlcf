@@ -9,10 +9,11 @@ from fastapi import FastAPI, HTTPException, Depends, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
+from datetime import datetime
 import structlog
 
 from .config import settings
-from .services.analyzer_service import AnalyzerService
+from .services.analyzer_service import AnalyzerService  
 from .services.ocr_service import OCRService
 from .models.analysis_models import (
     AnalysisRequest,
@@ -90,13 +91,29 @@ async def analyze_document(
                    document_id=request.document_id,
                    organization_id=request.organization_config.organization_id)
         
-        result = await analyzer_service.analyze_document(request)
+        analysis_result = await analyzer_service.analyze_document(request)
         
         logger.info("Analysis completed successfully",
                    document_id=request.document_id,
-                   final_score=result.overall_score)
+                   final_score=analysis_result.weighted_score)
         
-        return result
+        # Cria resposta completa da API
+        response = AnalysisResponse(
+            analysis_result=analysis_result,
+            processing_info={
+                'analysis_engine': 'adaptive-v2.0.0',
+                'custom_rules_applied': len([f for f in analysis_result.findings if f.is_custom_rule]),
+                'organization_preset': analysis_result.applied_config.preset_type.value,
+                'cache_status': 'miss'  # Poderia vir do analyzer_service
+            },
+            api_metadata={
+                'service_version': '1.0.0',
+                'request_timestamp': datetime.utcnow().isoformat(),
+                'api_endpoint': '/analyze'
+            }
+        )
+        
+        return response
         
     except Exception as e:
         logger.error("Analysis failed", 
@@ -177,6 +194,85 @@ async def validate_config(config: OrganizationConfig):
         return validation_result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/analyze/adaptive", response_model=AnalysisResponse)
+async def analyze_document_adaptive(
+    request: AnalysisRequest,
+    _: str = Depends(verify_api_key),
+    __: None = Depends(rate_limit)
+):
+    """
+    🚀 ENDPOINT PRINCIPAL - Análise adaptativa com parâmetros personalizados
+    
+    Este é o endpoint principal do diferencial competitivo do LicitaReview.
+    Realiza análise de documentos aplicando:
+    - Pesos personalizados por organização
+    - Regras customizadas específicas
+    - Templates organizacionais
+    - Validações adaptativas
+    
+    O mesmo documento pode ter scores diferentes para organizações diferentes!
+    """
+    try:
+        logger.info("🚀 Starting adaptive analysis", 
+                   document_id=request.document_id,
+                   organization_id=request.organization_config.organization_id,
+                   analysis_type=request.analysis_type,
+                   custom_rules_count=len(request.organization_config.get_active_rules()),
+                   weight_distribution=request.organization_config.weights.get_weight_distribution_type())
+        
+        # Análise com motor adaptativo
+        analysis_result = await analyzer_service.analyze_document(request)
+        
+        # Calcula métricas de personalização
+        custom_findings = [f for f in analysis_result.findings if f.is_custom_rule]
+        base_findings = [f for f in analysis_result.findings if not f.is_custom_rule]
+        
+        # Cria resposta enriquecida
+        response = AnalysisResponse(
+            analysis_result=analysis_result,
+            processing_info={
+                'analysis_engine': 'adaptive-v2.0.0',
+                'custom_rules_applied': len(custom_findings),
+                'base_analysis_findings': len(base_findings),
+                'organization_preset': analysis_result.applied_config.preset_type.value,
+                'weight_distribution': analysis_result.applied_config.weights.get_weight_distribution_type(),
+                'dominant_category': analysis_result.applied_config.weights.get_dominant_category(),
+                'templates_validated': len([t for t in analysis_result.applied_config.templates if t.is_active]),
+                'personalization_score': len(custom_findings) / max(1, len(analysis_result.findings)) * 100,
+                'cache_status': 'miss'
+            },
+            api_metadata={
+                'service_version': '1.0.0',
+                'endpoint_version': 'adaptive-v1',
+                'request_timestamp': datetime.utcnow().isoformat(),
+                'api_endpoint': '/analyze/adaptive',
+                'differentiator_features': [
+                    'custom_weights',
+                    'organization_rules',
+                    'adaptive_scoring',
+                    'template_validation'
+                ]
+            }
+        )
+        
+        logger.info("✅ Adaptive analysis completed successfully",
+                   document_id=request.document_id,
+                   organization_id=request.organization_config.organization_id,
+                   weighted_score=analysis_result.weighted_score,
+                   total_findings=len(analysis_result.findings),
+                   custom_findings=len(custom_findings),
+                   personalization_score=response.processing_info['personalization_score'])
+        
+        return response
+        
+    except Exception as e:
+        logger.error("❌ Adaptive analysis failed", 
+                    document_id=request.document_id,
+                    organization_id=request.organization_config.organization_id, 
+                    error=str(e),
+                    error_type=type(e).__name__)
+        raise HTTPException(status_code=500, detail=f"Adaptive analysis failed: {str(e)}")
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):

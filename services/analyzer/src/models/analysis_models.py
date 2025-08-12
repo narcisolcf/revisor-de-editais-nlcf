@@ -599,3 +599,140 @@ class AnalysisResult(BaseModel):
             'execution_time': self.execution_time_seconds,
             'model_version': self.model_version
         }
+
+
+class DocumentUploadResponse(BaseModel):
+    """
+    Resposta do upload e processamento de documento.
+    
+    Retornada após o upload bem-sucedido de um documento para análise.
+    """
+    document_id: StrictStr = Field(
+        ...,
+        description="ID único gerado para o documento"
+    )
+    filename: Optional[str] = Field(
+        None,
+        description="Nome original do arquivo"
+    )
+    file_type: StrictStr = Field(
+        ...,
+        description="Tipo MIME do arquivo"
+    )
+    file_size: PositiveInt = Field(
+        ...,
+        description="Tamanho do arquivo em bytes"
+    )
+    extracted_text_length: PositiveInt = Field(
+        ...,
+        description="Comprimento do texto extraído"
+    )
+    document_type: Optional[str] = Field(
+        None,
+        description="Tipo de documento identificado automaticamente"
+    )
+    processing_status: str = Field(
+        default="completed",
+        regex=r"^(processing|completed|failed)$",
+        description="Status do processamento"
+    )
+    upload_timestamp: datetime = Field(
+        default_factory=datetime.utcnow,
+        description="Data e hora do upload"
+    )
+    preview_text: Optional[str] = Field(
+        None,
+        max_length=500,
+        description="Prévia do texto extraído"
+    )
+    detected_language: Optional[str] = Field(
+        None,
+        description="Idioma detectado no documento"
+    )
+    estimated_analysis_time: Optional[int] = Field(
+        None,
+        description="Tempo estimado para análise em segundos"
+    )
+    
+    class Config:
+        """Configuração do modelo Pydantic."""
+        use_enum_values = True
+        validate_assignment = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+        schema_extra = {
+            "example": {
+                "document_id": "doc_abc123def456",
+                "filename": "edital_pregao_001_2024.pdf",
+                "file_type": "application/pdf",
+                "file_size": 245760,
+                "extracted_text_length": 15420,
+                "document_type": "pregao",
+                "processing_status": "completed",
+                "upload_timestamp": "2024-01-15T14:30:00Z",
+                "preview_text": "EDITAL DE PREGÃO ELETRÔNICO Nº 001/2024...",
+                "detected_language": "pt-BR",
+                "estimated_analysis_time": 45
+            }
+        }
+
+
+class AnalysisResponse(BaseModel):
+    """
+    Resposta completa de uma análise de documento.
+    
+    Modelo de resposta para APIs que inclui tanto o resultado
+    da análise quanto metadados adicionais.
+    """
+    analysis_result: AnalysisResult = Field(
+        ...,
+        description="Resultado completo da análise"
+    )
+    processing_info: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Informações sobre o processamento"
+    )
+    api_metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Metadados da API"
+    )
+    
+    class Config:
+        """Configuração do modelo Pydantic."""
+        use_enum_values = True
+        validate_assignment = True
+    
+    @property
+    def overall_score(self) -> float:
+        """Accessor para o score ponderado final."""
+        return self.analysis_result.weighted_score
+    
+    @property
+    def total_findings(self) -> int:
+        """Accessor para o total de findings."""
+        return len(self.analysis_result.findings)
+    
+    @property
+    def critical_findings(self) -> int:
+        """Accessor para findings críticos."""
+        return len([
+            f for f in self.analysis_result.findings 
+            if f.severity == ProblemSeverity.CRITICA
+        ])
+    
+    def to_summary_dict(self) -> Dict[str, Any]:
+        """Converte para dicionário resumido para APIs."""
+        return {
+            'document_id': self.analysis_result.document_id,
+            'organization_id': self.analysis_result.organization_id,
+            'overall_score': self.overall_score,
+            'total_findings': self.total_findings,
+            'critical_findings': self.critical_findings,
+            'analysis_status': self.analysis_result.status.value,
+            'executed_at': self.analysis_result.executed_at.isoformat(),
+            'execution_time': self.analysis_result.execution_time_seconds,
+            'applied_preset': self.analysis_result.applied_config.preset_type.value,
+            'weight_distribution': self.analysis_result.applied_config.weights.get_weight_distribution_type(),
+            'processing_info': self.processing_info
+        }
