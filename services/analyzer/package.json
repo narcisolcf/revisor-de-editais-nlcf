@@ -1,0 +1,24 @@
+{
+  "name": "@licitareview/analyzer",
+  "version": "1.0.0",
+  "description": "Python document analysis service for LicitaReview",
+  "scripts": {
+    "dev": "python -m src.main",
+    "start": "uvicorn src.main:app --host 0.0.0.0 --port 8080",
+    "test": "pytest",
+    "test:coverage": "pytest --cov=src --cov-report=xml --cov-report=html",
+    "lint": "ruff check src/",
+    "lint:fix": "ruff check src/ --fix",
+    "format": "black src/",
+    "type-check": "mypy src/"
+  },
+  "keywords": [
+    "document-analysis",
+    "ai",
+    "nlp",
+    "python",
+    "fastapi"
+  ],
+  "author": "LicitaReview Team",
+  "license": "MIT"
+}

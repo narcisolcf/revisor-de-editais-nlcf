@@ -1,0 +1,50 @@
+{
+  "name": "@licitareview/utils",
+  "version": "1.0.0",
+  "description": "Shared utilities for LicitaReview",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "@licitareview/types": "*",
+    "date-fns": "^3.6.0",
+    "lodash-es": "^4.17.21",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12",
+    "@vitest/ui": "^1.6.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.2.2",
+    "vitest": "^1.6.0"
+  },
+  "keywords": [
+    "utilities",
+    "helpers",
+    "validation",
+    "formatting"
+  ],
+  "author": "LicitaReview Team",
+  "license": "MIT"
+}

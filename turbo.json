@@ -1,0 +1,61 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local"],
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "build/**"],
+      "env": ["NODE_ENV", "NEXT_PUBLIC_*", "VITE_*", "REACT_APP_*"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": ["NODE_ENV", "NEXT_PUBLIC_*", "VITE_*", "REACT_APP_*"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^lint"],
+      "outputs": []
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    },
+    "deploy:staging": {
+      "dependsOn": ["build", "test", "lint"],
+      "outputs": []
+    },
+    "deploy:prod": {
+      "dependsOn": ["build", "test", "lint", "type-check"],
+      "outputs": []
+    },
+    "analyze": {
+      "outputs": ["analyze/**"]
+    },
+    "db:migrate": {
+      "cache": false
+    },
+    "db:seed": {
+      "cache": false
+    }
+  },
+  "globalEnv": [
+    "NODE_ENV",
+    "CI",
+    "VERCEL_URL",
+    "DATABASE_URL",
+    "FIREBASE_PROJECT_ID",
+    "GOOGLE_CLOUD_PROJECT"
+  ]
+}
