@@ -54,11 +54,8 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
   body {
-    @apply bg-background text-foreground antialiased font-sans;
+    @apply bg-white text-gray-900 antialiased font-sans;
   }
 }
 

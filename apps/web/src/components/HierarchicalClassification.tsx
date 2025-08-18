@@ -29,7 +29,7 @@ export function HierarchicalClassification({
 
   // Debug logging (development only)
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log('🔍 HierarchicalClassification state:', {
         loadingTree,
         hasError: !!error,
@@ -96,7 +96,7 @@ export function HierarchicalClassification({
         return;
       }
       
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('Selected tipoObjeto:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
       }
       
@@ -119,7 +119,7 @@ export function HierarchicalClassification({
         return;
       }
       
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('Selected modalidade:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
       }
       
@@ -142,7 +142,7 @@ export function HierarchicalClassification({
         return;
       }
       
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('Selected subtipo:', { key, nome: selected.nome, filhosCount: selected.filhos.length });
       }
       
@@ -164,7 +164,7 @@ export function HierarchicalClassification({
         return;
       }
       
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('Selected documento:', { key, nome: selected.nome });
       }
       

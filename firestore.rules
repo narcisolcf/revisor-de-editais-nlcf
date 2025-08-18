@@ -16,6 +16,45 @@ service cloud.firestore {
       allow read, write: if true;
     }
     
+    // Regras para a coleção de comissões
+    match /comissoes/{comissaoId} {
+      // Permitir leitura apenas para usuários autenticados
+      allow read: if request.auth != null;
+      
+      // Permitir escrita apenas para administradores
+      // Verifica se o usuário está autenticado e tem papel de administrador
+      allow write: if request.auth != null && 
+        request.auth.token.admin == true;
+    }
+    
+    // Sub-coleções da comissão
+    match /comissoes/{comissaoId}/membros/{membroId} {
+      // Permitir leitura apenas para usuários autenticados
+      allow read: if request.auth != null;
+      
+      // Permitir escrita apenas para administradores
+      allow write: if request.auth != null && 
+        request.auth.token.admin == true;
+    }
+    
+    match /comissoes/{comissaoId}/reunioes/{reuniaoId} {
+      // Permitir leitura apenas para usuários autenticados
+      allow read: if request.auth != null;
+      
+      // Permitir escrita apenas para administradores
+      allow write: if request.auth != null && 
+        request.auth.token.admin == true;
+    }
+    
+    match /comissoes/{comissaoId}/decisoes/{decisaoId} {
+      // Permitir leitura apenas para usuários autenticados
+      allow read: if request.auth != null;
+      
+      // Permitir escrita apenas para administradores
+      allow write: if request.auth != null && 
+        request.auth.token.admin == true;
+    }
+    
     // Outras coleções (manter regras existentes)
     match /{document=**} {
       allow read, write: if false;  // Negar por padrão

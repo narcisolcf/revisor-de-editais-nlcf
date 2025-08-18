@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useAuth } from "@/contexts/AuthContext";
 import { validateCNPJ, formatCNPJ } from "@/utils/formatters";
-import { UserPlus, Building, Mail, Lock, FileText } from "lucide-react";
+import { UserPlus, Building, Mail, Lock, FileText, Loader2 } from "lucide-react";
 
 export default function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -17,17 +18,39 @@ export default function SignUpForm() {
     password: "",
     confirmPassword: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { register } = useAuth();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validação de campos obrigatórios
+    if (!formData.prefectureName || !formData.email || !formData.cnpj || !formData.password || !formData.confirmPassword) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.fillAllFields'),
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: t('common.error'),
         description: t('auth.passwordsDontMatch'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validação de senha forte
+    if (formData.password.length < 6) {
+      toast({
+        title: t('common.error'),
+        description: 'A senha deve ter pelo menos 6 caracteres',
         variant: "destructive",
       });
       return;
@@ -42,12 +65,23 @@ export default function SignUpForm() {
       return;
     }
 
-    // TODO: Implement actual signup logic
-    toast({
-      title: t('common.success'),
-      description: t('auth.accountCreatedDesc'),
-    });
-    navigate("/login");
+    try {
+       setIsLoading(true);
+       await register(
+         formData.email, 
+         formData.password, 
+         {
+           displayName: formData.prefectureName,
+           organizationName: formData.prefectureName,
+           cnpj: formData.cnpj
+         }
+       );
+       navigate("/dashboard");
+     } catch (error) {
+       // Error handling is done in the AuthContext
+     } finally {
+       setIsLoading(false);
+     }
   };
 
   const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,8 +150,13 @@ export default function SignUpForm() {
             required
           />
         </div>
-        <Button type="submit" className="w-full bg-government-500 hover:bg-government-600 text-white">
-          <UserPlus className="mr-2 h-4 w-4" /> {t('auth.signUp')}
+        <Button type="submit" className="w-full bg-government-500 hover:bg-government-600 text-white" disabled={isLoading}>
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <UserPlus className="mr-2 h-4 w-4" />
+          )}
+          {isLoading ? t('common.loading') : t('auth.signUp')}
         </Button>
       </form>
       <div className="text-center">

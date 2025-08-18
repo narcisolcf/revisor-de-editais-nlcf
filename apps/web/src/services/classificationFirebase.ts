@@ -79,7 +79,7 @@ export async function fetchClassificationTree(): Promise<ClassificationNode[]> {
 
     const tree = buildHierarchy();
     
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(`✅ Firebase: Built classification tree with ${tree.length} root nodes`);
       console.log('Root nodes:', tree.map(n => ({ key: n.key, nome: n.nome, filhos: n.filhos.length })));
     }

@@ -12,6 +12,9 @@ export * from "./analysis.types";
 // Config Types (CORE DIFFERENTIATOR)
 export * from "./config.types";
 
+// Comissões Types
+export * from "./comissoes.types";
+
 // Common API Types
 export interface ApiResponse<T = any> {
   success: boolean;

@@ -1,0 +1,252 @@
+2025-08-17T21:51:41.121554Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/.turbo-cookie"), AnchoredSystemPathBuf(".turbo/cookies/1.cookie")}
+2025-08-17T21:51:41.121571Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T21:52:02.125067Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1755467522035-c0c9e96e20079.mjs")}
+2025-08-17T21:52:02.125179Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T21:52:02.222803Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1755467522035-c0c9e96e20079.mjs")}
+2025-08-17T21:52:02.222823Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T21:52:29.523107Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package-lock.json")}
+2025-08-17T21:52:29.523331Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T21:52:39.022267Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/postcss.config.js")}
+2025-08-17T21:52:39.022306Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T21:52:59.025824Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1755467578946-9ed2cd723de5e8.mjs")}
+2025-08-17T21:52:59.025874Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T21:52:59.122585Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1755467578946-9ed2cd723de5e8.mjs")}
+2025-08-17T21:52:59.122594Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T21:54:59.328307Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/index.css")}
+2025-08-17T21:54:59.328403Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T21:55:10.924312Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/ui/chart.tsx")}
+2025-08-17T21:55:10.924380Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T21:55:17.624559Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/ui/sonner.tsx")}
+2025-08-17T21:55:17.624796Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T21:55:17.724289Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/ui/sonner.tsx")}
+2025-08-17T21:55:17.724300Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T21:58:11.529731Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/features/crud_comissoes.md")}
+2025-08-17T21:58:11.530265Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T21:58:11.624502Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/features/crud_comissoes.md")}
+2025-08-17T21:58:11.624513Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T22:01:14.925248Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/features/ui_comissoes.md")}
+2025-08-17T22:01:14.925289Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T22:01:15.026963Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/features/ui_comissoes.md")}
+2025-08-17T22:01:15.026973Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T22:05:13.238938Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/features/tests_crud_comissoes.md")}
+2025-08-17T22:05:13.238970Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T22:05:13.338660Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/features/tests_crud_comissoes.md")}
+2025-08-17T22:05:13.338694Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T22:05:13.438999Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/features/tests_crud_comissoes.md")}
+2025-08-17T22:05:13.439011Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T22:06:22.838662Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/features/tests_crud_comissoes.md")}
+2025-08-17T22:06:22.838710Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T22:06:22.939708Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/features/tests_crud_comissoes.md")}
+2025-08-17T22:06:22.939720Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T23:00:59.201987Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/types/comissoes.types.ts")}
+2025-08-17T23:00:59.204005Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:00:59.281324Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/types/comissoes.types.ts")}
+2025-08-17T23:00:59.281336Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:00:59.383701Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/types/comissoes.types.ts")}
+2025-08-17T23:00:59.383713Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:01:09.182091Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/types/index.ts")}
+2025-08-17T23:01:09.182154Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:01:09.301792Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/types/index.ts")}
+2025-08-17T23:01:09.302020Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:02:07.892536Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/repositories/ComissaoRepository.ts")}
+2025-08-17T23:02:07.893721Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:02:07.982187Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/repositories/ComissaoRepository.ts")}
+2025-08-17T23:02:07.982201Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:02:08.081747Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/repositories/ComissaoRepository.ts")}
+2025-08-17T23:02:08.081758Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:02:22.483124Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/repositories/ComissaoRepository.ts")}
+2025-08-17T23:02:22.483215Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:03:45.481828Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/services"), AnchoredSystemPathBuf("services/api/src/services/ComissaoService.ts")}
+2025-08-17T23:03:45.481851Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:03:45.583759Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/services/ComissaoService.ts")}
+2025-08-17T23:03:45.583777Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:03:45.681709Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/services/ComissaoService.ts")}
+2025-08-17T23:03:45.681721Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:04:00.086097Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/services/ComissaoService.ts")}
+2025-08-17T23:04:00.086157Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:04:00.179987Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/services/ComissaoService.ts")}
+2025-08-17T23:04:00.179999Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:04:22.080717Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/services/ComissaoService.ts")}
+2025-08-17T23:04:22.080752Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:04:22.181425Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/services/ComissaoService.ts")}
+2025-08-17T23:04:22.181436Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:04:38.781679Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/services/ComissaoService.ts")}
+2025-08-17T23:04:38.781718Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:04:49.282183Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/services/ComissaoService.ts")}
+2025-08-17T23:04:49.282249Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:04:49.380707Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/services/ComissaoService.ts")}
+2025-08-17T23:04:49.380718Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:05:56.282049Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/comissoes.ts")}
+2025-08-17T23:05:56.282197Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:05:56.380530Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/comissoes.ts")}
+2025-08-17T23:05:56.380547Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:06:15.279400Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/routes"), AnchoredSystemPathBuf("services/api/src/api/routes/comissoes.ts")}
+2025-08-17T23:06:15.279436Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:06:15.379993Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/routes/comissoes.ts")}
+2025-08-17T23:06:15.380003Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:06:34.379693Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/routes/comissoes.ts")}
+2025-08-17T23:06:34.379734Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:07:24.179522Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/comissoes-api.ts")}
+2025-08-17T23:07:24.179544Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:07:24.279810Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/comissoes-api.ts")}
+2025-08-17T23:07:24.279825Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:08:19.281847Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/comissoes-api.ts")}
+2025-08-17T23:08:19.281876Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:08:19.378743Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/comissoes-api.ts")}
+2025-08-17T23:08:19.378753Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:09:00.780459Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/comissoes-api.ts")}
+2025-08-17T23:09:00.780502Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:09:08.680129Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/comissoes-api.ts")}
+2025-08-17T23:09:08.680495Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:09:08.779671Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/comissoes-api.ts")}
+2025-08-17T23:09:08.779682Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:09:21.180256Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/index.ts")}
+2025-08-17T23:09:21.180292Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:09:21.280048Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/index.ts")}
+2025-08-17T23:09:21.280082Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:12:38.480185Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/types/comissao.ts")}
+2025-08-17T23:12:38.480490Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:12:38.577095Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/types/comissao.ts")}
+2025-08-17T23:12:38.577107Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:12:38.678999Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/types/comissao.ts")}
+2025-08-17T23:12:38.679009Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:13:11.578624Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/services/comissoesService.ts")}
+2025-08-17T23:13:11.578651Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:13:11.678000Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/services/comissoesService.ts")}
+2025-08-17T23:13:11.678010Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:13:35.379838Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/hooks/useComissoes.ts")}
+2025-08-17T23:13:35.379914Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:14:25.278338Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/ComissoesTable.tsx"), AnchoredSystemPathBuf("apps/web/src/components/comissoes")}
+2025-08-17T23:14:25.278369Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:14:25.378698Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/ComissoesTable.tsx")}
+2025-08-17T23:14:25.378713Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:15:30.879265Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/ComissaoForm.tsx")}
+2025-08-17T23:15:30.879304Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:15:30.979121Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/ComissaoForm.tsx")}
+2025-08-17T23:15:30.979159Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:15:31.078090Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/ComissaoForm.tsx")}
+2025-08-17T23:15:31.078101Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:15:39.777532Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/types/comissao.ts")}
+2025-08-17T23:15:39.777608Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:15:39.978744Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/types/comissao.ts")}
+2025-08-17T23:15:39.978778Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:15:40.078139Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/types/comissao.ts")}
+2025-08-17T23:15:40.078152Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:16:49.704048Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/MembrosManager.tsx")}
+2025-08-17T23:16:49.705066Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:16:50.114097Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/MembrosManager.tsx")}
+2025-08-17T23:16:50.114184Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:16:51.398653Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/MembrosManager.tsx")}
+2025-08-17T23:16:51.398709Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:17:50.589379Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/ComissaoDetails.tsx")}
+2025-08-17T23:17:50.610330Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:17:50.877647Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/ComissaoDetails.tsx")}
+2025-08-17T23:17:50.877697Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:17:51.277626Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/ComissaoDetails.tsx")}
+2025-08-17T23:17:51.277856Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:17:51.977956Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/ComissaoDetails.tsx")}
+2025-08-17T23:17:51.978025Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:17:52.980966Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/comissoes/ComissaoDetails.tsx")}
+2025-08-17T23:17:52.980999Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:18:47.650629Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/pages/Comissoes.tsx")}
+2025-08-17T23:18:47.656650Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:18:48.077457Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/pages/Comissoes.tsx")}
+2025-08-17T23:18:48.077474Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:18:48.176773Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/pages/Comissoes.tsx")}
+2025-08-17T23:18:48.176788Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:18:48.779329Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/pages/Comissoes.tsx")}
+2025-08-17T23:18:48.780965Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:19:21.009987Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/ui/date-picker.tsx")}
+2025-08-17T23:19:21.012788Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:19:21.075907Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/ui/date-picker.tsx")}
+2025-08-17T23:19:21.075921Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:19:21.176313Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/ui/date-picker.tsx")}
+2025-08-17T23:19:21.176329Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:20:29.113601Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/App.tsx")}
+2025-08-17T23:20:29.118248Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:20:29.275959Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/App.tsx")}
+2025-08-17T23:20:29.275979Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:21:13.301395Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/index.css")}
+2025-08-17T23:21:13.304971Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:21:13.376037Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/index.css")}
+2025-08-17T23:21:13.376055Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:23:02.497959Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/package.json")}
+2025-08-17T23:23:02.501682Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:23:03.175470Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package-lock.json")}
+2025-08-17T23:23:03.175484Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T23:23:24.074933Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1755473003966-9f65f60f94d468.mjs")}
+2025-08-17T23:23:24.075069Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:23:24.175554Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1755473003966-9f65f60f94d468.mjs")}
+2025-08-17T23:23:24.175573Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:23:39.278484Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/package.json")}
+2025-08-17T23:23:39.278587Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:23:42.775404Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package-lock.json")}
+2025-08-17T23:23:42.775501Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T23:24:06.579338Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1755473046456-91147e664776e8.mjs")}
+2025-08-17T23:24:06.579385Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:24:06.775833Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1755473046456-91147e664776e8.mjs")}
+2025-08-17T23:24:06.776193Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:24:42.575866Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/tailwind.config.ts")}
+2025-08-17T23:24:42.575923Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:24:42.874944Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/tailwind.config.ts")}
+2025-08-17T23:24:42.874962Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:24:57.873967Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/tailwind.config.ts")}
+2025-08-17T23:24:57.873997Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:25:18.474747Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1755473118411-149994ce13efc.mjs")}
+2025-08-17T23:25:18.474771Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:25:18.574163Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1755473118411-149994ce13efc.mjs")}
+2025-08-17T23:25:18.574173Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:25:28.074650Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/index.css")}
+2025-08-17T23:25:28.074673Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:27:40.284179Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("firestore.rules")}
+2025-08-17T23:27:40.285821Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T23:27:40.474509Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("firestore.rules")}
+2025-08-17T23:27:40.474522Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T23:28:31.503737Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/firestore-comissoes.rules")}
+2025-08-17T23:28:31.505593Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:28:31.585474Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/firestore-comissoes.rules")}
+2025-08-17T23:28:31.585489Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:29:38.631110Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/firestore-security-comissoes.md")}
+2025-08-17T23:29:38.637119Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T23:29:38.791696Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/firestore-security-comissoes.md")}
+2025-08-17T23:29:38.791712Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T23:29:38.902925Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/firestore-security-comissoes.md")}
+2025-08-17T23:29:38.902964Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T23:29:39.091318Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("docs/firestore-security-comissoes.md")}
+2025-08-17T23:29:39.091332Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-17T23:31:13.806924Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples"), AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:31:13.809694Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:31:14.091108Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:31:14.091182Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:31:14.190656Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:31:14.190673Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:31:27.909602Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:31:27.912047Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:31:27.990378Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:31:27.990393Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:32:56.912373Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/examples/comissoes-firebase.ts"), AnchoredSystemPathBuf("apps/web/src/examples")}
+2025-08-17T23:32:56.917602Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:32:56.993209Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/examples/comissoes-firebase.ts")}
+2025-08-17T23:32:56.993229Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:32:57.089891Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/examples/comissoes-firebase.ts")}
+2025-08-17T23:32:57.089916Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:34:19.930833Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/examples/comissoes-firebase.ts")}
+2025-08-17T23:34:19.935976Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:34:20.189937Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/examples/comissoes-firebase.ts")}
+2025-08-17T23:34:20.189954Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-17T23:35:22.023129Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:35:22.026613Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:35:22.190041Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:35:22.190072Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:38:23.026904Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:38:23.032086Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:38:23.388959Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:38:23.388973Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:38:43.095953Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:38:43.097474Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:38:43.691409Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:38:43.691423Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:39:04.090457Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:39:04.090739Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-17T23:39:04.295252Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/examples/comissoes-service.go")}
+2025-08-17T23:39:04.295270Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))

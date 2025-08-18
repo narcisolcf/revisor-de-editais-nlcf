@@ -47,7 +47,7 @@ export interface ConfigImpactAnalysis {
 }
 
 // Configuração da API
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const API_TIMEOUT = 30000; // 30 segundos
 
 class AnalysisConfigService {
@@ -62,7 +62,6 @@ class AnalysisConfigService {
         'Content-Type': 'application/json',
         ...options.headers,
       },
-      timeout: API_TIMEOUT,
     };
 
     const response = await fetch(url, {

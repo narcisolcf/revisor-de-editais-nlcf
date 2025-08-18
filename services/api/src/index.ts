@@ -10,6 +10,7 @@ setupGlobalErrorHandlers();
 // Export API Functions
 export { documentsApi } from "./api/documents";
 export { analysisConfigApi } from "./api/analysis-config";
+export { comissoesApi } from "./api/comissoes-api";
 
 // Export Trigger Functions  
 export { onDocumentUpload } from "./triggers/document-upload";

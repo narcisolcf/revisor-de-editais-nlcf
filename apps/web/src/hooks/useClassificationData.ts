@@ -8,29 +8,29 @@ export function useClassificationTree() {
   return useQuery<ClassificationNode[]>({
     queryKey: ['classification-tree'],
     queryFn: async () => {
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('🔄 useClassificationTree: Starting data fetch...');
       }
       
       try {
         const tree = await fetchClassificationTree();
         if (Array.isArray(tree) && tree.length > 0) {
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`✅ Firebase data loaded successfully: ${tree.length} root nodes`);
-          }
+          if (import.meta.env.DEV) {
+          console.log(`✅ Firebase data loaded successfully: ${tree.length} root nodes`);
+        }
           return tree;
         }
         // Fallback para dados locais apenas se Firebase falhar
         console.warn('⚠️ Empty Firebase response, falling back to local classification data');
         const localData = getTiposObjeto();
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log(`📁 Local data loaded: ${localData.length} root nodes`);
         }
         return localData;
       } catch (error) {
         console.warn('❌ Firebase classification fetch failed, using local data:', error);
         const localData = getTiposObjeto();
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log(`📁 Local data loaded as fallback: ${localData.length} root nodes`);
         }
         return localData;

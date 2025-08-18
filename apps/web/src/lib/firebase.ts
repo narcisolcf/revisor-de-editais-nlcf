@@ -1,5 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 
 // Seus valores reais do Firebase substituindo os exemplos.
 const firebaseConfig = {
@@ -16,6 +18,12 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
 // Exporta a conexão com o banco de dados Firestore
 export const db = getFirestore(app);
+
+// Exporta a autenticação do Firebase
+export const auth = getAuth(app);
+
+// Exporta o Firebase Storage
+export const storage = getStorage(app);
 
 // Exporta o app do Firebase para outros usos
 export default app;
