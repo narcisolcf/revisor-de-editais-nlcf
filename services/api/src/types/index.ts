@@ -43,6 +43,13 @@ export interface ErrorResponse extends ApiResponse {
   stack?: string; // Only in development
 }
 
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  hasMore: boolean;
+  nextPageToken?: string;
+}
+
 // Audit Log Types
 export interface AuditLog {
   id: string;
@@ -168,16 +175,6 @@ export interface RateLimitInfo {
 }
 
 // Common Utility Types
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
-
-export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = 
-  Pick<T, Exclude<keyof T, Keys>> & 
-  {
-    [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>
-  }[Keys];
-
 export type Timestamp = {
   createdAt: Date;
   updatedAt: Date;
@@ -190,6 +187,11 @@ export type WithTimestamp<T> = T & Timestamp;
 export type WithMetadata<T> = T & {
   metadata?: Record<string, any>;
 };
+
+// Status Types
+export type Status = 'active' | 'inactive' | 'pending' | 'archived';
+export type Priority = 'low' | 'medium' | 'high' | 'critical';
+export type Severity = 'info' | 'warning' | 'error' | 'critical';
 
 // Environment Types
 export interface Environment {

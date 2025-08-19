@@ -2,9 +2,14 @@
  * Tipos para upload de documentos
  */
 
-import { BaseEntity } from '../core/base';
-import { Status } from '../core/common';
 import { DocumentType, DocumentMetadata, ProcessingInfo } from './base';
+
+// Interface base para entidades com ID e timestamps
+interface BaseEntity {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 /** Estado de upload de um documento */
 export interface DocumentUpload extends BaseEntity {
@@ -100,11 +105,11 @@ export interface UploadConfig {
   /** Se deve sobrescrever arquivo existente */
   overwriteExisting: boolean;
   /** Callback para progresso */
-  onProgress?: (progress: UploadProgress) => void;
+  onProgress?: (_progress: UploadProgress) => void;
   /** Callback para conclusão */
-  onComplete?: (result: UploadResult) => void;
+  onComplete?: (_result: UploadResult) => void;
   /** Callback para erro */
-  onError?: (error: UploadError) => void;
+  onError?: (_error: UploadError) => void;
 }
 
 /** Resultado do upload */
@@ -245,7 +250,7 @@ export interface BatchUploadOptions {
   /** Se deve parar em caso de erro */
   stopOnError: boolean;
   /** Callback para progresso do lote */
-  onBatchProgress?: (progress: BatchProgress) => void;
+  onBatchProgress?: (_progress: BatchProgress) => void;
 }
 
 /** Progresso de upload em lote */

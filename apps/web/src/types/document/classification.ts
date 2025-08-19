@@ -2,7 +2,6 @@
  * Tipos para classificação de documentos
  */
 
-import { BaseEntity } from '../core/base';
 import { DocumentType } from './base';
 
 /** Sistema de classificação hierárquica */

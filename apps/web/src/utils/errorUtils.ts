@@ -98,7 +98,7 @@ export function getErrorDisplayMessage(error: Error): string {
   }
 }
 
-export function classifyConsoleMessage(type: string, message: string, args: unknown[]): ConsoleCategory {
+export function classifyConsoleMessage(type: string, message: string, _args: unknown[]): ConsoleCategory {
   const msg = message.toLowerCase();
   
   // React warnings

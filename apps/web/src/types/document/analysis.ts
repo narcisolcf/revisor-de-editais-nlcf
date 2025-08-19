@@ -2,9 +2,8 @@
  * Tipos para análise de documentos
  */
 
-import { BaseEntity, TimestampedEntity } from '../core/base';
-import { Status, Priority, Severity } from '../core/common';
-import { DocumentType } from './base';
+import { TimestampedEntity } from '../core/base';
+import { Priority, Severity } from '../core/common';
 
 /** Análise completa de um documento */
 export interface DocumentAnalysis extends TimestampedEntity {
