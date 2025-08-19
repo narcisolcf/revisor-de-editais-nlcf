@@ -5,7 +5,7 @@ Serviço de domínio para lógica de negócio relacionada a análises.
 Coordena a execução de análises adaptativas.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime
 import asyncio
 import uuid

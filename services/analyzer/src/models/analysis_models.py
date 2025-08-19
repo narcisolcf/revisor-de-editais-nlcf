@@ -7,14 +7,13 @@ requests de análise e findings específicos do sistema LicitaReview.
 
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, validator, root_validator
 from pydantic.types import StrictStr, PositiveInt, confloat
 
-from .document_models import Document, DocumentType
-from .config_models import OrganizationConfig
+from .config_models import OrganizationConfig, AnalysisWeights
 
 
 class ProblemSeverity(str, Enum):
@@ -113,7 +112,6 @@ class ConformityScore(BaseModel):
         Returns:
             Score ponderado entre 0-100
         """
-        from .config_models import AnalysisWeights  # Import local para evitar circular
         
         return (
             self.structural * (weights.structural / 100) +

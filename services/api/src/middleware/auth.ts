@@ -6,7 +6,7 @@
 import { Request, Response, NextFunction } from "express";
 import { auth } from "../config/firebase";
 import { UserContext, ErrorResponse } from "../types";
-import { createErrorResponse } from "../utils/validation";
+import { createErrorResponse } from "../utils";
 
 // Extend Request type to include user context
 declare global {
@@ -31,6 +31,7 @@ export const authenticateUser = async (
     
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       res.status(401).json(createErrorResponse(
+        "AUTH_MISSING_TOKEN",
         "Missing or invalid authorization header",
         { expected: "Bearer <token>" },
         req.requestId
@@ -63,8 +64,9 @@ export const authenticateUser = async (
     } catch (tokenError) {
       console.error("Token verification failed:", tokenError);
       res.status(401).json(createErrorResponse(
+        "AUTH_INVALID_TOKEN",
         "Invalid or expired token",
-        { error: tokenError.message },
+        { error: String(tokenError) },
         req.requestId
       ));
       return;
@@ -72,8 +74,9 @@ export const authenticateUser = async (
   } catch (error) {
     console.error("Authentication middleware error:", error);
     res.status(500).json(createErrorResponse(
+      "AUTH_FAILED",
       "Authentication service error",
-      { error: error.message },
+      { error: String(error) },
       req.requestId
     ));
     return;
@@ -87,8 +90,9 @@ export const requireRoles = (requiredRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json(createErrorResponse(
+        "AUTH_USER_NOT_AUTHENTICATED",
         "User not authenticated",
-        null,
+        undefined,
         req.requestId
       ));
       return;
@@ -100,6 +104,7 @@ export const requireRoles = (requiredRoles: string[]) => {
     
     if (!hasRequiredRole) {
       res.status(403).json(createErrorResponse(
+        "AUTH_INSUFFICIENT_PERMISSIONS",
         "Insufficient permissions",
         { 
           required: requiredRoles,
@@ -121,8 +126,9 @@ export const requirePermissions = (requiredPermissions: string[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json(createErrorResponse(
+        "AUTH_USER_NOT_AUTHENTICATED",
         "User not authenticated",
-        null,
+        undefined,
         req.requestId
       ));
       return;
@@ -134,6 +140,7 @@ export const requirePermissions = (requiredPermissions: string[]) => {
     
     if (!hasAllPermissions) {
       res.status(403).json(createErrorResponse(
+        "AUTH_MISSING_PERMISSIONS",
         "Missing required permissions",
         {
           required: requiredPermissions,
@@ -154,8 +161,9 @@ export const requirePermissions = (requiredPermissions: string[]) => {
 export const requireOrganization = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.user) {
     res.status(401).json(createErrorResponse(
+      "AUTH_USER_NOT_AUTHENTICATED",
       "User not authenticated",
-      null,
+      undefined,
       req.requestId
     ));
     return;
@@ -163,8 +171,9 @@ export const requireOrganization = (req: Request, res: Response, next: NextFunct
   
   if (!req.user.organizationId) {
     res.status(403).json(createErrorResponse(
+      "AUTH_NO_ORGANIZATION",
       "No organization associated with user",
-      null,
+      undefined,
       req.requestId
     ));
     return;
@@ -180,8 +189,9 @@ export const validateOrganizationAccess = (orgIdParam: string = "organizationId"
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json(createErrorResponse(
+        "AUTH_USER_NOT_AUTHENTICATED",
         "User not authenticated",
-        null,
+        undefined,
         req.requestId
       ));
       return;
@@ -191,6 +201,7 @@ export const validateOrganizationAccess = (orgIdParam: string = "organizationId"
     
     if (!resourceOrgId) {
       res.status(400).json(createErrorResponse(
+        "AUTH_MISSING_ORG_ID",
         "Organization ID not provided in request",
         { parameter: orgIdParam },
         req.requestId
@@ -207,6 +218,7 @@ export const validateOrganizationAccess = (orgIdParam: string = "organizationId"
     // User must belong to the same organization
     if (req.user.organizationId !== resourceOrgId) {
       res.status(403).json(createErrorResponse(
+        "AUTH_ORG_ACCESS_DENIED",
         "Access denied to organization resource",
         {
           userOrganization: req.user.organizationId,
@@ -249,7 +261,7 @@ export const optionalAuth = async (
         };
       } catch (tokenError) {
         // Ignore token errors in optional auth
-        console.warn("Optional auth token verification failed:", tokenError.message);
+        console.warn("Optional auth token verification failed:", String(tokenError));
       }
     }
     
@@ -269,8 +281,9 @@ export const authenticateService = (req: Request, res: Response, next: NextFunct
   
   if (!apiKey) {
     res.status(401).json(createErrorResponse(
+      "AUTH_API_KEY_REQUIRED",
       "API key required for service authentication",
-      null,
+      undefined,
       req.requestId
     ));
     return;
@@ -281,8 +294,9 @@ export const authenticateService = (req: Request, res: Response, next: NextFunct
   
   if (!validApiKeys.includes(apiKey)) {
     res.status(401).json(createErrorResponse(
+      "AUTH_INVALID_API_KEY",
       "Invalid API key",
-      null,
+      undefined,
       req.requestId
     ));
     return;

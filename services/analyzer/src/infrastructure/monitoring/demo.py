@@ -6,11 +6,8 @@ Demonstração completa das funcionalidades de monitoramento.
 
 import asyncio
 import random
-from datetime import datetime, timedelta
 
 from .observability import get_observability_manager, observe_async, observe_sync
-from .metrics import get_metrics_collector
-from .tracing import get_tracer
 from .alerting import AlertRule, AlertSeverity
 
 

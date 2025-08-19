@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { DocumentType } from './document.types';
 
 // Enums
+/* eslint-disable no-unused-vars */
 export enum AnalysisPreset {
   RIGOROUS = 'RIGOROUS',
   STANDARD = 'STANDARD', 
@@ -40,6 +41,7 @@ export enum ProblemCategory {
   CONFORMIDADE = 'CONFORMIDADE',
   COMPLETUDE = 'COMPLETUDE'
 }
+/* eslint-enable no-unused-vars */
 
 // Zod Schemas
 export const AnalysisPresetSchema = z.nativeEnum(AnalysisPreset);

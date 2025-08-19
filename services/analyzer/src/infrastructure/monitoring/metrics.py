@@ -10,8 +10,7 @@ from typing import Dict, Any, Optional, List, Callable
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 from enum import Enum
-from collections import defaultdict, deque
-import json
+from collections import deque
 import threading
 from contextlib import asynccontextmanager
 

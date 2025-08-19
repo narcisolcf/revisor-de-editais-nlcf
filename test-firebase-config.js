@@ -4,6 +4,34 @@ const path = require('path');
 // Configurar o caminho para o arquivo de credenciais
 const serviceAccountPath = path.join(__dirname, 'credentials', 'licitareview-prod-b6b067fdd7e4.json');
 
+// Teste básico de leitura/escrita no Firestore
+async function testFirestore(db) {
+  try {
+    // Criar um documento de teste
+    const testRef = db.collection('test').doc('config-test');
+    await testRef.set({
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      message: 'Teste de configuração realizado com sucesso',
+      status: 'success'
+    });
+    console.log('✅ Escrita no Firestore funcionando!');
+
+    // Ler o documento de teste
+    const doc = await testRef.get();
+    if (doc.exists) {
+      console.log('✅ Leitura do Firestore funcionando!');
+      console.log('Dados do teste:', doc.data());
+    }
+
+    // Limpar o documento de teste
+    await testRef.delete();
+    console.log('✅ Documento de teste removido!');
+
+  } catch (error) {
+    console.error('❌ Erro ao testar Firestore:', error);
+  }
+}
+
 try {
   // Inicializar o Firebase Admin SDK
   admin.initializeApp({
@@ -20,37 +48,10 @@ try {
   // Testar Auth
   const auth = admin.auth();
   console.log('✅ Firebase Auth configurado!');
-
-  // Teste básico de leitura/escrita no Firestore
-  async function testFirestore() {
-    try {
-      // Criar um documento de teste
-      const testRef = db.collection('test').doc('config-test');
-      await testRef.set({
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        message: 'Teste de configuração realizado com sucesso',
-        status: 'success'
-      });
-      console.log('✅ Escrita no Firestore funcionando!');
-
-      // Ler o documento de teste
-      const doc = await testRef.get();
-      if (doc.exists) {
-        console.log('✅ Leitura do Firestore funcionando!');
-        console.log('Dados do teste:', doc.data());
-      }
-
-      // Limpar o documento de teste
-      await testRef.delete();
-      console.log('✅ Documento de teste removido!');
-
-    } catch (error) {
-      console.error('❌ Erro ao testar Firestore:', error);
-    }
-  }
+  console.log('🔐 Auth instance:', typeof auth); // Usar a variável para evitar warning
 
   // Executar teste
-  testFirestore().then(() => {
+  testFirestore(db).then(() => {
     console.log('\n🎉 Todos os testes passaram! Configuração está funcionando corretamente.');
     process.exit(0);
   }).catch((error) => {

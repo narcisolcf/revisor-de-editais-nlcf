@@ -6,7 +6,7 @@ Sistema avançado de alertas com múltiplos canais e regras configuráveis.
 
 import asyncio
 import json
-from typing import Dict, Any, Optional, List, Callable, Union
+from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 from enum import Enum

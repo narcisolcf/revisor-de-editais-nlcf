@@ -5,8 +5,6 @@ Serviço responsável por extrair texto de documentos diversos,
 incluindo PDFs, imagens e documentos Word.
 """
 
-import asyncio
-from typing import Optional
 import structlog
 from fastapi import UploadFile
 
@@ -90,7 +88,7 @@ class OCRService:
         - pdf2image + Tesseract para PDFs escaneados
         """
         # Simulação - em produção implementaria extração real
-        return f"""
+        return """
         EDITAL DE PREGÃO ELETRÔNICO Nº 001/2024
         
         A Prefeitura Municipal de Example, através da Secretaria de Administração,
@@ -131,7 +129,7 @@ class OCRService:
         Em produção, utilizaria python-docx ou similar.
         """
         # Simulação - em produção implementaria extração real
-        return f"""
+        return """
         TERMO DE REFERÊNCIA
         
         1. OBJETO
@@ -167,7 +165,7 @@ class OCRService:
         Em produção, utilizaria Tesseract, Azure OCR, etc.
         """
         # Simulação - em produção implementaria OCR real
-        return f"""
+        return """
         ATA DE REGISTRO DE PREÇOS Nº 001/2024
         
         Aos vinte dias do mês de janeiro do ano de dois mil e vinte e quatro,

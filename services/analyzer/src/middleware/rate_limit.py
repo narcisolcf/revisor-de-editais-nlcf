@@ -5,7 +5,7 @@ Controla a taxa de requests para prevenir abuse da API.
 """
 
 import time
-from typing import Dict, Optional
+from typing import Dict
 from fastapi import HTTPException, Request
 import structlog
 

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { WithId, WithTimestamp, ApiResponse, PaginatedResponse } from "./index";
 
 // Enums
+/* eslint-disable no-unused-vars */
 export enum TipoComissao {
   PERMANENTE = "Permanente",
   TEMPORARIA = "Temporaria"
@@ -26,6 +27,7 @@ export enum PapelMembro {
   MEMBRO = "Membro",
   SUPLENTE = "Suplente"
 }
+/* eslint-enable no-unused-vars */
 
 // Schemas for validation
 export const TipoComissaoSchema = z.nativeEnum(TipoComissao);
@@ -67,7 +69,7 @@ export const ConfiguracoesComissaoSchema = z.object({
 });
 
 // Comissão Interface
-export interface Comissao extends WithId, WithTimestamp {
+export interface Comissao extends WithId<{}>, WithTimestamp<{}> {
   nomeDaComissao: string;
   tipo: TipoComissao;
   dataDeCriacao: Date;

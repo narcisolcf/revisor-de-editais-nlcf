@@ -15,11 +15,14 @@ import {
   AlertTriangle,
   Eye,
   Download,
-  Trash2
+  Trash2,
+  Brain,
+  Zap
 } from 'lucide-react';
 import { DocumentService, UploadProgress } from '@/services/documentService';
 import { DocumentClassification, DocumentUpload } from '@/types/document';
 import { HierarchicalClassification } from '@/components/HierarchicalClassification';
+import { useSmartClassification } from '@/hooks/useSmartClassification';
 import { useToast } from '@/components/ui/use-toast';
 
 interface DocumentUploaderProps {
@@ -48,6 +51,20 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [classification, setClassification] = useState<DocumentClassification | null>(null);
   const [description, setDescription] = useState('');
+  const [autoClassifyEnabled, setAutoClassifyEnabled] = useState(true);
+  
+  // Hook para classificação automática
+  const { 
+    classifyDocument, 
+    isClassifying, 
+    result: classificationResult, 
+    error: classificationError,
+    autoApplied,
+    clearClassification,
+    getConfidenceText,
+    getConfidenceColor,
+    isHighConfidence
+  } = useSmartClassification();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
   const { toast } = useToast();
@@ -79,6 +96,31 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       const combined = [...prev, ...newFiles];
       return combined.slice(0, maxFiles);
     });
+
+    // Classificação automática para o primeiro arquivo válido
+    if (autoClassifyEnabled && acceptedFiles.length > 0) {
+      const firstValidFile = acceptedFiles.find(file => 
+        DocumentService.validateFile(file).valid
+      );
+      
+      if (firstValidFile) {
+        // Extrair texto do arquivo para classificação
+        DocumentService.extractTextFromFile(firstValidFile).then(({ text }) => {
+          classifyDocument(text, {
+            autoApply: false, // Não aplicar automaticamente no upload
+            onSuggestion: (result) => {
+              // Sugerir classificação baseada no resultado
+              if (result.confidence > 0.7) {
+                setClassification({
+                  tipoObjeto: result.documentType,
+                  tipoDocumento: result.documentType
+                });
+              }
+            }
+          });
+        }).catch(console.error);
+      }
+    }
   }, [maxFiles]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -219,6 +261,82 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
           </Button>
         )}
       </div>
+
+      {/* Configuração da Classificação Automática */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="w-5 h-5" />
+            Classificação Automática com IA
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-blue-500" />
+              <span className="text-sm font-medium">Detectar tipo automaticamente</span>
+            </div>
+            <Button
+              variant={autoClassifyEnabled ? "default" : "outline"}
+              size="sm"
+              onClick={() => setAutoClassifyEnabled(!autoClassifyEnabled)}
+            >
+              {autoClassifyEnabled ? 'Ativado' : 'Desativado'}
+            </Button>
+          </div>
+
+          {/* Resultados da Classificação */}
+          {classificationResult && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span className="font-medium text-sm">Tipo detectado:</span>
+                <Badge variant="secondary">{classificationResult.documentType}</Badge>
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm text-gray-600">Confiança:</span>
+                <Badge 
+                  variant={isHighConfidence(classificationResult.confidence) ? "default" : "outline"}
+                  className={getConfidenceColor(classificationResult.confidence)}
+                >
+                  {getConfidenceText(classificationResult.confidence)}
+                </Badge>
+                <span className="text-xs text-gray-500">
+                  ({(classificationResult.confidence * 100).toFixed(1)}%)
+                </span>
+              </div>
+              {classificationResult.alternatives && classificationResult.alternatives.length > 0 && (
+                <div className="text-sm text-gray-600">
+                  <span>Alternativas: </span>
+                  {classificationResult.alternatives.slice(0, 2).map((alt, idx) => (
+                    <Badge key={idx} variant="outline" className="mr-1">
+                      {alt.type} ({(alt.confidence * 100).toFixed(0)}%)
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Erro na Classificação */}
+          {classificationError && (
+            <Alert className="border-red-200 bg-red-50">
+              <AlertTriangle className="w-4 h-4 text-red-500" />
+              <AlertDescription className="text-red-700">
+                Erro na classificação automática: {classificationError}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Indicador de Processamento */}
+          {isClassifying && (
+            <div className="flex items-center gap-2 text-blue-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span className="text-sm">Analisando documento...</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Classificação */}
       <Card>

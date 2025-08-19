@@ -1,0 +1,132 @@
+# Flask e extensões
+Flask==2.3.3
+Flask-CORS==4.0.0
+Werkzeug==2.3.7
+
+# Google Cloud
+google-cloud-vision==3.4.4
+google-cloud-storage==2.10.0
+google-cloud-logging==3.8.0
+google-auth==2.23.3
+
+# Machine Learning
+scikit-learn==1.3.0
+numpy==1.24.3
+pandas==2.0.3
+joblib==1.3.2
+
+# Processamento de texto
+nltk==3.8.1
+spacy==3.6.1
+textstat==0.7.3
+langdetect==1.0.9
+
+# Processamento de documentos
+PyPDF2==3.0.1
+python-docx==0.8.11
+python-pptx==0.6.21
+openpyxl==3.1.2
+pdf2image==1.16.3
+poppler-utils==0.1.0
+
+# OCR e visão computacional
+Pillow==10.0.0
+opencv-python==4.8.0.76
+pytesseract==0.3.10
+
+# Utilitários
+requests==2.31.0
+click==8.1.7
+python-dotenv==1.0.0
+psutil==5.9.5
+
+# Cache e performance
+redis==4.6.0
+memory-profiler==0.61.0
+
+# Logging e monitoramento
+structlog==23.1.0
+prometheus-client==0.17.1
+
+# Validação e serialização
+marshmallow==3.20.1
+cerberus==1.3.5
+
+# Testes (para desenvolvimento)
+pytest==7.4.2
+pytest-cov==4.1.0
+pytest-mock==3.11.1
+
+# Formatação e linting (para desenvolvimento)
+black==23.7.0
+flake8==6.0.0
+isort==5.12.0
+
+# Segurança
+cryptography==41.0.4
+
+# Timezone
+pytz==2023.3
+
+# Regex avançado
+regex==2023.8.8
+
+# Processamento de linguagem natural em português
+spacy-langdetect==0.1.2
+
+# Para análise de sentimentos (opcional)
+vaderSentiment==3.3.2
+
+# Para análise de legibilidade em português
+py-readability-metrics==1.4.5
+
+# Para extração de features de texto
+scikit-image==0.21.0
+
+# Para processamento paralelo
+joblib==1.3.2
+
+# Para manipulação de datas
+python-dateutil==2.8.2
+
+# Para validação de URLs e emails
+validators==0.22.0
+
+# Para compressão
+zstandard==0.21.0
+
+# Para análise estatística
+scipy==1.11.2
+
+# Para gráficos (se necessário)
+matplotlib==3.7.2
+seaborn==0.12.2
+
+# Para encoding detection
+chardet==5.2.0
+
+# Para parsing de HTML (se necessário)
+BeautifulSoup4==4.12.2
+lxml==4.9.3
+
+# Para métricas de texto
+textdistance==4.6.0
+
+# Para análise de complexidade
+radon==6.0.1
+
+# Para hash e checksums
+xxhash==3.3.0
+
+# Para configuração
+PyYAML==6.0.1
+toml==0.10.2
+
+# Para retry e circuit breaker
+tenacity==8.2.3
+
+# Para rate limiting
+Flask-Limiter==3.5.0
+
+# Para health checks
+py-healthcheck==1.10.1

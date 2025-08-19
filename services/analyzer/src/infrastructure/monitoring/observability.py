@@ -4,13 +4,12 @@ Observability Integration
 Integração completa de observabilidade combinando métricas, tracing e alertas.
 """
 
-import asyncio
 from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime
 from contextlib import asynccontextmanager
 
 from .metrics import MetricsCollector, AdvancedMetricsService
-from .tracing import Tracer, get_tracer, trace_operation
+from .tracing import Tracer, get_tracer
 from .alerting import AlertManager, setup_default_alerting
 
 

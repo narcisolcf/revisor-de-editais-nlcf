@@ -1,10 +1,29 @@
 import { useState, useCallback, useEffect } from 'react';
 import { DocumentAnalysis, DocumentUpload } from '@/types/document';
 import { DocumentService } from '@/services/documentService';
+import { DocumentAnalysisService } from '@/services/documentAnalysisService';
+import { ParametersService } from '@/services/parametersService';
 
 interface UseDocumentAnalysisOptions {
   autoRefresh?: boolean;
   refreshInterval?: number;
+  useCloudRun?: boolean;
+  enableRealTimeProgress?: boolean;
+}
+
+interface AnalysisProgress {
+  stage: 'uploading' | 'extracting' | 'analyzing' | 'validating' | 'completing';
+  progress: number;
+  message: string;
+  estimated_time?: number;
+}
+
+interface AnalysisStatistics {
+  totalAnalyses: number;
+  averageScore: number;
+  scoreDistribution: Record<string, number>;
+  commonProblems: Array<{ type: string; count: number }>;
+  processingTimes: { average: number; min: number; max: number };
 }
 
 interface AnalysisState {
@@ -13,6 +32,8 @@ interface AnalysisState {
   isLoading: boolean;
   isAnalyzing: boolean;
   error: string | null;
+  progress: AnalysisProgress | null;
+  statistics: AnalysisStatistics | null;
 }
 
 interface UseDocumentAnalysisReturn extends AnalysisState {
@@ -41,6 +62,14 @@ interface UseDocumentAnalysisReturn extends AnalysisState {
     failed: number;
     averageScore: number;
   };
+  
+  // Funcionalidades de alta prioridade
+  analyzeDocumentWithFile: (file: File, options?: any) => Promise<DocumentAnalysis | null>;
+  analyzeBatch: (files: File[], options?: any) => Promise<DocumentAnalysis[]>;
+  reanalyzeDocument: (documentId: string) => Promise<DocumentAnalysis | null>;
+  getAnalysisStatus: (analysisId: string) => Promise<any>;
+  loadStatistics: () => Promise<void>;
+  clearCache: () => Promise<void>;
 }
 
 export const useDocumentAnalysis = (
@@ -53,7 +82,9 @@ export const useDocumentAnalysis = (
     currentAnalysis: null,
     isLoading: false,
     isAnalyzing: false,
-    error: null
+    error: null,
+    progress: null,
+    statistics: null
   });
 
   // DocumentService é uma classe com métodos estáticos
@@ -229,15 +260,159 @@ export const useDocumentAnalysis = (
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval, refresh]);
 
+  // Funcionalidades de alta prioridade
+  const parametersService = new ParametersService();
+
+  const createDocumentFromFile = useCallback((file: File): DocumentUpload => {
+    return {
+      id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      prefeituraId: 'mock_prefeitura',
+      nome: file.name,
+      tipo: file.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'DOCX',
+      classification: {
+        tipoObjeto: 'aquisicao',
+        modalidadePrincipal: 'processo_licitatorio',
+        subtipo: 'processo_licitatorio',
+        tipoDocumento: 'edital'
+      },
+      tamanho: file.size,
+      urlStorage: '',
+      status: 'processando',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }, []);
+
+  const analyzeDocumentWithFile = useCallback(async (
+    file: File, 
+    options?: any
+  ): Promise<DocumentAnalysis | null> => {
+    try {
+      setState(prev => ({ ...prev, isAnalyzing: true, error: null, progress: { stage: 'uploading', progress: 0, message: 'Preparando análise...' } }));
+
+      const extractionResult = await DocumentAnalysisService.extractTextFromFile(file);
+      const document = createDocumentFromFile(file);
+
+      const analysis = await DocumentAnalysisService.analyzeDocumentRealTime(
+        document,
+        extractionResult.text,
+        (progress) => setState(prev => ({ ...prev, progress }))
+      );
+
+      setState(prev => ({
+        ...prev,
+        currentAnalysis: analysis,
+        analyses: [analysis, ...prev.analyses],
+        isAnalyzing: false,
+        progress: null
+      }));
+      
+      return analysis;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro na análise';
+      setState(prev => ({ ...prev, error: errorMessage, isAnalyzing: false, progress: null }));
+      return null;
+    }
+  }, [createDocumentFromFile]);
+
+  const analyzeBatch = useCallback(async (
+    files: File[], 
+    options?: any
+  ): Promise<DocumentAnalysis[]> => {
+    if (files.length === 0) return [];
+
+    try {
+      setState(prev => ({ ...prev, isAnalyzing: true, error: null, progress: { stage: 'uploading', progress: 0, message: 'Preparando análise em lote...' } }));
+
+      const documentsToAnalyze = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        setState(prev => ({ ...prev, progress: {
+          stage: 'extracting',
+          progress: Math.round((i / files.length) * 50),
+          message: `Extraindo texto: ${file.name}...`
+        }}));
+
+        const extractionResult = await DocumentAnalysisService.extractTextFromFile(file);
+        const document = createDocumentFromFile(file);
+
+        documentsToAnalyze.push({ document, extractedText: extractionResult.text });
+      }
+
+      setState(prev => ({ ...prev, progress: { stage: 'analyzing', progress: 50, message: 'Executando análise em lote...' } }));
+
+      const batchResults = await DocumentAnalysisService.analyzeBatch(documentsToAnalyze);
+      
+      setState(prev => ({
+        ...prev,
+        analyses: [...batchResults, ...prev.analyses],
+        isAnalyzing: false,
+        progress: null
+      }));
+      
+      return batchResults;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro na análise em lote';
+      setState(prev => ({ ...prev, error: errorMessage, isAnalyzing: false, progress: null }));
+      return [];
+    }
+  }, [createDocumentFromFile]);
+
+  const reanalyzeDocument = useCallback(async (
+    documentId: string
+  ): Promise<DocumentAnalysis | null> => {
+    try {
+      setState(prev => ({ ...prev, isAnalyzing: true, error: null }));
+      
+      const newAnalysis = await DocumentAnalysisService.reanalyzeDocument(documentId);
+      
+      setState(prev => ({
+        ...prev,
+        analyses: prev.analyses.map(analysis => 
+          analysis.documentoId === documentId ? newAnalysis : analysis
+        ),
+        currentAnalysis: prev.currentAnalysis?.documentoId === documentId ? newAnalysis : prev.currentAnalysis,
+        isAnalyzing: false
+      }));
+      
+      return newAnalysis;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao reprocessar';
+      setState(prev => ({ ...prev, error: errorMessage, isAnalyzing: false }));
+      return null;
+    }
+  }, []);
+
+  const getAnalysisStatus = useCallback(async (analysisId: string) => {
+    try {
+      return await DocumentAnalysisService.getAnalysisStatus(analysisId);
+    } catch (err) {
+      setState(prev => ({ ...prev, error: err instanceof Error ? err.message : 'Erro ao obter status' }));
+      throw err;
+    }
+  }, []);
+
+  const loadStatistics = useCallback(async () => {
+    try {
+      const stats = await DocumentAnalysisService.getAnalysisStatistics();
+      setState(prev => ({ ...prev, statistics: stats }));
+    } catch (err) {
+      console.error('Erro ao carregar estatísticas:', err);
+    }
+  }, []);
+
+  const clearCache = useCallback(async () => {
+    try {
+      await DocumentAnalysisService.clearAnalysisCache();
+      await loadStatistics();
+    } catch (err) {
+      setState(prev => ({ ...prev, error: err instanceof Error ? err.message : 'Erro ao limpar cache' }));
+    }
+  }, [loadStatistics]);
+
   return {
-    // Estado
-    analyses: state.analyses,
-    currentAnalysis: state.currentAnalysis,
-    isLoading: state.isLoading,
-    isAnalyzing: state.isAnalyzing,
-    error: state.error,
-    
-    // Ações
+    ...state,
     startAnalysis,
     cancelAnalysis,
     retryAnalysis,
@@ -247,11 +422,15 @@ export const useDocumentAnalysis = (
     setCurrentAnalysis,
     clearError,
     refresh,
-    
-    // Utilitários
     getAnalysisById,
     getLatestAnalysis,
-    getAnalysisStats
+    getAnalysisStats,
+    analyzeDocumentWithFile,
+    analyzeBatch,
+    reanalyzeDocument,
+    getAnalysisStatus,
+    loadStatistics,
+    clearCache
   };
 };
 

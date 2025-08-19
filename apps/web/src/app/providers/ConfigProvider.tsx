@@ -6,7 +6,7 @@
  * and templates.
  */
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -50,18 +50,27 @@ interface ConfigContextType {
   isDirty: boolean;
   
   // Configuration Actions
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateWeights: (weights: AnalysisWeights) => void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   addCustomRule: (rule: CustomRule) => void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateCustomRule: (id: string, rule: Partial<CustomRule>) => void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   removeCustomRule: (id: string) => void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setPreset: (preset: AnalysisPreset) => void;
   saveConfig: () => Promise<void>;
   resetConfig: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   validateWeights: (weights: AnalysisWeights) => Promise<boolean>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   testRule: (pattern: string, text: string) => Promise<boolean>;
   
   // Utility functions
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getPresetWeights: (preset: AnalysisPreset) => AnalysisWeights;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   calculateWeightedScore: (baseScores: Record<string, number>) => number;
 }
 

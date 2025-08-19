@@ -4,7 +4,6 @@ Advanced Tracing System
 Sistema avançado de tracing para rastreamento de operações.
 """
 
-import time
 import uuid
 import asyncio
 from typing import Dict, Any, Optional, List, Callable, Union
@@ -14,7 +13,7 @@ from enum import Enum
 from contextlib import asynccontextmanager
 import json
 import threading
-from collections import defaultdict, deque
+from collections import defaultdict
 
 
 class SpanStatus(str, Enum):

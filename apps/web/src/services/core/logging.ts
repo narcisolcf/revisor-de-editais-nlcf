@@ -5,6 +5,7 @@
 import { Severity } from '../../types/core/common';
 
 /** Níveis de log */
+/* eslint-disable no-unused-vars */
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -12,6 +13,7 @@ export enum LogLevel {
   ERROR = 3,
   CRITICAL = 4
 }
+/* eslint-enable no-unused-vars */
 
 /** Entrada de log */
 export interface LogEntry {
@@ -517,7 +519,7 @@ export class CategoryLogger {
 
 /** Instância global do serviço de logging */
 export const loggingService = new LoggingService({
-  level: process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.INFO,
+  level: import.meta.env.DEV ? LogLevel.DEBUG : LogLevel.INFO,
   console: true,
   persist: true,
   includeStackTrace: true

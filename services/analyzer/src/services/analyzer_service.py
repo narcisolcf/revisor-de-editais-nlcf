@@ -5,25 +5,22 @@ Este módulo integra o motor de análise adaptativo com o sistema de análise
 padrão, coordenando análises personalizadas e gerenciando cache de resultados.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 import hashlib
-import json
+import re
 from dataclasses import dataclass
 
 import structlog
 from fastapi import UploadFile
 
 from .adaptive_analyzer import AdaptiveAnalyzer
-from ..models.document_models import Document, DocumentType
+from ..models.document_models import Document
 from ..models.config_models import OrganizationConfig, AnalysisWeights, AnalysisPreset
 from ..models.analysis_models import (
     AnalysisRequest, 
     AnalysisResult, 
-    DocumentUploadResponse,
-    AnalysisStatus,
-    ConformityScore
+    DocumentUploadResponse
 )
 
 logger = structlog.get_logger(__name__)

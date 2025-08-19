@@ -8,6 +8,7 @@ import { DocumentType } from "./document.types";
 import { ProblemSeverity, ProblemCategory } from "./analysis.types";
 
 // Enums
+/* eslint-disable no-unused-vars */
 export enum AnalysisPreset {
   RIGOROUS = "RIGOROUS",
   STANDARD = "STANDARD",
@@ -23,6 +24,7 @@ export enum WeightDistributionType {
   STRUCTURAL_FOCUSED = "STRUCTURAL_FOCUSED",
   CUSTOM = "CUSTOM"
 }
+/* eslint-enable no-unused-vars */
 
 // Zod Schemas
 export const AnalysisPresetSchema = z.nativeEnum(AnalysisPreset);

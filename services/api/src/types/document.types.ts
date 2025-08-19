@@ -6,6 +6,7 @@
 import { z } from "zod";
 
 // Enums
+/* eslint-disable no-unused-vars */
 export enum DocumentType {
   EDITAL = "EDITAL",
   TERMO_REFERENCIA = "TERMO_REFERENCIA", 
@@ -36,6 +37,7 @@ export enum LicitationModality {
   LEILAO = "LEILAO",
   CREDENCIAMENTO = "CREDENCIAMENTO"
 }
+/* eslint-enable no-unused-vars */
 
 // Zod Schemas
 export const DocumentTypeSchema = z.nativeEnum(DocumentType);

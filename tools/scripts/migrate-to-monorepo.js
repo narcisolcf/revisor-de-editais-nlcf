@@ -9,10 +9,10 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+// import { fileURLToPath } from 'url'; // Comentado - não utilizado no momento
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url); // Comentado - não utilizado no momento
+// const __dirname = path.dirname(__filename); // Comentado - não utilizado no momento
 
 const CURRENT_DIR = process.cwd();
 const BACKUP_DIR = path.join(CURRENT_DIR, '.migration-backup');

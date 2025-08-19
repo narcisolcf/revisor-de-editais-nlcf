@@ -18,7 +18,6 @@ from ...domain.interfaces.repositories import (
     ICacheRepository
 )
 from ...domain.interfaces.services import (
-    IAnalysisEngine,
     ITextExtractionService,
     INotificationService,
     IMetricsService,

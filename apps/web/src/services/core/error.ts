@@ -14,7 +14,6 @@ import {
   FileError,
   FileErrorType,
   AppError,
-  ErrorReport,
   ErrorHandlingConfig
 } from '../../types/core/errors';
 import { Severity } from '../../types/core/common';
@@ -257,7 +256,7 @@ export class FileErrorImpl extends AppErrorImpl implements FileError {
 export class ErrorService {
   private config: ErrorServiceConfig;
   private errorQueue: AppError[] = [];
-  private reportingTimer?: NodeJS.Timeout;
+  private reportingTimer?: ReturnType<typeof setTimeout>;
 
   constructor(config: Partial<ErrorServiceConfig> = {}) {
     this.config = {
@@ -610,13 +609,13 @@ export function handleError(error: Error | AppError, context?: Record<string, un
 }
 
 /** Função utilitária para criar wrapper de função com tratamento de erro */
-export function withErrorHandling<T extends (...args: any[]) => any>(
+export function withErrorHandling<T extends (..._args: any[]) => any>(
   fn: T,
   context?: Record<string, unknown>
 ): T {
-  return ((...args: Parameters<T>) => {
+  return ((..._args: Parameters<T>) => {
     try {
-      const result = fn(...args);
+      const result = fn(..._args);
       
       // Se retorna Promise, trata erros assíncronos
       if (result instanceof Promise) {

@@ -37,6 +37,10 @@ export const config = {
   // Logging
   logLevel: process.env.LOG_LEVEL || "info",
   enableAuditLogs: process.env.ENABLE_AUDIT_LOGS === "true",
+  
+  // Environment
+  nodeEnv: process.env.NODE_ENV || "development",
+  isDevelopment: process.env.NODE_ENV !== "production",
 } as const;
 
 // Validation

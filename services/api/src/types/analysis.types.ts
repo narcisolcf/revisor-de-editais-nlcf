@@ -4,9 +4,9 @@
  */
 
 import { z } from "zod";
-import { DocumentType } from "./document.types";
 
 // Enums
+/* eslint-disable no-unused-vars */
 export enum ProblemSeverity {
   CRITICA = "CRITICA",
   ALTA = "ALTA", 
@@ -22,6 +22,7 @@ export enum ProblemCategory {
   CONFORMIDADE = "CONFORMIDADE",
   COMPLETUDE = "COMPLETUDE"
 }
+/* eslint-enable no-unused-vars */
 
 // Zod Schemas
 export const ProblemSeveritySchema = z.nativeEnum(ProblemSeverity);

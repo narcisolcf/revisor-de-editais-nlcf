@@ -11,7 +11,7 @@ Cada órgão pode configurar pesos e regras específicas para seus processos lic
 
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, validator, root_validator

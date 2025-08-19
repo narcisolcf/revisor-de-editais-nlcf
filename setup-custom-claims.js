@@ -1,5 +1,5 @@
 const admin = require('firebase-admin');
-const path = require('path');
+// const path = require('path'); // Comentado - não utilizado no momento
 
 // Inicializar Firebase Admin SDK
 const serviceAccount = require('./credentials/analisador-de-editais-firebase-adminsdk-fbsvc-2f209c7f43.json');

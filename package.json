@@ -2,6 +2,7 @@
   "name": "licitareview",
   "version": "1.0.0",
   "description": "Sistema inteligente de análise de documentos licitatórios com parâmetros personalizáveis por organização",
+  "type": "module",
   "private": true,
   "workspaces": [
     "apps/*",

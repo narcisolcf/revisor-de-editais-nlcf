@@ -7,14 +7,14 @@ serialização avançada e validação cruzada.
 
 import json
 from datetime import datetime
-from typing import Dict, List, Any, Union, Optional, Type, TypeVar
+from typing import Dict, List, Any, Type, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
-from .document_models import Document, DocumentClassification, DocumentMetadata
-from .analysis_models import AnalysisResult, AnalysisFinding, ConformityScore
-from .config_models import OrganizationConfig, AnalysisWeights, CustomRule
+from .document_models import Document
+from .analysis_models import AnalysisResult
+from .config_models import OrganizationConfig, AnalysisWeights
 
 # Type variable para funções genéricas
 T = TypeVar('T', bound=BaseModel)

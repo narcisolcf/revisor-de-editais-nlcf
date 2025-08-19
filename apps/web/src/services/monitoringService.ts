@@ -71,7 +71,7 @@ class MonitoringService {
     }
   }
 
-  private async sendToMonitoringService(errorRecord: ErrorRecord): Promise<void> {
+  private async sendToMonitoringService(_errorRecord: ErrorRecord): Promise<void> {
     // Future implementation for external services like Sentry
     // For now, we just store locally and log
     

@@ -15,7 +15,7 @@ export interface FileUploadState {
 export interface UseDocumentUploadOptions {
   prefeituraId: string;
   onUploadSuccess?: (document: DocumentUpload) => void;
-  onUploadError?: (error: string, file: File) => void;
+  onUploadError?: (errorMessage: string, file: File) => void;
   maxConcurrentUploads?: number;
 }
 

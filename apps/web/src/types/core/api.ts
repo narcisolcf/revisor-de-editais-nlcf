@@ -104,7 +104,7 @@ export type ResponseInterceptor = {
   /** Interceptor para respostas de sucesso */
   onSuccess?: <T>(response: ApiResponse<T>) => ApiResponse<T> | Promise<ApiResponse<T>>;
   /** Interceptor para respostas de erro */
-  onError?: (error: NetworkError) => NetworkError | Promise<NetworkError>;
+  onError?: (_error: NetworkError) => NetworkError | Promise<NetworkError>;
 };
 
 /** Configuração de retry */

@@ -6,7 +6,7 @@
 
 import { onObjectFinalized } from "firebase-functions/v2/storage";
 import { logger } from "firebase-functions";
-import { storage, collections } from "../config/firebase";
+import { storage, collections, firestore } from "../config/firebase";
 import { 
   Document, 
   DocumentStatus, 
@@ -15,7 +15,7 @@ import {
   NotificationPayload
 } from "../types";
 import { config } from "../config";
-import { retry, withTimeout, formatFileSize } from "../utils";
+import { retryWithBackoff, formatBytes } from "../utils";
 
 const bucket = storage.bucket();
 
@@ -30,13 +30,13 @@ export const onDocumentUpload = onObjectFinalized({
   bucket: config.storageBucket
 }, async (event) => {
   const filePath = event.data.name;
-  const fileSize = parseInt(event.data.size || "0", 10);
+  const fileSize = parseInt(String(event.data.size || "0"), 10);
   const contentType = event.data.contentType || "";
   const timeCreated = event.data.timeCreated;
   
   logger.info(`Document upload detected: ${filePath}`, {
     filePath,
-    fileSize: formatFileSize(fileSize),
+    fileSize: formatBytes(fileSize),
     contentType,
     timeCreated
   });
@@ -66,8 +66,8 @@ export const onDocumentUpload = onObjectFinalized({
   
   // Check file size
   if (fileSize > config.maxDocumentSize) {
-    logger.warn(`File too large: ${formatFileSize(fileSize)} for ${filePath}`);
-    await markDocumentAsError(filePath, `File too large: ${formatFileSize(fileSize)}`);
+    logger.warn(`File too large: ${formatBytes(fileSize)} for ${filePath}`);
+    await markDocumentAsError(filePath, `File too large: ${formatBytes(fileSize)}`);
     return;
   }
   
@@ -122,7 +122,7 @@ export const onDocumentUpload = onObjectFinalized({
       updatedAt: new Date()
     };
     
-    await retry(async () => {
+    await retryWithBackoff(async () => {
       await docRef.update(updateData);
     }, 3, 1000);
     
@@ -134,7 +134,7 @@ export const onDocumentUpload = onObjectFinalized({
     // Send success notification
     await createUploadNotification(organizationId, documentId, "success", {
       fileName,
-      fileSize: formatFileSize(fileSize),
+      fileSize: formatBytes(fileSize),
       message: "Document uploaded successfully and processing started"
     });
     
@@ -147,7 +147,7 @@ export const onDocumentUpload = onObjectFinalized({
     const pathParts = filePath.split("/");
     if (pathParts.length >= 3) {
       const documentId = pathParts[2];
-      await markDocumentAsError(documentId, `Upload processing error: ${error.message}`);
+      await markDocumentAsError(documentId, `Upload processing error: ${error instanceof Error ? error.message : String(error)}`);
     }
     
     throw error; // Re-throw to trigger retry
@@ -213,7 +213,7 @@ async function startDocumentProcessing(document: Document, filePath: string): Pr
     };
     
     // Add to processing queue (could use Cloud Tasks or Pub/Sub)
-    await collections.firestore.collection("processing_queue").add(taskPayload);
+    await firestore.collection("processing_queue").add(taskPayload);
     
     logger.info(`Document queued for analysis: ${document.id}`, {
       taskId: taskPayload.id,
@@ -222,7 +222,7 @@ async function startDocumentProcessing(document: Document, filePath: string): Pr
     
   } catch (error) {
     logger.error(`Error starting document processing: ${document.id}`, error);
-    await markDocumentAsError(document.id, `Processing start error: ${error.message}`);
+    await markDocumentAsError(document.id, `Processing start error: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }
@@ -269,7 +269,7 @@ async function createUploadNotification(
       channels: ["push"] // Could include "email" if critical
     };
     
-    await collections.firestore.collection("notifications").add({
+    await firestore.collection("notifications").add({
       ...notification,
       createdAt: new Date(),
       processed: false
@@ -365,7 +365,7 @@ export async function validateDocument(filePath: string, document: Document): Pr
     } else {
       // Get file metadata for additional validation
       const [metadata] = await file.getMetadata();
-      const actualSize = parseInt(metadata.size || "0", 10);
+      const actualSize = parseInt(String(metadata.size || 0), 10);
       
       // Validate file size matches metadata
       if (Math.abs(actualSize - document.metadata.fileSize) > 1024) { // 1KB tolerance
@@ -387,7 +387,7 @@ export async function validateDocument(filePath: string, document: Document): Pr
     };
     
   } catch (error) {
-    errors.push(`Validation error: ${error.message}`);
+    errors.push(`Validation error: ${error instanceof Error ? error.message : String(error)}`);
     return { isValid: false, errors, warnings };
   }
 }

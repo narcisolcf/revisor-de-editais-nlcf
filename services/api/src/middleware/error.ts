@@ -135,6 +135,7 @@ export const errorHandler = (
 
   // Create error response
   const errorResponse = createErrorResponse(
+    'INTERNAL_ERROR',
     message,
     config.isDevelopment ? details || error.stack : details,
     req.requestId
@@ -158,6 +159,7 @@ export const errorHandler = (
  */
 export const notFoundHandler = (req: Request, res: Response): void => {
   const error = createErrorResponse(
+    "NOT_FOUND",
     `Route not found: ${req.method} ${req.path}`,
     {
       method: req.method,
@@ -280,11 +282,12 @@ export const externalServiceError = (serviceName: string, error: any) => {
  */
 export const rateLimitError = (req: Request, res: Response) => {
   const error = createErrorResponse(
+    "RATE_LIMIT_EXCEEDED",
     "Rate limit exceeded",
     {
       limit: "100 requests per 15 minutes",
       retryAfter: "15 minutes",
-      documentation: "Check rate limiting documentation"
+      documentation: "https://docs.api.com/rate-limits"
     },
     req.requestId
   );
@@ -297,11 +300,12 @@ export const rateLimitError = (req: Request, res: Response) => {
  */
 export const corsError = (req: Request, res: Response) => {
   const error = createErrorResponse(
+    "CORS_VIOLATION",
     "CORS policy violation",
     {
-      origin: req.get("Origin"),
+      origin: req.headers.origin,
       allowedOrigins: config.corsOrigin,
-      documentation: "Check CORS configuration"
+      documentation: "https://docs.api.com/cors"
     },
     req.requestId
   );
@@ -314,10 +318,11 @@ export const corsError = (req: Request, res: Response) => {
  */
 export const formatValidationError = (error: ValidationError) => {
   return createErrorResponse(
+    "VALIDATION_ERROR",
     error.message,
     {
       validationErrors: error.details,
-      documentation: "Check API documentation for proper request format"
+      documentation: "https://docs.api.com/validation"
     }
   );
 };

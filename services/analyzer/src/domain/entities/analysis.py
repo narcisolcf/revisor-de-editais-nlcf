@@ -12,7 +12,7 @@ from enum import Enum
 import uuid
 
 from .document import DocumentId
-from .organization import OrganizationId
+from .organization import OrganizationId, AnalysisWeights
 
 
 class AnalysisStatus(str, Enum):
@@ -110,7 +110,6 @@ class ConformityScores:
         Returns:
             Score ponderado entre 0-100
         """
-        from .organization import AnalysisWeights
         
         return (
             self.structural * (weights.structural / 100) +

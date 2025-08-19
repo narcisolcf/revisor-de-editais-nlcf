@@ -177,7 +177,7 @@ export class FallbackSystem {
     }
   }
 
-  private evaluateCustomCondition(condition: FallbackCondition, context: AnalysisContext, error: Error): boolean {
+  private evaluateCustomCondition(condition: FallbackCondition, context: AnalysisContext, _error: Error): boolean {
     // Implementar lógica customizada se necessário
     return true;
   }
@@ -257,14 +257,14 @@ export class FallbackSystem {
         sugestaoCorrecao: 'Verificar configurações e tentar novamente',
         categoria: 'formal'
       }],
-      metrics: { errorType: error.constructor.name, fallbackUsed: true },
+      metrics: {},
       score: 50,
       confidence: 20,
       processingTime: 0
     };
   }
 
-  private async executeCustomAction(action: FallbackAction, context: AnalysisContext, error: Error): Promise<any> {
+  private async executeCustomAction(action: FallbackAction, context: AnalysisContext, _error: Error): Promise<any> {
     // Implementar ações customizadas se necessário
     return null;
   }
@@ -423,7 +423,7 @@ class GeneralBasicAnalyzer extends BasicAnalyzer {
         sugestaoCorrecao: 'Verificar configurações e tentar novamente',
         categoria: 'formal'
       }],
-      metrics: { basicAnalysis: true, fallbackUsed: true },
+      metrics: {},
       score: 60,
       confidence: 40,
       processingTime: 0
@@ -442,7 +442,7 @@ class StructuralBasicAnalyzer extends BasicAnalyzer {
         sugestaoCorrecao: 'Verificar configurações do analisador estrutural',
         categoria: 'formal'
       }],
-      metrics: { basicStructuralAnalysis: true, fallbackUsed: true },
+      metrics: {},
       score: 65,
       confidence: 35,
       processingTime: 0
@@ -461,7 +461,7 @@ class LegalBasicAnalyzer extends BasicAnalyzer {
         sugestaoCorrecao: 'Verificar configurações do analisador legal',
         categoria: 'juridico'
       }],
-      metrics: { basicLegalAnalysis: true, fallbackUsed: true },
+      metrics: {},
       score: 55,
       confidence: 30,
       processingTime: 0

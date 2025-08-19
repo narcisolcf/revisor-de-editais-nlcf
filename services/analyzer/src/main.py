@@ -10,7 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from datetime import datetime
-import structlog
 
 from .config import settings
 from .services.analyzer_service import AnalyzerService  

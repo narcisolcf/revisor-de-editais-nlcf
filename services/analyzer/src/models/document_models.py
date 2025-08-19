@@ -7,8 +7,8 @@ e suas características no sistema LicitaReview.
 
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any, Union
-from uuid import UUID, uuid4
+from typing import Dict, List, Optional, Any
+from uuid import uuid4
 
 from pydantic import BaseModel, Field, validator, root_validator
 from pydantic.types import StrictStr, PositiveInt
