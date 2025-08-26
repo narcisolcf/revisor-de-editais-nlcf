@@ -1,0 +1,332 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.cdnfonts.com/css/rawline');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme {
+  --font-sans: InterVariable, sans-serif;
+  --font-sans--font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.75rem;
+
+    /* Government palette */
+    --government-50: 214 100% 97%;
+    --government-100: 214 95% 93%;
+    --government-200: 213 97% 87%;
+    --government-500: 217 91% 60%;
+    --government-600: 221 83% 53%;
+    --government-700: 224 76% 48%;
+
+    /* Layout tokens for landing page */
+    --surface: 225 29% 98%; /* #f8f9fc */
+    --muted-surface: 220 40% 92%; /* #e7ebf3 */
+    --ink: 222 30% 10%; /* #0e121b */
+    --muted-ink: 222 33% 46%; /* #4e6397 */
+    --cta: 224 79% 40%; /* #1543b7 */
+    --cta-foreground: 225 29% 98%; /* #f8f9fc */
+
+    /* DSGov Dropdown and Form Tokens */
+    --select-border: 214.3 31.8% 91.4%;
+    --select-border-focus: 221.2 83.2% 53.3%;
+    --select-background: 0 0% 100%;
+    --select-background-hover: 210 40% 96%;
+    --select-background-disabled: 210 40% 96%;
+    --select-foreground: 222.2 84% 4.9%;
+    --select-foreground-disabled: 215.4 16.3% 46.9%;
+    --select-item-hover: 210 40% 96%;
+    --select-item-focus: 221.2 83.2% 96%;
+    --select-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    --select-radius: 4px;
+
+    /* Form Elements - DSGov Standards */
+    --form-input-height: 48px;
+    --form-input-padding-x: 12px;
+    --form-input-padding-y: 14px;
+    --form-border-radius: 4px;
+    --form-border-width: 1px;
+    --form-label-size: 14px;
+    --form-help-size: 12px;
+    --form-spacing: 16px;
+    
+    /* Form States */
+    --form-border-default: hsl(var(--border));
+    --form-border-focus: hsl(var(--primary));
+    --form-border-error: hsl(var(--destructive));
+    --form-border-success: hsl(142, 76%, 36%);
+    --form-bg-disabled: hsl(var(--muted));
+    --form-text-disabled: hsl(var(--muted-foreground));
+    
+    /* Form Focus States */
+    --form-focus-shadow: 0 0 0 2px hsla(var(--primary), 0.2);
+    --form-error-shadow: 0 0 0 2px hsla(var(--destructive), 0.2);
+    --form-success-shadow: 0 0 0 2px hsla(142, 76%, 36%, 0.2);
+
+    /* Collapse tokens - DSGov Standards */
+    --collapse-trigger-height: 48px;
+    --collapse-trigger-padding-x: 16px;
+    --collapse-trigger-padding-y: 12px;
+    --collapse-border-radius: 4px;
+    --collapse-border-width: 1px;
+    --collapse-transition: all 200ms ease-in-out;
+    --collapse-icon-size: 16px;
+    
+    /* Collapse colors */
+    --collapse-border-default: hsl(var(--border));
+    --collapse-border-hover: hsl(var(--government-300));
+    --collapse-border-focus: hsl(var(--government-500));
+    --collapse-bg-default: hsl(var(--background));
+    --collapse-bg-hover: hsl(var(--government-50));
+    --collapse-bg-focus: hsl(var(--government-50));
+    --collapse-text-default: hsl(var(--foreground));
+    --collapse-text-secondary: hsl(var(--muted-foreground));
+
+    /* Content Overflow Tokens */
+    --content-overflow-gradient: linear-gradient(180deg, transparent 0%, hsl(var(--background)) 100%);
+    --content-max-height-sm: 120px;
+    --content-max-height-md: 240px;
+    --content-max-height-lg: 360px;
+    --content-transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Text truncation utilities */
+    --text-truncate-lines-1: 1;
+    --text-truncate-lines-2: 2;
+    --text-truncate-lines-3: 3;
+
+    /* Tipografia Rawline - DSGov Standards */
+    --font-family-base: 'Rawline', 'Raleway', sans-serif;
+    
+    /* Font Weights - Rawline */
+    --font-weight-thin: 100;
+    --font-weight-extra-light: 200;
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semi-bold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extra-bold: 800;
+    --font-weight-black: 900;
+    
+    /* Escala Tipográfica Minor Third (1.2) - Base 14px */
+    --font-size-scale-up-07: 3.583rem; /* 50.16px */
+    --font-size-scale-up-06: 2.986rem; /* 41.8px */
+    --font-size-scale-up-05: 2.488rem; /* 34.84px */
+    --font-size-scale-up-04: 2.074rem; /* 29.03px */
+    --font-size-scale-up-03: 1.728rem; /* 24.19px */
+    --font-size-scale-up-02: 1.44rem;  /* 20.16px */
+    --font-size-scale-up-01: 1.2rem;   /* 16.8px */
+    --font-size-scale-base: 1rem;      /* 14px */
+    --font-size-scale-down-01: 0.833rem; /* 11.67px */
+    --font-size-scale-down-02: 0.694rem; /* 9.72px */
+    --font-size-scale-down-03: 0.579rem; /* 8.10px */
+    
+    /* Line Heights - DSGov Standards */
+    --font-lineheight-low: 1.15;    /* Para títulos grandes */
+    --font-lineheight-medium: 1.45; /* Para texto base */
+    --font-lineheight-high: 1.85;   /* Para texto densso */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased font-sans;
+  }
+
+}
+
+.glass-card {
+  @apply bg-white bg-opacity-80 backdrop-blur-lg border border-gray-100 rounded-xl shadow-lg;
+}
+
+/* Smooth scrolling and better mobile experience */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better focus styles */
+:focus {
+  @apply outline-none ring-2 ring-government-500 ring-offset-2 ring-offset-white;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-government-500 rounded-full;
+}
+
+/* Animations */
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out;
+}
+
+/* Content Overflow Utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: var(--text-truncate-lines-1);
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: var(--text-truncate-lines-2);
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: var(--text-truncate-lines-3);
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fade-bottom {
+  position: relative;
+}
+
+.fade-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: var(--content-overflow-gradient);
+  pointer-events: none;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground));
+}
+
+.show-more-trigger {
+  @apply inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer;
+}
+
+/* Tipografia Rawline - Utility Classes */
+.font-rawline {
+  font-family: var(--font-family-base);
+}
+
+/* Escala Tipográfica DSGov */
+.text-scale-up-07 { font-size: var(--font-size-scale-up-07); line-height: var(--font-lineheight-low); }
+.text-scale-up-06 { font-size: var(--font-size-scale-up-06); line-height: var(--font-lineheight-low); }
+.text-scale-up-05 { font-size: var(--font-size-scale-up-05); line-height: var(--font-lineheight-low); }
+.text-scale-up-04 { font-size: var(--font-size-scale-up-04); line-height: var(--font-lineheight-low); }
+.text-scale-up-03 { font-size: var(--font-size-scale-up-03); line-height: var(--font-lineheight-low); }
+.text-scale-up-02 { font-size: var(--font-size-scale-up-02); line-height: var(--font-lineheight-medium); }
+.text-scale-up-01 { font-size: var(--font-size-scale-up-01); line-height: var(--font-lineheight-medium); }
+.text-scale-base { font-size: var(--font-size-scale-base); line-height: var(--font-lineheight-medium); }
+.text-scale-down-01 { font-size: var(--font-size-scale-down-01); line-height: var(--font-lineheight-medium); }
+.text-scale-down-02 { font-size: var(--font-size-scale-down-02); line-height: var(--font-lineheight-medium); }
+.text-scale-down-03 { font-size: var(--font-size-scale-down-03); line-height: var(--font-lineheight-medium); }
+
+/* Pesos da Fonte Rawline */
+.font-thin { font-weight: var(--font-weight-thin); }
+.font-extra-light { font-weight: var(--font-weight-extra-light); }
+.font-light { font-weight: var(--font-weight-light); }
+.font-regular { font-weight: var(--font-weight-regular); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semi-bold { font-weight: var(--font-weight-semi-bold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+.font-extra-bold { font-weight: var(--font-weight-extra-bold); }
+.font-black { font-weight: var(--font-weight-black); }
+
+/* Estilos de Títulos DSGov */
+.title-h1 {
+  font-size: var(--font-size-scale-up-06);
+  line-height: var(--font-lineheight-low);
+  font-weight: var(--font-weight-bold);
+}
+
+.title-h2 {
+  font-size: var(--font-size-scale-up-05);
+  line-height: var(--font-lineheight-low);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.title-h3 {
+  font-size: var(--font-size-scale-up-04);
+  line-height: var(--font-lineheight-low);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.title-h4 {
+  font-size: var(--font-size-scale-up-03);
+  line-height: var(--font-lineheight-medium);
+  font-weight: var(--font-weight-medium);
+}
+
+.title-h5 {
+  font-size: var(--font-size-scale-up-02);
+  line-height: var(--font-lineheight-medium);
+  font-weight: var(--font-weight-medium);
+}
+
+.title-h6 {
+  font-size: var(--font-size-scale-up-01);
+  line-height: var(--font-lineheight-medium);
+  font-weight: var(--font-weight-medium);
+}

@@ -1,0 +1,74 @@
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+
+# Python virtual environments
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Turbo cache
+.turbo/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Test coverage
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Migration backup
+.migration-backup/
+
+# Credentials
+credentials/
+
+# Test files
+tests/
+test/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+
+# ESLint results
+eslint-*.json
+
+# Package locks (keep requirements.txt and package.json)
+package-lock.json
+bun.lockb
+yarn.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local

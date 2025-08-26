@@ -1,0 +1,211 @@
+// Firestore Security Rules for LicitaReview
+// 
+// These rules enforce:
+// 1. Organization-level access control
+// 2. User role-based permissions
+// 3. Document security based on classification
+// 4. Audit trail protection
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions for authentication and authorization
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    function getUserEmail() {
+      return request.auth.token.email;
+    }
+    
+    function isOwnerOrAdmin(organizationId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/organizations/$(organizationId)/users/$(getUserId())) &&
+        get(/databases/$(database)/documents/organizations/$(organizationId)/users/$(getUserId())).data.role in ['OWNER', 'ADMIN'];
+    }
+    
+    function hasPermission(organizationId, permission) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/organizations/$(organizationId)/users/$(getUserId())) &&
+        get(/databases/$(database)/documents/organizations/$(organizationId)/users/$(getUserId())).data.permissions.hasAll([permission]);
+    }
+    
+    function isUserInOrganization(organizationId) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/organizations/$(organizationId)/users/$(getUserId())) &&
+        get(/databases/$(database)/documents/organizations/$(organizationId)/users/$(getUserId())).data.status == 'ACTIVE';
+    }
+    
+    function canAccessDocument(documentData) {
+      let organizationId = documentData.organizationId;
+      let accessLevel = documentData.security.accessLevel;
+      
+      return isUserInOrganization(organizationId) && (
+        accessLevel == 'PUBLIC' ||
+        (accessLevel == 'INTERNAL' && hasPermission(organizationId, 'READ_DOCUMENTS')) ||
+        (accessLevel == 'RESTRICTED' && hasPermission(organizationId, 'READ_DOCUMENTS')) ||
+        (accessLevel == 'CONFIDENTIAL' && isOwnerOrAdmin(organizationId))
+      );
+    }
+
+    // ========================================
+    // ORGANIZATIONS COLLECTION
+    // ========================================
+    
+    // Organization profiles - only authenticated users can read their org
+    match /organizations/{organizationId} {
+      allow read: if isAuthenticated() && isUserInOrganization(organizationId);
+      allow create: if isAuthenticated() && getUserId() == resource.data.createdBy;
+      allow update: if isOwnerOrAdmin(organizationId) && 
+        // Prevent changing audit fields
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if false; // Organizations cannot be deleted via Firestore rules
+      
+      // Organization templates
+      match /templates/{templateId} {
+        allow read: if isUserInOrganization(organizationId) && 
+          (resource.data.isPublic == true || hasPermission(organizationId, 'READ_DOCUMENTS'));
+        allow create: if hasPermission(organizationId, 'MANAGE_TEMPLATES') &&
+          request.resource.data.organizationId == organizationId;
+        allow update: if hasPermission(organizationId, 'MANAGE_TEMPLATES') &&
+          resource.data.organizationId == organizationId &&
+          request.resource.data.organizationId == organizationId;
+        allow delete: if hasPermission(organizationId, 'MANAGE_TEMPLATES') &&
+          resource.data.organizationId == organizationId;
+      }
+      
+      // Analysis rules
+      match /analysis_rules/{ruleId} {
+        allow read: if isUserInOrganization(organizationId);
+        allow create: if hasPermission(organizationId, 'MANAGE_RULES') &&
+          request.resource.data.organizationId == organizationId;
+        allow update: if hasPermission(organizationId, 'MANAGE_RULES') &&
+          resource.data.organizationId == organizationId &&
+          request.resource.data.organizationId == organizationId;
+        allow delete: if hasPermission(organizationId, 'MANAGE_RULES') &&
+          resource.data.organizationId == organizationId;
+      }
+      
+      // Custom parameters (🚀 CORE DIFFERENTIATOR)
+      match /custom_params/{configId} {
+        allow read: if isUserInOrganization(organizationId);
+        allow create: if hasPermission(organizationId, 'MANAGE_CONFIGS') &&
+          request.resource.data.organizationId == organizationId;
+        allow update: if hasPermission(organizationId, 'MANAGE_CONFIGS') &&
+          resource.data.organizationId == organizationId &&
+          request.resource.data.organizationId == organizationId;
+        allow delete: if hasPermission(organizationId, 'MANAGE_CONFIGS') &&
+          resource.data.organizationId == organizationId;
+      }
+      
+      // Organization users
+      match /users/{userId} {
+        allow read: if isUserInOrganization(organizationId) &&
+          (userId == getUserId() || hasPermission(organizationId, 'VIEW_ANALYTICS'));
+        allow create: if isOwnerOrAdmin(organizationId) &&
+          request.resource.data.organizationId == organizationId;
+        allow update: if (userId == getUserId() && 
+          // Users can only update their own preferences
+          request.resource.data.keys().hasOnly(['preferences', 'updatedAt']) &&
+          resource.data.organizationId == request.resource.data.organizationId) ||
+          (isOwnerOrAdmin(organizationId) && 
+          resource.data.organizationId == organizationId);
+        allow delete: if isOwnerOrAdmin(organizationId) && userId != getUserId(); // Can't delete self
+      }
+    }
+
+    // ========================================
+    // DOCUMENTS COLLECTION
+    // ========================================
+    
+    // Document metadata
+    match /documents/{documentId} {
+      allow read: if canAccessDocument(resource.data);
+      allow create: if hasPermission(resource.data.organizationId, 'WRITE_DOCUMENTS') &&
+        request.resource.data.organizationId != null &&
+        isUserInOrganization(request.resource.data.organizationId) &&
+        request.resource.data.createdBy == getUserId();
+      allow update: if hasPermission(resource.data.organizationId, 'WRITE_DOCUMENTS') &&
+        resource.data.organizationId == request.resource.data.organizationId &&
+        // Protect audit fields
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if hasPermission(resource.data.organizationId, 'DELETE_DOCUMENTS');
+      
+      // Document analyses
+      match /analyses/{analysisId} {
+        allow read: if canAccessDocument(get(/databases/$(database)/documents/documents/$(documentId)).data);
+        allow create: if hasPermission(request.resource.data.organizationId, 'WRITE_DOCUMENTS') &&
+          request.resource.data.documentId == documentId &&
+          request.resource.data.createdBy == getUserId();
+        allow update: if hasPermission(resource.data.organizationId, 'WRITE_DOCUMENTS') &&
+          resource.data.documentId == documentId;
+        allow delete: if false; // Analyses should not be deleted for audit purposes
+      }
+      
+      // Document versions
+      match /versions/{versionId} {
+        allow read: if canAccessDocument(get(/databases/$(database)/documents/documents/$(documentId)).data);
+        allow create: if hasPermission(get(/databases/$(database)/documents/documents/$(documentId)).data.organizationId, 'WRITE_DOCUMENTS') &&
+          request.resource.data.documentId == documentId &&
+          request.resource.data.createdBy == getUserId();
+        allow update: if hasPermission(resource.data.organizationId, 'WRITE_DOCUMENTS') &&
+          resource.data.documentId == documentId;
+        allow delete: if false; // Versions should not be deleted for audit purposes
+      }
+      
+      // Review comments
+      match /comments/{commentId} {
+        allow read: if canAccessDocument(get(/databases/$(database)/documents/documents/$(documentId)).data);
+        allow create: if hasPermission(request.resource.data.organizationId, 'WRITE_DOCUMENTS') &&
+          request.resource.data.documentId == documentId &&
+          request.resource.data.createdBy == getUserId() &&
+          isUserInOrganization(request.resource.data.organizationId);
+        allow update: if resource.data.createdBy == getUserId() && 
+          request.resource.data.documentId == documentId &&
+          // Protect audit fields
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.createdBy == resource.data.createdBy;
+        allow delete: if resource.data.createdBy == getUserId() ||
+          hasPermission(resource.data.organizationId, 'MANAGE_USERS');
+      }
+    }
+
+    // ========================================
+    // SYSTEM COLLECTIONS
+    // ========================================
+    
+    // Migration records - read-only for admins
+    match /migrations/{migrationId} {
+      allow read: if isAuthenticated(); // Any authenticated user can see migration status
+      allow write: if false; // Only server-side code can write migrations
+    }
+    
+    // Audit logs - write-only for system, read for admins
+    match /audit_logs/{logId} {
+      allow read: if isAuthenticated() && getUserEmail().matches('.*@(admin\\.)?licitareview\\.com$');
+      allow write: if false; // Only server-side code can write audit logs
+    }
+    
+    // System configuration - read-only for authenticated users
+    match /system_config/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only server-side code can write system config
+    }
+
+    // ========================================
+    // SECURITY CONSTRAINTS
+    // ========================================
+    
+    // Prevent access to any other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

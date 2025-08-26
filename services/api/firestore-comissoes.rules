@@ -1,0 +1,208 @@
+// Firestore Security Rules para Comissões - LicitaReview
+// 
+// Estas regras implementam:
+// 1. Controle de acesso baseado em autenticação
+// 2. Permissões baseadas em papéis (administradores)
+// 3. Segurança para documentos de comissões
+// 4. Proteção de trilha de auditoria
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Funções auxiliares para autenticação e autorização
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    function getUserEmail() {
+      return request.auth.token.email;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        request.auth.token.admin == true;
+    }
+    
+    function isSystemAdmin() {
+      return isAuthenticated() && 
+        getUserEmail().matches('.*@(admin\\.)?licitareview\\.com$');
+    }
+    
+    function canReadComissao(comissaoData) {
+      return isAuthenticated() && (
+        // Administradores podem ler tudo
+        isAdmin() ||
+        // Membros da comissão podem ler
+        getUserId() in comissaoData.membros.keys() ||
+        // Comissões públicas podem ser lidas por usuários autenticados
+        (comissaoData.configuracoes.publica == true)
+      );
+    }
+    
+    function canWriteComissao(comissaoData) {
+      return isAuthenticated() && (
+        // Apenas administradores podem escrever
+        isAdmin() ||
+        // Presidente da comissão pode editar
+        (getUserId() in comissaoData.membros.keys() && 
+         comissaoData.membros[getUserId()].papel == 'PRESIDENTE')
+      );
+    }
+    
+    function isValidComissaoData(data) {
+      return data.keys().hasAll(['nome', 'tipo', 'status', 'dataInicio', 'membros', 'configuracoes']) &&
+        data.nome is string &&
+        data.tipo in ['PERMANENTE', 'TEMPORARIA', 'ESPECIAL'] &&
+        data.status in ['ATIVA', 'INATIVA', 'SUSPENSA', 'ENCERRADA'] &&
+        data.dataInicio is timestamp &&
+        data.membros is map &&
+        data.configuracoes is map;
+    }
+    
+    function isValidMembroData(data) {
+      return data.keys().hasAll(['usuarioId', 'papel', 'dataInicio']) &&
+        data.usuarioId is string &&
+        data.papel in ['PRESIDENTE', 'VICE_PRESIDENTE', 'SECRETARIO', 'MEMBRO', 'SUPLENTE'] &&
+        data.dataInicio is timestamp;
+    }
+    
+    // ========================================
+    // COLEÇÃO DE COMISSÕES
+    // ========================================
+    
+    match /comissoes/{comissaoId} {
+      // Leitura: usuários autenticados com permissão
+      allow read: if canReadComissao(resource.data);
+      
+      // Criação: apenas administradores
+      allow create: if isAdmin() &&
+        isValidComissaoData(request.resource.data) &&
+        request.resource.data.criadoPor == getUserId() &&
+        request.resource.data.criadoEm == request.time;
+      
+      // Atualização: administradores ou presidente da comissão
+      allow update: if canWriteComissao(resource.data) &&
+        isValidComissaoData(request.resource.data) &&
+        // Proteger campos de auditoria
+        request.resource.data.criadoPor == resource.data.criadoPor &&
+        request.resource.data.criadoEm == resource.data.criadoEm &&
+        request.resource.data.atualizadoPor == getUserId() &&
+        request.resource.data.atualizadoEm == request.time;
+      
+      // Exclusão: apenas administradores do sistema
+      allow delete: if isSystemAdmin();
+      
+      // ========================================
+      // SUB-COLEÇÃO: MEMBROS
+      // ========================================
+      
+      match /membros/{membroId} {
+        // Leitura: usuários autenticados que podem ler a comissão
+        allow read: if canReadComissao(get(/databases/$(database)/documents/comissoes/$(comissaoId)).data);
+        
+        // Criação: administradores ou presidente da comissão
+        allow create: if canWriteComissao(get(/databases/$(database)/documents/comissoes/$(comissaoId)).data) &&
+          isValidMembroData(request.resource.data) &&
+          request.resource.data.comissaoId == comissaoId &&
+          request.resource.data.adicionadoPor == getUserId() &&
+          request.resource.data.adicionadoEm == request.time;
+        
+        // Atualização: administradores ou presidente da comissão
+        allow update: if canWriteComissao(get(/databases/$(database)/documents/comissoes/$(comissaoId)).data) &&
+          isValidMembroData(request.resource.data) &&
+          resource.data.comissaoId == request.resource.data.comissaoId &&
+          // Proteger campos de auditoria
+          request.resource.data.adicionadoPor == resource.data.adicionadoPor &&
+          request.resource.data.adicionadoEm == resource.data.adicionadoEm &&
+          request.resource.data.atualizadoPor == getUserId() &&
+          request.resource.data.atualizadoEm == request.time;
+        
+        // Exclusão: administradores ou presidente da comissão
+        allow delete: if canWriteComissao(get(/databases/$(database)/documents/comissoes/$(comissaoId)).data);
+      }
+      
+      // ========================================
+      // SUB-COLEÇÃO: REUNIÕES
+      // ========================================
+      
+      match /reunioes/{reuniaoId} {
+        // Leitura: usuários autenticados que podem ler a comissão
+        allow read: if canReadComissao(get(/databases/$(database)/documents/comissoes/$(comissaoId)).data);
+        
+        // Criação: administradores ou membros da comissão
+        allow create: if canWriteComissao(get(/databases/$(database)/documents/comissoes/$(comissaoId)).data) &&
+          request.resource.data.comissaoId == comissaoId &&
+          request.resource.data.criadoPor == getUserId() &&
+          request.resource.data.criadoEm == request.time;
+        
+        // Atualização: administradores ou membros da comissão
+        allow update: if canWriteComissao(get(/databases/$(database)/documents/comissoes/$(comissaoId)).data) &&
+          resource.data.comissaoId == request.resource.data.comissaoId &&
+          // Proteger campos de auditoria
+          request.resource.data.criadoPor == resource.data.criadoPor &&
+          request.resource.data.criadoEm == resource.data.criadoEm &&
+          request.resource.data.atualizadoPor == getUserId() &&
+          request.resource.data.atualizadoEm == request.time;
+        
+        // Exclusão: apenas administradores
+        allow delete: if isAdmin();
+      }
+      
+      // ========================================
+      // SUB-COLEÇÃO: DECISÕES
+      // ========================================
+      
+      match /decisoes/{decisaoId} {
+        // Leitura: usuários autenticados que podem ler a comissão
+        allow read: if canReadComissao(get(/databases/$(database)/documents/comissoes/$(comissaoId)).data);
+        
+        // Criação: administradores ou membros da comissão
+        allow create: if canWriteComissao(get(/databases/$(database)/documents/comissoes/$(comissaoId)).data) &&
+          request.resource.data.comissaoId == comissaoId &&
+          request.resource.data.criadoPor == getUserId() &&
+          request.resource.data.criadoEm == request.time;
+        
+        // Atualização: administradores ou presidente da comissão
+        allow update: if canWriteComissao(get(/databases/$(database)/documents/comissoes/$(comissaoId)).data) &&
+          resource.data.comissaoId == request.resource.data.comissaoId &&
+          // Proteger campos de auditoria
+          request.resource.data.criadoPor == resource.data.criadoPor &&
+          request.resource.data.criadoEm == resource.data.criadoEm &&
+          request.resource.data.atualizadoPor == getUserId() &&
+          request.resource.data.atualizadoEm == request.time;
+        
+        // Exclusão: apenas administradores do sistema (decisões são importantes para auditoria)
+        allow delete: if isSystemAdmin();
+      }
+    }
+    
+    // ========================================
+    // COLEÇÃO DE ESTATÍSTICAS DE COMISSÕES
+    // ========================================
+    
+    match /comissoes-stats/{statId} {
+      // Leitura: usuários autenticados
+      allow read: if isAuthenticated();
+      
+      // Escrita: apenas código do servidor (via Cloud Functions)
+      allow write: if false;
+    }
+    
+    // ========================================
+    // LOGS DE AUDITORIA DE COMISSÕES
+    // ========================================
+    
+    match /comissoes-audit/{logId} {
+      // Leitura: apenas administradores do sistema
+      allow read: if isSystemAdmin();
+      
+      // Escrita: apenas código do servidor (via Cloud Functions)
+      allow write: if false;
+    }
+  }
+}
