@@ -54,7 +54,11 @@ class ComissaoService {
             dataDeEncerramento: data.dataDeEncerramento ? new Date(data.dataDeEncerramento) : undefined,
             descricao: data.descricao,
             objetivo: data.objetivo,
-            membros: data.membros.map(membro => (Object.assign(Object.assign({}, membro), { dataDeIngresso: now, ativo: true }))),
+            membros: data.membros.map(membro => ({
+                ...membro,
+                dataDeIngresso: now,
+                ativo: true
+            })),
             status: types_1.StatusComissao.ATIVA,
             organizationId: this.organizationId,
             createdBy,
@@ -78,7 +82,12 @@ class ComissaoService {
         // Validate business rules
         await this.validateUpdateRequest(existingComissao, data);
         // Prepare update data
-        const updateData = Object.assign(Object.assign({}, data), { dataDeEncerramento: data.dataDeEncerramento, lastModifiedBy: updatedBy, updatedAt: new Date() });
+        const updateData = {
+            ...data,
+            dataDeEncerramento: data.dataDeEncerramento,
+            lastModifiedBy: updatedBy,
+            updatedAt: new Date()
+        };
         const updatedComissao = await this.repository.update(id, updateData);
         // Log update
         await this.logHistory(id, 'updated', data, updatedBy, 'Comissão atualizada');
@@ -152,7 +161,7 @@ class ComissaoService {
             await this.validateMemberRole(comissao, data.papel, servidorId);
         }
         // If deactivating member, set dataDeSaida
-        const updateData = Object.assign({}, data);
+        const updateData = { ...data };
         if (data.ativo === false && !membro.dataDeSaida) {
             updateData.dataDeSaida = new Date();
         }
@@ -204,7 +213,10 @@ class ComissaoService {
         const snapshot = await historyCollection.get();
         const docs = snapshot.docs.slice(0, limit);
         const hasMore = snapshot.docs.length > limit;
-        const data = docs.map(doc => (Object.assign({ id: doc.id }, doc.data())));
+        const data = docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
         // Get total count
         const totalSnapshot = await this.db
             .collection(`organizations/${this.organizationId}/comissoes/${comissaoId}/history`)

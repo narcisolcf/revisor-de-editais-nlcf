@@ -5,7 +5,6 @@
 export * from "./firebase";
 export declare const config: {
     readonly projectId: string | undefined;
-    readonly storageBucket: string | undefined;
     readonly corsOrigin: string;
     readonly maxRequestSize: string;
     readonly rateLimitWindowMs: number;
@@ -19,6 +18,8 @@ export declare const config: {
     readonly documentAnalyzerServiceUrl: string | undefined;
     readonly logLevel: string;
     readonly enableAuditLogs: boolean;
+    readonly nodeEnv: string;
+    readonly isDevelopment: boolean;
 };
 export default config;
 //# sourceMappingURL=index.d.ts.map

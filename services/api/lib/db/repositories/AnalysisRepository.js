@@ -23,39 +23,55 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
      * Find analyses by organization
      */
     async findByOrganization(organizationId, options = {}) {
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'organizationId', operator: '==', value: organizationId },
                 ...(options.where || [])
-            ], orderBy: [{ field: 'createdAt', direction: 'desc' }] }));
+            ],
+            orderBy: [{ field: 'createdAt', direction: 'desc' }]
+        });
     }
     /**
      * Find analyses by document
      */
     async findByDocument(documentId, options = {}) {
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'documentId', operator: '==', value: documentId },
                 ...(options.where || [])
-            ], orderBy: [{ field: 'createdAt', direction: 'desc' }] }));
+            ],
+            orderBy: [{ field: 'createdAt', direction: 'desc' }]
+        });
     }
     /**
      * Find analyses by user
      */
     async findByUser(userId, organizationId, options = {}) {
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'userId', operator: '==', value: userId },
                 { field: 'organizationId', operator: '==', value: organizationId },
                 ...(options.where || [])
-            ], orderBy: [{ field: 'createdAt', direction: 'desc' }] }));
+            ],
+            orderBy: [{ field: 'createdAt', direction: 'desc' }]
+        });
     }
     /**
      * Find analyses by status
      */
     async findByStatus(organizationId, status, options = {}) {
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'organizationId', operator: '==', value: organizationId },
                 { field: 'processing.status', operator: '==', value: status },
                 ...(options.where || [])
-            ], orderBy: [{ field: 'updatedAt', direction: 'desc' }] }));
+            ],
+            orderBy: [{ field: 'updatedAt', direction: 'desc' }]
+        });
     }
     /**
      * Find active/running analyses
@@ -73,33 +89,45 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
      * Find completed analyses
      */
     async findCompleted(organizationId, options = {}) {
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'organizationId', operator: '==', value: organizationId },
                 { field: 'processing.status', operator: '==', value: 'COMPLETED' },
                 ...(options.where || [])
-            ], orderBy: [{ field: 'processing.completedAt', direction: 'desc' }] }));
+            ],
+            orderBy: [{ field: 'processing.completedAt', direction: 'desc' }]
+        });
     }
     /**
      * Find failed analyses
      */
     async findFailed(organizationId, options = {}) {
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'organizationId', operator: '==', value: organizationId },
                 { field: 'processing.status', operator: 'in', value: ['FAILED', 'TIMEOUT'] },
                 ...(options.where || [])
-            ], orderBy: [{ field: 'updatedAt', direction: 'desc' }] }));
+            ],
+            orderBy: [{ field: 'updatedAt', direction: 'desc' }]
+        });
     }
     /**
      * Find analyses by score range
      */
     async findByScoreRange(organizationId, minScore, maxScore, options = {}) {
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'organizationId', operator: '==', value: organizationId },
                 { field: 'processing.status', operator: '==', value: 'COMPLETED' },
                 { field: 'results.scores.overall', operator: '>=', value: minScore },
                 { field: 'results.scores.overall', operator: '<=', value: maxScore },
                 ...(options.where || [])
-            ], orderBy: [{ field: 'results.scores.overall', direction: 'desc' }] }));
+            ],
+            orderBy: [{ field: 'results.scores.overall', direction: 'desc' }]
+        });
     }
     /**
      * Find analyses by configuration
@@ -129,12 +157,32 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
      * Create new analysis
      */
     async createAnalysis(data) {
-        const analysisData = Object.assign(Object.assign({}, data), { processing: Object.assign({ status: 'PENDING', progress: 0 }, data.processing), engine: Object.assign({ name: 'licitareview-v2', version: '2.0.0', fallbackUsed: false, cacheHit: false }, data.engine), request: Object.assign({ priority: 'NORMAL', options: {
+        const analysisData = {
+            ...data,
+            processing: {
+                status: 'PENDING',
+                progress: 0,
+                ...data.processing
+            },
+            engine: {
+                name: 'licitareview-v2',
+                version: '2.0.0',
+                fallbackUsed: false,
+                cacheHit: false,
+                ...data.engine
+            },
+            request: {
+                priority: 'NORMAL',
+                options: {
                     includeAI: true,
                     generateRecommendations: true,
                     detailedMetrics: false,
                     customRules: []
-                }, timeout: 300 }, data.request) });
+                },
+                timeout: 300,
+                ...data.request
+            }
+        };
         return this.create(analysisData);
     }
     /**
@@ -145,7 +193,15 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
         const current = await this.findById(id);
         if (!current)
             return null;
-        const updatedProcessing = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, current.processing), { status: status }), (progress !== undefined && { progress })), (currentStep && { currentStep })), (status === 'PROCESSING' && !current.processing.startedAt && { startedAt: new Date() })), (status === 'COMPLETED' && { completedAt: new Date(), progress: 100 })), (error && { error }));
+        const updatedProcessing = {
+            ...current.processing,
+            status: status,
+            ...(progress !== undefined && { progress }),
+            ...(currentStep && { currentStep }),
+            ...(status === 'PROCESSING' && !current.processing.startedAt && { startedAt: new Date() }),
+            ...(status === 'COMPLETED' && { completedAt: new Date(), progress: 100 }),
+            ...(error && { error })
+        };
         return this.update(id, {
             processing: updatedProcessing,
             updatedAt: new Date()
@@ -160,7 +216,12 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
             return null;
         return this.update(id, {
             results,
-            processing: Object.assign(Object.assign({}, current.processing), { status: 'COMPLETED', completedAt: new Date(), progress: 100 }),
+            processing: {
+                ...current.processing,
+                status: 'COMPLETED',
+                completedAt: new Date(),
+                progress: 100
+            },
             updatedAt: new Date()
         });
     }
@@ -172,7 +233,10 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
         if (!current)
             return null;
         return this.update(id, {
-            processing: Object.assign(Object.assign({}, current.processing), { metrics }),
+            processing: {
+                ...current.processing,
+                metrics
+            },
             updatedAt: new Date()
         });
     }
@@ -184,9 +248,17 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
         if (!current)
             return null;
         return this.update(id, {
-            processing: Object.assign(Object.assign({}, current.processing), { status: 'CANCELLED', completedAt: new Date() }),
+            processing: {
+                ...current.processing,
+                status: 'CANCELLED',
+                completedAt: new Date()
+            },
             updatedAt: new Date(),
-            metadata: Object.assign(Object.assign({}, current.metadata), { cancelledBy, cancelledAt: new Date().toISOString() })
+            metadata: {
+                ...current.metadata,
+                cancelledBy,
+                cancelledAt: new Date().toISOString()
+            }
         });
     }
     /**
@@ -210,13 +282,13 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
         const successRate = totalAnalyses > 0 ? (completedCount / totalAnalyses) * 100 : 0;
         // Calculate average score
         const scoresSum = completedAnalyses
-            .filter(a => { var _a, _b; return (_b = (_a = a.results) === null || _a === void 0 ? void 0 : _a.scores) === null || _b === void 0 ? void 0 : _b.overall; })
-            .reduce((sum, a) => { var _a, _b; return sum + (((_b = (_a = a.results) === null || _a === void 0 ? void 0 : _a.scores) === null || _b === void 0 ? void 0 : _b.overall) || 0); }, 0);
+            .filter(a => a.results?.scores?.overall)
+            .reduce((sum, a) => sum + (a.results?.scores?.overall || 0), 0);
         const averageScore = completedCount > 0 ? scoresSum / completedCount : 0;
         // Calculate average processing time
         const processingTimes = completedAnalyses
-            .filter(a => { var _a; return (_a = a.processing.metrics) === null || _a === void 0 ? void 0 : _a.totalProcessingTime; })
-            .map(a => { var _a; return ((_a = a.processing.metrics) === null || _a === void 0 ? void 0 : _a.totalProcessingTime) || 0; });
+            .filter(a => a.processing.metrics?.totalProcessingTime)
+            .map(a => a.processing.metrics?.totalProcessingTime || 0);
         const averageProcessingTime = processingTimes.length > 0
             ? processingTimes.reduce((sum, time) => sum + time, 0) / processingTimes.length
             : 0;
@@ -229,8 +301,7 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
             critical: 0 // 0-39
         };
         completedAnalyses.forEach(analysis => {
-            var _a, _b;
-            const score = ((_b = (_a = analysis.results) === null || _a === void 0 ? void 0 : _a.scores) === null || _b === void 0 ? void 0 : _b.overall) || 0;
+            const score = analysis.results?.scores?.overall || 0;
             if (score >= 90)
                 scoreDistribution.excellent++;
             else if (score >= 75)
@@ -245,8 +316,7 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
         // Common problems
         const problemCounts = {};
         completedAnalyses.forEach(analysis => {
-            var _a, _b;
-            (_b = (_a = analysis.results) === null || _a === void 0 ? void 0 : _a.problems) === null || _b === void 0 ? void 0 : _b.forEach(problem => {
+            analysis.results?.problems?.forEach(problem => {
                 const key = `${problem.category}:${problem.severity}`;
                 problemCounts[key] = (problemCounts[key] || 0) + 1;
             });

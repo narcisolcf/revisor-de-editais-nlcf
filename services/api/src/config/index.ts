@@ -9,7 +9,7 @@ export * from "./firebase";
 export const config = {
   // Firebase
   projectId: process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  // storageBucket: process.env.FIREBASE_STORAGE_BUCKET, // Temporarily disabled
   
   // API Configuration
   corsOrigin: process.env.CORS_ORIGIN || "*",

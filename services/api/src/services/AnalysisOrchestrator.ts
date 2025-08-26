@@ -7,7 +7,7 @@ import { Firestore } from 'firebase-admin/firestore';
 import { DocumentRepository } from '../db/repositories/DocumentRepository';
 import { OrganizationRepository } from '../db/repositories/OrganizationRepository';
 import { CloudRunClient } from './CloudRunClient';
-import { TaskQueueService } from './TaskQueueService';
+
 import { NotificationService } from './NotificationService';
 
 // Tipos básicos
@@ -89,6 +89,9 @@ export interface AnalysisProgress {
   startedAt: Date;
   completedAt?: Date;
   error?: string;
+  retryCount?: number;
+  lastRetryAt?: Date;
+  maxRetries?: number;
 }
 
 export class AnalysisOrchestrator {
@@ -96,9 +99,11 @@ export class AnalysisOrchestrator {
   private documentRepo: DocumentRepository;
   private organizationRepo: OrganizationRepository;
   private cloudRunClient: CloudRunClient;
-  private taskQueue: TaskQueueService;
   private notificationService: NotificationService;
   private activeAnalyses: Map<string, AnalysisProgress> = new Map();
+  private readonly maxRetries: number = 3;
+  private readonly retryDelayMs: number = 5000; // 5 segundos
+  private readonly maxRetryDelayMs: number = 60000; // 1 minuto
 
   constructor(
     firestore: Firestore,
@@ -109,7 +114,6 @@ export class AnalysisOrchestrator {
     this.documentRepo = new DocumentRepository(firestore);
     this.organizationRepo = new OrganizationRepository(firestore);
     this.cloudRunClient = new CloudRunClient(cloudRunServiceUrl);
-    this.taskQueue = new TaskQueueService(projectId);
     this.notificationService = new NotificationService(projectId);
   }
 
@@ -145,37 +149,38 @@ export class AnalysisOrchestrator {
    * Processa uma análise
    */
   async processAnalysis(analysisId: string, request: AnalysisRequest): Promise<void> {
+    const progress = await this.getAnalysisProgress(analysisId);
+    const retryCount = progress?.retryCount || 0;
+    const maxRetries = progress?.maxRetries || this.maxRetries;
+
     try {
       // Atualizar progresso
       await this.updateProgress(analysisId, {
         status: 'processing',
         progress: 10,
-        currentStep: 'Carregando documento'
+        currentStep: 'Carregando documento',
+        retryCount,
+        maxRetries
       });
 
-      // Buscar documento (simulado para teste)
-      const document: any = {
-        id: request.documentId,
-        name: `Documento ${request.documentId}`,
-        content: 'Conteúdo simulado do documento para teste',
-        type: 'EDITAL',
-        size: 1024,
-        uploadedAt: new Date()
-      };
+      // Buscar documento com retry
+      const document = await this.retryOperation(
+        () => this.loadDocument(request.documentId),
+        'Carregando documento',
+        analysisId
+      );
 
       await this.updateProgress(analysisId, {
         progress: 30,
         currentStep: 'Carregando configurações'
       });
 
-      // Configuração da organização (simulada para teste)
-      const orgConfig: any = {
-        analysisSettings: {
-          enableAI: true,
-          strictMode: false,
-          customRules: []
-        }
-      };
+      // Configuração da organização com retry
+      const orgConfig = await this.retryOperation(
+        () => this.loadOrganizationConfig(request.organizationId),
+        'Carregando configurações',
+        analysisId
+      );
       
       await this.updateProgress(analysisId, {
         progress: 50,
@@ -201,6 +206,7 @@ export class AnalysisOrchestrator {
         }
       };
 
+      // Análise com retry automático (CloudRunClient já tem retry interno)
       const cloudRunResult = await this.cloudRunClient.analyzeDocument(cloudRunRequest);
 
       await this.updateProgress(analysisId, {
@@ -211,8 +217,12 @@ export class AnalysisOrchestrator {
       // Converter resultado para formato interno
       const analysisResult = this.convertCloudRunResult(cloudRunResult, request);
       
-      // Salvar resultado
-      await this.saveAnalysisResult(request.documentId, analysisResult);
+      // Salvar resultado com retry
+      await this.retryOperation(
+        () => this.saveAnalysisResult(request.documentId, analysisResult),
+        'Salvando resultados',
+        analysisId
+      );
 
       // Finalizar análise
       await this.updateProgress(analysisId, {
@@ -222,19 +232,23 @@ export class AnalysisOrchestrator {
         completedAt: new Date()
       });
 
-      // Enviar notificação
-      await this.notificationService.notifyAnalysisComplete(
-        request.userId,
-        request.organizationId,
-        analysisId,
-        document.name || 'Documento',
-        analysisResult
-      );
+      // Enviar notificação (sem retry crítico)
+      try {
+        await this.notificationService.notifyAnalysisComplete(
+          request.userId,
+          request.organizationId,
+          analysisId,
+          document.name || 'Documento',
+          analysisResult
+        );
+      } catch (notificationError) {
+        console.warn(`Falha ao enviar notificação para análise ${analysisId}:`, notificationError);
+      }
 
       this.activeAnalyses.delete(analysisId);
 
     } catch (error) {
-      await this.handleAnalysisError(analysisId, error as Error);
+      await this.handleAnalysisErrorWithRetry(analysisId, request, error as Error, retryCount, maxRetries);
     }
   }
 
@@ -354,5 +368,224 @@ export class AnalysisOrchestrator {
     });
 
     this.activeAnalyses.delete(analysisId);
+  }
+
+  /**
+   * Trata erros com lógica de retry automático
+   */
+  private async handleAnalysisErrorWithRetry(
+    analysisId: string, 
+    request: AnalysisRequest, 
+    error: Error, 
+    currentRetryCount: number, 
+    maxRetries: number
+  ): Promise<void> {
+    const isRetryableError = this.isRetryableError(error);
+    const canRetry = isRetryableError && currentRetryCount < maxRetries;
+
+    if (canRetry) {
+      const nextRetryCount = currentRetryCount + 1;
+      const delayMs = this.calculateRetryDelay(nextRetryCount);
+
+      console.warn(`Análise ${analysisId} falhou (tentativa ${nextRetryCount}/${maxRetries}). Reagendando em ${delayMs}ms:`, {
+        error: error.message,
+        retryCount: nextRetryCount,
+        maxRetries,
+        delayMs
+      });
+
+      await this.updateProgress(analysisId, {
+        status: 'processing',
+        currentStep: `Erro temporário - reagendando (${nextRetryCount}/${maxRetries})`,
+        error: error.message,
+        retryCount: nextRetryCount,
+        lastRetryAt: new Date()
+      });
+
+      // Agendar retry
+      setTimeout(async () => {
+        try {
+          await this.processAnalysis(analysisId, request);
+        } catch (retryError) {
+          console.error(`Erro no retry da análise ${analysisId}:`, retryError);
+        }
+      }, delayMs);
+
+    } else {
+      // Falha definitiva
+      await this.updateProgress(analysisId, {
+        status: 'failed',
+        currentStep: isRetryableError ? 'Máximo de tentativas excedido' : 'Erro não recuperável',
+        error: error.message,
+        completedAt: new Date(),
+        retryCount: currentRetryCount
+      });
+
+      console.error(`Análise ${analysisId} falhou definitivamente:`, {
+        error: error.message,
+        stack: error.stack,
+        retryCount: currentRetryCount,
+        maxRetries,
+        isRetryableError,
+        timestamp: new Date().toISOString()
+      });
+
+      this.activeAnalyses.delete(analysisId);
+    }
+  }
+
+  /**
+   * Executa uma operação com retry automático
+   */
+  private async retryOperation<T>(
+    operation: () => Promise<T>,
+    operationName: string,
+    analysisId: string,
+    maxRetries: number = 3
+  ): Promise<T> {
+    let lastError: Error;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error as Error;
+        
+        if (attempt === maxRetries || !this.isRetryableError(lastError)) {
+          throw lastError;
+        }
+
+        const delayMs = this.calculateRetryDelay(attempt);
+        console.warn(`${operationName} falhou (tentativa ${attempt}/${maxRetries}). Tentando novamente em ${delayMs}ms:`, {
+          error: lastError.message,
+          analysisId,
+          attempt,
+          maxRetries
+        });
+
+        await this.sleep(delayMs);
+      }
+    }
+
+    throw lastError!;
+  }
+
+  /**
+   * Verifica se um erro pode ser retentado
+   */
+  private isRetryableError(error: Error): boolean {
+    const message = error.message.toLowerCase();
+    const name = error.name.toLowerCase();
+
+    // Erros de rede e temporários
+    const networkErrors = [
+      'network', 'timeout', 'econnreset', 'enotfound', 'econnrefused',
+      'socket hang up', 'request timeout', 'connection reset'
+    ];
+
+    // Erros HTTP retryáveis
+    const retryableHttpErrors = [
+      '429', '500', '502', '503', '504', 'rate limit', 'service unavailable',
+      'internal server error', 'bad gateway', 'gateway timeout'
+    ];
+
+    // Erros do Firestore retryáveis
+    const firestoreErrors = [
+      'unavailable', 'deadline-exceeded', 'resource-exhausted', 'aborted'
+    ];
+
+    return networkErrors.some(err => message.includes(err) || name.includes(err)) ||
+           retryableHttpErrors.some(err => message.includes(err)) ||
+           firestoreErrors.some(err => message.includes(err));
+  }
+
+  /**
+   * Calcula o delay para retry com backoff exponencial
+   */
+  private calculateRetryDelay(attempt: number): number {
+    const baseDelay = this.retryDelayMs;
+    const exponentialDelay = baseDelay * Math.pow(2, attempt - 1);
+    const jitter = Math.random() * 1000; // Adiciona jitter para evitar thundering herd
+    
+    return Math.min(exponentialDelay + jitter, this.maxRetryDelayMs);
+  }
+
+  /**
+   * Utilitário para sleep
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Carrega documento do banco de dados
+   */
+  private async loadDocument(documentId: string): Promise<any> {
+    try {
+      // Tentar carregar do repository primeiro
+      if (this.documentRepo) {
+        const document = await this.documentRepo.findById(documentId);
+        if (document) {
+          return document;
+        }
+      }
+
+      // Fallback para busca direta no Firestore
+      const doc = await this.db.collection('documents').doc(documentId).get();
+      if (!doc.exists) {
+        throw new Error(`Documento ${documentId} não encontrado`);
+      }
+
+      return { id: doc.id, ...doc.data() };
+    } catch (error) {
+      console.error(`Erro ao carregar documento ${documentId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Carrega configuração da organização
+   */
+  private async loadOrganizationConfig(organizationId: string): Promise<any> {
+    try {
+      // Tentar carregar organização do repository primeiro
+      if (this.organizationRepo) {
+        const organization = await this.organizationRepo.findById(organizationId);
+        if (organization) {
+          // Extrair configurações da organização
+          return {
+            analysisSettings: {
+              enableAI: true,
+              strictMode: false,
+              customRules: []
+            },
+            notificationSettings: {
+              email: true
+            }
+          };
+        }
+      }
+
+      // Fallback para busca direta no Firestore
+      const doc = await this.db.collection('organization_configs').doc(organizationId).get();
+      if (!doc.exists) {
+        // Retornar configuração padrão se não existir
+        return {
+          analysisSettings: {
+            enableAI: true,
+            strictMode: false,
+            customRules: []
+          },
+          notificationSettings: {
+            email: true
+          }
+        };
+      }
+
+      return doc.data();
+    } catch (error) {
+      console.error(`Erro ao carregar configuração da organização ${organizationId}:`, error);
+      throw error;
+    }
   }
 }

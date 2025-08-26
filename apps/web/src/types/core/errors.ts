@@ -143,7 +143,7 @@ export interface ErrorHandlingConfig {
   /** Se deve tentar recuperação automática */
   autoRecover: boolean;
   /** Função customizada para tratamento */
-  customHandler?: (error: AppError) => void;
+  customHandler?: (_error: AppError) => void;
 }
 
 /** Contexto de erro para debugging */

@@ -21,8 +21,8 @@ export * from './migrations/migration-runner';
 export * from './migrations/001-initial-data';
 
 // Database initialization utility
-import { Firestore, initializeApp, getApps, cert } from 'firebase-admin/firestore';
-import { getFirestore } from 'firebase-admin/firestore';
+import { Firestore, getFirestore } from 'firebase-admin/firestore';
+import { getApps } from 'firebase-admin/app';
 import * as admin from 'firebase-admin';
 
 let db: Firestore;
@@ -38,24 +38,25 @@ export function initializeDatabase(serviceAccountKey?: any): Firestore {
   try {
     // Check if Firebase app is already initialized
     if (getApps().length === 0) {
-      const app = admin.initializeApp({
-        credential: serviceAccountKey 
-          ? cert(serviceAccountKey)
-          : admin.credential.applicationDefault(),
-        projectId: process.env.GCP_PROJECT_ID
-      });
-      
-      db = getFirestore(app);
-    } else {
-      db = getFirestore();
+      if (serviceAccountKey) {
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccountKey),
+          projectId: serviceAccountKey.project_id
+        });
+      } else {
+        // Use default credentials (for Cloud Functions/Cloud Run)
+        admin.initializeApp();
+      }
     }
 
-    console.log('✅ Firestore initialized successfully');
+    db = getFirestore();
+    
+    console.log('✅ Firestore database initialized successfully');
     return db;
     
   } catch (error) {
     console.error('❌ Failed to initialize Firestore:', error);
-    throw error;
+    throw new Error(`Database initialization failed: ${error}`);
   }
 }
 
@@ -99,7 +100,7 @@ export async function healthCheck(): Promise<boolean> {
 }
 
 // Repository factory functions for easy access
-export function createOrganizationRepository(database?: Firestore) {
+export async function createOrganizationRepository(database?: Firestore) {
   const dbInstance = database || getDatabase();
   return {
     organizations: new (await import('./repositories/OrganizationRepository')).OrganizationRepository(dbInstance),
@@ -110,7 +111,7 @@ export function createOrganizationRepository(database?: Firestore) {
   };
 }
 
-export function createDocumentRepository(database?: Firestore) {
+export async function createDocumentRepository(database?: Firestore) {
   const dbInstance = database || getDatabase();
   return {
     documents: new (await import('./repositories/DocumentRepository')).DocumentRepository(dbInstance),

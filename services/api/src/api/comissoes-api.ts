@@ -8,7 +8,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import { v4 as uuidv4 } from "uuid";
+
 import { z } from "zod";
 
 import { 
@@ -16,24 +16,22 @@ import {
   UpdateComissaoRequestSchema,
   AdicionarMembroRequestSchema,
   AtualizarMembroRequestSchema,
-  ComissoesQueryOptionsSchema
+
 } from "../types";
 import {
   authenticateUser,
   requireOrganization,
-  validateOrganizationAccess,
+
   requirePermissions,
   PERMISSIONS
 } from "../middleware/auth";
 import {
-  validateRequestBody,
-  validateQueryParams,
-  validatePathParams,
+  validateData,
   ValidationError,
-  createSuccessResponse,
+
   createErrorResponse,
   generateRequestId,
-  UUIDSchema
+
 } from "../utils";
 import { config } from "../config";
 import {
@@ -54,9 +52,7 @@ const ComissaoIdSchema = z.object({
   id: z.string().uuid()
 });
 
-const ServidorIdSchema = z.object({
-  servidorId: z.string().uuid()
-});
+
 
 const ComissaoServidorSchema = z.object({
   id: z.string().uuid(),
@@ -108,15 +104,35 @@ app.get("/:id",
   requirePermissions([PERMISSIONS.DOCUMENTS_READ]),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(ComissaoIdSchema, req.params);
+      const pathValidation = validateData(ComissaoIdSchema, req.params);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          'Parâmetros de caminho inválidos',
+          pathValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
       await getComissaoById(req, res);
+      return;
     } catch (error) {
       const requestId = req.headers['x-request-id'] as string;
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, requestId));
+        res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          error.message,
+          error.details as Record<string, unknown>,
+          requestId
+        ));
       } else {
-        res.status(500).json(createErrorResponse('Internal server error', undefined, requestId));
+        res.status(500).json(createErrorResponse(
+          'INTERNAL_ERROR',
+          'Erro interno do servidor',
+          {},
+          requestId
+        ));
       }
+      return;
     }
   }
 );
@@ -127,8 +143,19 @@ app.get("/:id",
  */
 app.post("/",
   requirePermissions([PERMISSIONS.DOCUMENTS_WRITE]),
-  validateRequestBody(CreateComissaoRequestSchema),
-  createComissao
+  async (req, res) => {
+    const bodyValidation = validateData(CreateComissaoRequestSchema, req.body);
+    if (!bodyValidation.success) {
+      return res.status(400).json(createErrorResponse(
+        'VALIDATION_ERROR',
+        'Dados da requisição inválidos',
+        bodyValidation.details as Record<string, unknown>,
+        req.headers['x-request-id'] as string
+      ));
+    }
+    await createComissao(req, res);
+    return;
+  }
 );
 
 /**
@@ -137,18 +164,39 @@ app.post("/",
  */
 app.put("/:id",
   requirePermissions([PERMISSIONS.DOCUMENTS_WRITE]),
-  validateRequestBody(UpdateComissaoRequestSchema),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(ComissaoIdSchema, req.params);
+      const pathValidation = validateData(ComissaoIdSchema, req.params);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          'Parâmetros de caminho inválidos',
+          pathValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
+      
+      const bodyValidation = validateData(UpdateComissaoRequestSchema, req.body);
+      if (!bodyValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          'Dados da requisição inválidos',
+          bodyValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
+      
       await updateComissao(req, res);
+      return;
     } catch (error) {
       const requestId = req.headers['x-request-id'] as string;
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, requestId));
+        res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown>, requestId));
       } else {
-        res.status(500).json(createErrorResponse('Internal server error', undefined, requestId));
+        res.status(500).json(createErrorResponse("INTERNAL_ERROR", "Erro interno do servidor", {}, requestId));
       }
+      return;
+      return;
     }
   }
 );
@@ -161,15 +209,25 @@ app.delete("/:id",
   requirePermissions([PERMISSIONS.DOCUMENTS_DELETE]),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(ComissaoIdSchema, req.params);
+      const pathValidation = validateData(ComissaoIdSchema, req.params);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          'Parâmetros de caminho inválidos',
+          pathValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
       await deleteComissao(req, res);
+      return;
     } catch (error) {
       const requestId = req.headers['x-request-id'] as string;
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, requestId));
+        res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown>, requestId));
       } else {
-        res.status(500).json(createErrorResponse('Internal server error', undefined, requestId));
+        res.status(500).json(createErrorResponse("INTERNAL_ERROR", "Erro interno do servidor", {}, requestId));
       }
+      return;
     }
   }
 );
@@ -180,17 +238,36 @@ app.delete("/:id",
  */
 app.post("/:id/membros",
   requirePermissions([PERMISSIONS.DOCUMENTS_WRITE]),
-  validateRequestBody(AdicionarMembroRequestSchema),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(ComissaoIdSchema, req.params);
+      const pathValidation = validateData(ComissaoIdSchema, req.params);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Parâmetros de caminho inválidos",
+          pathValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
+      
+      const bodyValidation = validateData(AdicionarMembroRequestSchema, req.body);
+      if (!bodyValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          'Dados da requisição inválidos',
+          bodyValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
+      
       await adicionarMembro(req, res);
+      return;
     } catch (error) {
       const requestId = req.headers['x-request-id'] as string;
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown>, requestId));
       } else {
-        res.status(500).json(createErrorResponse('Internal server error', undefined, requestId));
+        return res.status(500).json(createErrorResponse("INTERNAL_ERROR", 'Erro interno do servidor', {}, requestId));
       }
     }
   }
@@ -204,14 +281,23 @@ app.delete("/:id/membros/:servidorId",
   requirePermissions([PERMISSIONS.DOCUMENTS_WRITE]),
   async (req, res) => {
     try {
-      validatePathParams(ComissaoServidorSchema, req.params);
+      const pathValidation = validateData(ComissaoServidorSchema, req.params);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Parâmetros de caminho inválidos",
+          pathValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
       await removerMembro(req, res);
+      return;
     } catch (error) {
       const requestId = req.headers['x-request-id'] as string;
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown>, requestId));
       } else {
-        res.status(500).json(createErrorResponse('Internal server error', undefined, requestId));
+        return res.status(500).json(createErrorResponse("INTERNAL_ERROR", 'Erro interno do servidor', {}, requestId));
       }
     }
   }
@@ -223,17 +309,36 @@ app.delete("/:id/membros/:servidorId",
  */
 app.patch("/:id/membros/:servidorId",
   requirePermissions([PERMISSIONS.DOCUMENTS_WRITE]),
-  validateRequestBody(AtualizarMembroRequestSchema),
   async (req, res) => {
     try {
-      validatePathParams(ComissaoServidorSchema, req.params);
+      const pathValidation = validateData(ComissaoServidorSchema, req.params);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Parâmetros de caminho inválidos",
+          pathValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
+      
+      const bodyValidation = validateData(AtualizarMembroRequestSchema, req.body);
+      if (!bodyValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          'Dados da requisição inválidos',
+          bodyValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
+      
       await atualizarMembro(req, res);
+      return;
     } catch (error) {
       const requestId = req.headers['x-request-id'] as string;
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown>, requestId));
       } else {
-        res.status(500).json(createErrorResponse('Internal server error', undefined, requestId));
+        return res.status(500).json(createErrorResponse("INTERNAL_ERROR", 'Erro interno do servidor', {}, requestId));
       }
     }
   }
@@ -247,15 +352,25 @@ app.get("/:id/stats",
   requirePermissions([PERMISSIONS.DOCUMENTS_READ]),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(ComissaoIdSchema, req.params);
-      await getComissaoStats(req, res);
-    } catch (error) {
-      const requestId = req.headers['x-request-id'] as string;
-      if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, requestId));
-      } else {
-        res.status(500).json(createErrorResponse('Internal server error', undefined, requestId));
+      const pathValidation = validateData(ComissaoIdSchema, req.params);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Parâmetros de caminho inválidos",
+          pathValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
       }
+      await getComissaoStats(req, res);
+      return;
+     } catch (error) {
+       const requestId = req.headers['x-request-id'] as string;
+      if (error instanceof ValidationError) {
+        res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown>, requestId));
+      } else {
+        res.status(500).json(createErrorResponse("INTERNAL_ERROR", 'Erro interno do servidor', {}, requestId));
+      }
+      return;
     }
   }
 );
@@ -268,14 +383,23 @@ app.get("/:id/history",
   requirePermissions([PERMISSIONS.DOCUMENTS_READ]),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(ComissaoIdSchema, req.params);
+      const pathValidation = validateData(ComissaoIdSchema, req.params);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Parâmetros de caminho inválidos",
+          pathValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
       await getComissaoHistory(req, res);
+      return;
     } catch (error) {
       const requestId = req.headers['x-request-id'] as string;
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown>, requestId));
       } else {
-        res.status(500).json(createErrorResponse('Internal server error', undefined, requestId));
+        return res.status(500).json(createErrorResponse("INTERNAL_ERROR", 'Erro interno do servidor', {}, requestId));
       }
     }
   }
@@ -285,9 +409,10 @@ app.get("/:id/history",
 app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Comissões API Error:', error);
   const errorResponse = createErrorResponse(
-    error.message || 'Internal server error',
-    error instanceof ValidationError ? error.details : undefined,
-    req.requestId
+    "INTERNAL_ERROR",
+    error.message || 'Erro interno do servidor',
+    error instanceof ValidationError ? error.details as Record<string, unknown> : {},
+    req.headers['x-request-id'] as string
   );
   res.status(error instanceof ValidationError ? 400 : 500).json(errorResponse);
 });

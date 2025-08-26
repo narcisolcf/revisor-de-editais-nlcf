@@ -15,9 +15,8 @@ const db = (0, firestore_1.getFirestore)();
  * List comissões with filtering and pagination
  */
 const listComissoes = async (req, res) => {
-    var _a;
     try {
-        const organizationId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.organizationId;
+        const organizationId = req.user?.organizationId;
         if (!organizationId) {
             return res.status(400).json({
                 success: false,
@@ -33,6 +32,7 @@ const listComissoes = async (req, res) => {
             data: result.data,
             pagination: result.pagination
         });
+        return;
     }
     catch (error) {
         console.error('Error listing comissões:', error);
@@ -43,7 +43,7 @@ const listComissoes = async (req, res) => {
                 details: error.errors
             });
         }
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -55,10 +55,9 @@ exports.listComissoes = listComissoes;
  * Get comissão by ID with detailed information
  */
 const getComissaoById = async (req, res) => {
-    var _a;
     try {
         const { id } = req.params;
-        const organizationId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.organizationId;
+        const organizationId = req.user?.organizationId;
         if (!organizationId) {
             return res.status(400).json({
                 success: false,
@@ -83,10 +82,11 @@ const getComissaoById = async (req, res) => {
             success: true,
             data: comissao
         });
+        return;
     }
     catch (error) {
         console.error('Error getting comissão:', error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -98,10 +98,9 @@ exports.getComissaoById = getComissaoById;
  * Create new comissão
  */
 const createComissao = async (req, res) => {
-    var _a, _b;
     try {
-        const organizationId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.organizationId;
-        const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.uid;
+        const organizationId = req.user?.organizationId;
+        const userId = req.user?.uid;
         if (!organizationId || !userId) {
             return res.status(400).json({
                 success: false,
@@ -117,6 +116,7 @@ const createComissao = async (req, res) => {
             data: comissao,
             message: 'Comissão created successfully'
         });
+        return;
     }
     catch (error) {
         console.error('Error creating comissão:', error);
@@ -133,7 +133,7 @@ const createComissao = async (req, res) => {
                 error: error.message
             });
         }
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -145,11 +145,10 @@ exports.createComissao = createComissao;
  * Update comissão
  */
 const updateComissao = async (req, res) => {
-    var _a, _b;
     try {
         const { id } = req.params;
-        const organizationId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.organizationId;
-        const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.uid;
+        const organizationId = req.user?.organizationId;
+        const userId = req.user?.uid;
         if (!organizationId || !userId) {
             return res.status(400).json({
                 success: false,
@@ -177,6 +176,7 @@ const updateComissao = async (req, res) => {
             data: comissao,
             message: 'Comissão updated successfully'
         });
+        return;
     }
     catch (error) {
         console.error('Error updating comissão:', error);
@@ -193,7 +193,7 @@ const updateComissao = async (req, res) => {
                 error: error.message
             });
         }
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -205,11 +205,10 @@ exports.updateComissao = updateComissao;
  * Delete comissão
  */
 const deleteComissao = async (req, res) => {
-    var _a, _b;
     try {
         const { id } = req.params;
-        const organizationId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.organizationId;
-        const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.uid;
+        const organizationId = req.user?.organizationId;
+        const userId = req.user?.uid;
         if (!organizationId || !userId) {
             return res.status(400).json({
                 success: false,
@@ -228,6 +227,7 @@ const deleteComissao = async (req, res) => {
             success: true,
             message: 'Comissão deleted successfully'
         });
+        return;
     }
     catch (error) {
         console.error('Error deleting comissão:', error);
@@ -237,7 +237,7 @@ const deleteComissao = async (req, res) => {
                 error: error.message
             });
         }
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -249,11 +249,10 @@ exports.deleteComissao = deleteComissao;
  * Add member to comissão
  */
 const adicionarMembro = async (req, res) => {
-    var _a, _b;
     try {
         const { id } = req.params;
-        const organizationId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.organizationId;
-        const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.uid;
+        const organizationId = req.user?.organizationId;
+        const userId = req.user?.uid;
         if (!organizationId || !userId) {
             return res.status(400).json({
                 success: false,
@@ -274,6 +273,7 @@ const adicionarMembro = async (req, res) => {
             success: true,
             message: 'Member added successfully'
         });
+        return;
     }
     catch (error) {
         console.error('Error adding member:', error);
@@ -290,7 +290,7 @@ const adicionarMembro = async (req, res) => {
                 error: error.message
             });
         }
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -302,11 +302,10 @@ exports.adicionarMembro = adicionarMembro;
  * Remove member from comissão
  */
 const removerMembro = async (req, res) => {
-    var _a, _b;
     try {
         const { id, servidorId } = req.params;
-        const organizationId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.organizationId;
-        const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.uid;
+        const organizationId = req.user?.organizationId;
+        const userId = req.user?.uid;
         if (!organizationId || !userId) {
             return res.status(400).json({
                 success: false,
@@ -325,6 +324,7 @@ const removerMembro = async (req, res) => {
             success: true,
             message: 'Member removed successfully'
         });
+        return;
     }
     catch (error) {
         console.error('Error removing member:', error);
@@ -334,7 +334,7 @@ const removerMembro = async (req, res) => {
                 error: error.message
             });
         }
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -346,11 +346,10 @@ exports.removerMembro = removerMembro;
  * Update member in comissão
  */
 const atualizarMembro = async (req, res) => {
-    var _a, _b;
     try {
         const { id, servidorId } = req.params;
-        const organizationId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.organizationId;
-        const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.uid;
+        const organizationId = req.user?.organizationId;
+        const userId = req.user?.uid;
         if (!organizationId || !userId) {
             return res.status(400).json({
                 success: false,
@@ -371,6 +370,7 @@ const atualizarMembro = async (req, res) => {
             success: true,
             message: 'Member updated successfully'
         });
+        return;
     }
     catch (error) {
         console.error('Error updating member:', error);
@@ -387,7 +387,7 @@ const atualizarMembro = async (req, res) => {
                 error: error.message
             });
         }
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -399,10 +399,9 @@ exports.atualizarMembro = atualizarMembro;
  * Get comissão statistics
  */
 const getComissaoStats = async (req, res) => {
-    var _a;
     try {
         const { id } = req.params;
-        const organizationId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.organizationId;
+        const organizationId = req.user?.organizationId;
         if (!organizationId) {
             return res.status(400).json({
                 success: false,
@@ -421,6 +420,7 @@ const getComissaoStats = async (req, res) => {
             success: true,
             data: stats
         });
+        return;
     }
     catch (error) {
         console.error('Error getting comissão stats:', error);
@@ -430,7 +430,7 @@ const getComissaoStats = async (req, res) => {
                 error: error.message
             });
         }
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: 'Internal server error'
         });
@@ -442,10 +442,9 @@ exports.getComissaoStats = getComissaoStats;
  * Get comissão history
  */
 const getComissaoHistory = async (req, res) => {
-    var _a;
     try {
         const { id } = req.params;
-        const organizationId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.organizationId;
+        const organizationId = req.user?.organizationId;
         if (!organizationId) {
             return res.status(400).json({
                 success: false,
@@ -472,6 +471,7 @@ const getComissaoHistory = async (req, res) => {
                 hasMore: result.hasMore
             }
         });
+        return;
     }
     catch (error) {
         console.error('Error getting comissão history:', error);
@@ -481,7 +481,7 @@ const getComissaoHistory = async (req, res) => {
                 error: error.message
             });
         }
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: 'Internal server error'
         });

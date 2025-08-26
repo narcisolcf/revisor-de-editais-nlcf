@@ -842,3 +842,45 @@
 2025-08-19T17:57:22.163997Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
 2025-08-19T17:57:22.264822Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/utils/errorUtils.ts")}
 2025-08-19T17:57:22.264833Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-19T17:58:22.868935Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("ROADMAP_ATUALIZADO_DEZ2024.md")}
+2025-08-19T17:58:22.869087Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-19T17:58:22.965500Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("ROADMAP_ATUALIZADO_DEZ2024.md")}
+2025-08-19T17:58:22.965516Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-19T17:58:23.064721Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("ROADMAP_ATUALIZADO_DEZ2024.md")}
+2025-08-19T17:58:23.064776Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-19T18:07:38.380210Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/process-analysis.ts")}
+2025-08-19T18:07:38.382437Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:07:38.666249Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/process-analysis.ts")}
+2025-08-19T18:07:38.666260Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:07:38.864599Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/process-analysis.ts")}
+2025-08-19T18:07:38.864611Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:07:59.166943Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/process-analysis.ts")}
+2025-08-19T18:07:59.166996Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:07:59.265601Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/api/process-analysis.ts")}
+2025-08-19T18:07:59.265613Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:08:08.265197Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/index.ts")}
+2025-08-19T18:08:08.265235Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:08:08.366151Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/index.ts")}
+2025-08-19T18:08:08.366167Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:08:57.664384Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/index.ts")}
+2025-08-19T18:08:57.664415Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:08:57.764767Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/index.ts")}
+2025-08-19T18:08:57.764779Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:09:04.165382Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/index.ts")}
+2025-08-19T18:09:04.165417Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:09:04.365522Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/index.ts")}
+2025-08-19T18:09:04.365535Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:09:23.365401Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/index.ts")}
+2025-08-19T18:09:23.365427Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:09:23.466059Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/index.ts")}
+2025-08-19T18:09:23.466070Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:09:31.665859Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/index.ts")}
+2025-08-19T18:09:31.665889Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:09:37.467586Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/index.ts")}
+2025-08-19T18:09:37.467721Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:09:37.566544Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/db/index.ts")}
+2025-08-19T18:09:37.566556Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:14:09.808710Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/.env")}
+2025-08-19T18:14:09.810420Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-19T18:14:09.896630Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/.env")}
+2025-08-19T18:14:09.896641Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/api"), path: AnchoredSystemPathBuf("services/api") }}))

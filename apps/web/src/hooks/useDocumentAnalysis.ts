@@ -64,10 +64,10 @@ interface UseDocumentAnalysisReturn extends AnalysisState {
   };
   
   // Funcionalidades de alta prioridade
-  analyzeDocumentWithFile: (file: File, options?: any) => Promise<DocumentAnalysis | null>;
-  analyzeBatch: (files: File[], options?: any) => Promise<DocumentAnalysis[]>;
+  analyzeDocumentWithFile: (file: File, options?: Record<string, unknown>) => Promise<DocumentAnalysis | null>;
+  analyzeBatch: (files: File[], options?: Record<string, unknown>) => Promise<DocumentAnalysis[]>;
   reanalyzeDocument: (documentId: string) => Promise<DocumentAnalysis | null>;
-  getAnalysisStatus: (analysisId: string) => Promise<any>;
+  getAnalysisStatus: (analysisId: string) => Promise<{ status: string; progress?: number; message?: string }>;
   loadStatistics: () => Promise<void>;
   clearCache: () => Promise<void>;
 }
@@ -285,7 +285,7 @@ export const useDocumentAnalysis = (
 
   const analyzeDocumentWithFile = useCallback(async (
     file: File, 
-    options?: any
+    options?: Record<string, unknown>
   ): Promise<DocumentAnalysis | null> => {
     try {
       setState(prev => ({ ...prev, isAnalyzing: true, error: null, progress: { stage: 'uploading', progress: 0, message: 'Preparando análise...' } }));
@@ -317,7 +317,7 @@ export const useDocumentAnalysis = (
 
   const analyzeBatch = useCallback(async (
     files: File[], 
-    options?: any
+    options?: Record<string, unknown>
   ): Promise<DocumentAnalysis[]> => {
     if (files.length === 0) return [];
 

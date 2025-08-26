@@ -37,7 +37,6 @@ import { Badge } from '../ui/badge';
 import { Skeleton } from '../ui/skeleton';
 import { Card, CardContent } from '../ui/card';
 import {
-  Comissao,
   ComissaoFilters,
   ComissoesTableProps,
   TipoComissao,

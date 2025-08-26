@@ -353,9 +353,9 @@ const MembrosManager: React.FC<MembrosManagerProps> = ({
     }
   };
 
-  const handleEditMembro = (membro: MembroComissao) => {
+  const handleEditMembro = (_membro: MembroComissao) => {
     // TODO: Implementar modal de edição
-    console.log('Editar membro:', membro);
+    console.log('Editar membro:', _membro);
   };
 
   const handleRemoveMembro = async (servidorId: string) => {

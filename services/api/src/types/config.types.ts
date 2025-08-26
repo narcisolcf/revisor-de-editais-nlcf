@@ -9,6 +9,20 @@ import { ProblemSeverity, ProblemCategory } from "./analysis.types";
 
 // Enums
 /* eslint-disable no-unused-vars */
+export enum AnalysisStatus {
+  PENDING = "PENDING",
+  PROCESSING = "PROCESSING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED"
+}
+
+export enum AnalysisPriority {
+  LOW = "LOW",
+  NORMAL = "NORMAL",
+  HIGH = "HIGH"
+}
+
 export enum AnalysisPreset {
   RIGOROUS = "RIGOROUS",
   STANDARD = "STANDARD",
@@ -27,6 +41,8 @@ export enum WeightDistributionType {
 /* eslint-enable no-unused-vars */
 
 // Zod Schemas
+export const AnalysisStatusSchema = z.nativeEnum(AnalysisStatus);
+export const AnalysisPrioritySchema = z.nativeEnum(AnalysisPriority);
 export const AnalysisPresetSchema = z.nativeEnum(AnalysisPreset);
 export const WeightDistributionTypeSchema = z.nativeEnum(WeightDistributionType);
 

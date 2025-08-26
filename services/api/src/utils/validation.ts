@@ -1,12 +1,13 @@
 import { z } from 'zod';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * Classe de erro de validação
  */
 export class ValidationError extends Error {
-  public details: any;
+  public details: unknown;
   
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message);
     this.name = 'ValidationError';
     this.details = details;
@@ -20,13 +21,13 @@ export interface ValidationResult<T> {
   success: boolean;
   data?: T;
   error?: string;
-  details?: any;
+  details?: unknown;
 }
 
 /**
  * Valida dados usando schema Zod
  */
-export function validateData<T>(schema: z.ZodSchema<T>, data: any): ValidationResult<T> {
+export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): ValidationResult<T> {
   try {
     const result = schema.parse(data);
     return {
@@ -54,15 +55,15 @@ export function validateData<T>(schema: z.ZodSchema<T>, data: any): ValidationRe
  * Middleware para validar body da requisição
  */
 export function validateBody<T>(schema: z.ZodSchema<T>) {
-  return (req: any, res: any, next: any) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const validation = validateData(schema, req.body);
     
     if (!validation.success) {
       throw new ValidationError(validation.error!, validation.details);
     }
     
-    req.validatedBody = validation.data;
-    next();
+    req.body = validation.data;
+    return next();
   };
 }
 
@@ -70,15 +71,15 @@ export function validateBody<T>(schema: z.ZodSchema<T>) {
  * Middleware para validar query parameters
  */
 export function validateQuery<T>(schema: z.ZodSchema<T>) {
-  return (req: any, res: any, next: any) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const validation = validateData(schema, req.query);
     
     if (!validation.success) {
       throw new ValidationError(validation.error!, validation.details);
     }
     
-    req.validatedQuery = validation.data;
-    next();
+    req.query = validation.data as any;
+    return next();
   };
 }
 
@@ -86,15 +87,15 @@ export function validateQuery<T>(schema: z.ZodSchema<T>) {
  * Middleware para validar path parameters
  */
 export function validatePathParams<T>(schema: z.ZodSchema<T>) {
-  return (req: any, res: any, next: any) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const validation = validateData(schema, req.params);
     
     if (!validation.success) {
       throw new ValidationError(validation.error!, validation.details);
     }
     
-    req.validatedParams = validation.data;
-    next();
+    req.params = validation.data as any;
+    return next();
   };
 }
 
@@ -122,3 +123,38 @@ export const AnalysisRequestSchema = z.object({
     detailedMetrics: z.boolean().default(false)
   }).optional()
 });
+
+// Schemas adicionais
+export const UUIDSchema = z.string().uuid('ID deve ser um UUID válido');
+
+// Função para validar corpo da requisição
+export function validateRequestBody<T>(schema: z.ZodSchema<T>) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = validateData(schema, req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: result.error,
+        details: result.details
+      });
+    }
+    req.body = result.data;
+    return next();
+  };
+}
+
+// Função para validar parâmetros de query
+export function validateQueryParams<T>(schema: z.ZodSchema<T>) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = validateData(schema, req.query);
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: result.error,
+        details: result.details
+      });
+    }
+    req.query = result.data as any;
+    return next();
+  };
+}

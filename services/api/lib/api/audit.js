@@ -31,34 +31,38 @@ app.use(auth_1.requireOrganization);
  */
 app.get("/logs", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ]), async (req, res) => {
     try {
-        const query = (0, utils_1.validateQueryParams)(utils_1.PaginationSchema.extend({
+        const queryValidation = (0, utils_1.validateData)(utils_1.PaginationSchema.extend({
             action: zod_1.z.string().optional(),
             resourceType: zod_1.z.string().optional(),
             resourceId: zod_1.z.string().optional(),
             userId: zod_1.z.string().optional(),
             startDate: zod_1.z.coerce.date().optional(),
             endDate: zod_1.z.coerce.date().optional()
-        }), req);
+        }), req.query);
+        if (!queryValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Invalid query parameters", queryValidation.details, req.requestId));
+        }
+        const query = queryValidation.data;
         const organizationId = req.user.organizationId;
         let auditQuery = firebase_1.collections.auditLogs
             .where("organizationId", "==", organizationId);
         // Apply filters
-        if (query.action) {
+        if (query?.action) {
             auditQuery = auditQuery.where("action", "==", query.action);
         }
-        if (query.resourceType) {
+        if (query?.resourceType) {
             auditQuery = auditQuery.where("resourceType", "==", query.resourceType);
         }
-        if (query.resourceId) {
+        if (query?.resourceId) {
             auditQuery = auditQuery.where("resourceId", "==", query.resourceId);
         }
-        if (query.userId) {
+        if (query?.userId) {
             auditQuery = auditQuery.where("userId", "==", query.userId);
         }
-        if (query.startDate) {
+        if (query?.startDate) {
             auditQuery = auditQuery.where("timestamp", ">=", query.startDate);
         }
-        if (query.endDate) {
+        if (query?.endDate) {
             auditQuery = auditQuery.where("timestamp", "<=", query.endDate);
         }
         // Apply sorting
@@ -67,29 +71,32 @@ app.get("/logs", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ])
         const countQuery = await auditQuery.count().get();
         const total = countQuery.data().count;
         // Apply pagination
-        const offset = (query.page - 1) * query.limit;
-        auditQuery = auditQuery.offset(offset).limit(query.limit);
+        const page = query?.page ?? 1;
+        const limit = query?.limit ?? 20;
+        const offset = (page - 1) * limit;
+        auditQuery = auditQuery.offset(offset).limit(limit);
         const snapshot = await auditQuery.get();
-        const auditLogs = snapshot.docs.map(doc => (Object.assign({ id: doc.id }, doc.data())));
-        const totalPages = Math.ceil(total / query.limit);
-        res.json({
-            success: true,
-            data: auditLogs,
+        const auditLogs = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        const totalPages = Math.ceil(total / limit);
+        res.json((0, utils_1.createSuccessResponse)({
+            auditLogs,
             pagination: {
-                page: query.page,
-                limit: query.limit,
+                page,
+                limit,
                 total,
                 totalPages,
-                hasNext: query.page < totalPages,
-                hasPrev: query.page > 1
-            },
-            timestamp: new Date().toISOString(),
-            requestId: req.requestId
-        });
+                hasNext: page < totalPages,
+                hasPrev: page > 1
+            }
+        }, req.requestId));
+        return;
     }
     catch (error) {
         console.error("Error getting audit logs:", error);
-        res.status(500).json((0, utils_1.createErrorResponse)("Failed to get audit logs", null, req.requestId));
+        return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to get audit logs", undefined, req.requestId));
     }
 });
 /**
@@ -98,12 +105,17 @@ app.get("/logs", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ])
  */
 app.get("/summary", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ]), async (req, res) => {
     try {
-        const query = (0, utils_1.validateQueryParams)(zod_1.z.object({
+        const queryValidation = (0, utils_1.validateData)(zod_1.z.object({
             days: zod_1.z.coerce.number().min(1).max(365).default(30)
-        }), req);
+        }), req.query);
+        if (!queryValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Invalid query parameters", queryValidation.details, req.requestId));
+        }
+        const query = queryValidation.data;
         const organizationId = req.user.organizationId;
+        const days = query?.days ?? 30;
         const startDate = new Date();
-        startDate.setDate(startDate.getDate() - query.days);
+        startDate.setDate(startDate.getDate() - days);
         const auditQuery = firebase_1.collections.auditLogs
             .where("organizationId", "==", organizationId)
             .where("timestamp", ">=", startDate);
@@ -118,12 +130,12 @@ app.get("/summary", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_REA
         };
         const auditLogs = [];
         snapshot.docs.forEach(doc => {
-            const log = Object.assign({ id: doc.id }, doc.data());
+            const log = { id: doc.id, ...doc.data() };
             auditLogs.push(log);
             const action = log.action || "unknown";
             const resourceType = log.resourceType || "unknown";
             const userId = log.userId || "unknown";
-            const day = log.timestamp.toDate().toISOString().split('T')[0];
+            const day = (log.timestamp instanceof Date ? log.timestamp : log.timestamp?.toDate?.() || new Date()).toISOString().split('T')[0];
             summary.byAction[action] = (summary.byAction[action] || 0) + 1;
             summary.byResourceType[resourceType] = (summary.byResourceType[resourceType] || 0) + 1;
             summary.byUser[userId] = (summary.byUser[userId] || 0) + 1;
@@ -135,13 +147,14 @@ app.get("/summary", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_REA
             .slice(0, 10);
         res.json((0, utils_1.createSuccessResponse)({
             organizationId,
-            period: `${query.days} days`,
+            period: `${days} days`,
             summary
-        }, undefined, req.requestId));
+        }, req.requestId));
+        return;
     }
     catch (error) {
         console.error("Error getting audit summary:", error);
-        res.status(500).json((0, utils_1.createErrorResponse)("Failed to get audit summary", null, req.requestId));
+        return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to get audit summary", undefined, req.requestId));
     }
 });
 /**
@@ -170,7 +183,7 @@ app.get("/actions", (req, res) => {
         "permission_granted",
         "permission_revoked"
     ];
-    res.json((0, utils_1.createSuccessResponse)(actions, undefined, req.requestId));
+    res.json((0, utils_1.createSuccessResponse)(actions, req.requestId));
 });
 /**
  * GET /audit/resource-types
@@ -187,7 +200,7 @@ app.get("/resource-types", (req, res) => {
         "session",
         "api_key"
     ];
-    res.json((0, utils_1.createSuccessResponse)(resourceTypes, undefined, req.requestId));
+    res.json((0, utils_1.createSuccessResponse)(resourceTypes, req.requestId));
 });
 /**
  * POST /audit/export
@@ -200,19 +213,22 @@ app.post("/export", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_REA
         let auditQuery = firebase_1.collections.auditLogs
             .where("organizationId", "==", organizationId);
         // Apply filters if provided
-        if (filters === null || filters === void 0 ? void 0 : filters.startDate) {
+        if (filters?.startDate) {
             auditQuery = auditQuery.where("timestamp", ">=", new Date(filters.startDate));
         }
-        if (filters === null || filters === void 0 ? void 0 : filters.endDate) {
+        if (filters?.endDate) {
             auditQuery = auditQuery.where("timestamp", "<=", new Date(filters.endDate));
         }
-        if (filters === null || filters === void 0 ? void 0 : filters.action) {
+        if (filters?.action) {
             auditQuery = auditQuery.where("action", "==", filters.action);
         }
         // Limit large exports
         auditQuery = auditQuery.orderBy("timestamp", "desc").limit(10000);
         const snapshot = await auditQuery.get();
-        const auditLogs = snapshot.docs.map(doc => (Object.assign({ id: doc.id }, doc.data())));
+        const auditLogs = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
         let exportData;
         let contentType;
         if (format === "csv") {
@@ -224,17 +240,18 @@ app.post("/export", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_REA
             contentType = "application/json";
         }
         else {
-            res.status(400).json((0, utils_1.createErrorResponse)("Unsupported export format", { supportedFormats: ["csv", "json"] }, req.requestId));
+            res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Unsupported export format", { supportedFormats: ["csv", "json"] }, req.requestId));
             return;
         }
         const filename = `audit-logs-${organizationId}-${new Date().toISOString().split('T')[0]}.${format}`;
         res.setHeader("Content-Type", contentType);
         res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
         res.send(exportData);
+        return;
     }
     catch (error) {
         console.error("Error exporting audit logs:", error);
-        res.status(500).json((0, utils_1.createErrorResponse)("Failed to export audit logs", null, req.requestId));
+        return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to export audit logs", undefined, req.requestId));
     }
 });
 /**
@@ -259,10 +276,9 @@ function convertToCSV(auditLogs) {
     ];
     const csvRows = [headers.join(",")];
     auditLogs.forEach(log => {
-        var _a;
         const row = [
             log.id || "",
-            ((_a = log.timestamp) === null || _a === void 0 ? void 0 : _a.toISOString()) || "",
+            log.timestamp?.toISOString() || "",
             log.userId || "",
             log.organizationId || "",
             log.action || "",
@@ -282,7 +298,11 @@ function convertToCSV(auditLogs) {
  */
 async function createAuditLog(logData) {
     try {
-        const auditLog = Object.assign({ id: (0, utils_1.generateRequestId)(), timestamp: new Date() }, logData);
+        const auditLog = {
+            id: (0, utils_1.generateRequestId)(),
+            timestamp: new Date(),
+            ...logData
+        };
         await firebase_1.collections.auditLogs.add(auditLog);
     }
     catch (error) {

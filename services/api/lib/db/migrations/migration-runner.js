@@ -29,9 +29,8 @@ class MigrationRunner {
      * Check if migration has been run
      */
     async isMigrationRun(migrationId) {
-        var _a;
         const doc = await this.db.collection(this.migrationsCollection).doc(migrationId).get();
-        return doc.exists && ((_a = doc.data()) === null || _a === void 0 ? void 0 : _a.success) === true;
+        return doc.exists && doc.data()?.success === true;
     }
     /**
      * Record migration execution
@@ -43,9 +42,12 @@ class MigrationRunner {
             description,
             version: '1.0.0',
             runAt: new Date(),
-            success,
-            error
+            success
         };
+        // Only add error field if it has a value
+        if (error) {
+            migrationInfo.error = error;
+        }
         await this.db.collection(this.migrationsCollection).doc(migrationId).set(migrationInfo);
     }
     /**
@@ -132,7 +134,10 @@ class MigrationRunner {
             const doc = await this.db.collection(this.migrationsCollection).doc(migration.id).get();
             if (doc.exists) {
                 const data = doc.data();
-                results.push(Object.assign(Object.assign({}, data), { available: true }));
+                results.push({
+                    ...data,
+                    available: true
+                });
             }
             else {
                 results.push({

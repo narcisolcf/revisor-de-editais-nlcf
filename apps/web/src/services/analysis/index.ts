@@ -1,16 +1,18 @@
 // Sistema de Análise por Categoria
-export { BaseAnalyzer, AnalysisContext, AnalysisResult, AnalyzerConfig } from './analyzers/BaseAnalyzer';
+export { BaseAnalyzer } from './analyzers/BaseAnalyzer';
+export type { AnalysisContext, AnalysisResult, AnalyzerConfig } from './analyzers/BaseAnalyzer';
 export { StructuralAnalyzer } from './analyzers/StructuralAnalyzer';
 export { LegalAnalyzer } from './analyzers/LegalAnalyzer';
 export { ClarityAnalyzer } from './analyzers/ClarityAnalyzer';
 export { ABNTAnalyzer } from './analyzers/ABNTAnalyzer';
 
 // Sistema de Cache Inteligente
-export { IntelligentCache, CacheConfig, CacheMetrics, CacheEntry } from './cache/IntelligentCache';
+export { IntelligentCache } from './cache/IntelligentCache';
+export type { CacheConfig, CacheMetrics, CacheEntry } from './cache/IntelligentCache';
 
 // Sistema de Fallback
-export { 
-  FallbackSystem, 
+export { FallbackSystem } from './fallback/FallbackSystem';
+export type { 
   FallbackConfig, 
   FallbackStrategy, 
   FallbackMetrics, 
@@ -18,8 +20,8 @@ export {
 } from './fallback/FallbackSystem';
 
 // Orquestrador Principal
-export { 
-  AnalysisOrchestrator, 
+export { AnalysisOrchestrator } from './AnalysisOrchestrator';
+export type { 
   OrchestratorConfig, 
   ComprehensiveAnalysisResult 
 } from './AnalysisOrchestrator';

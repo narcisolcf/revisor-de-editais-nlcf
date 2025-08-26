@@ -59,7 +59,6 @@ export type {
   Sort,
   FieldSelection,
   CacheConfig,
-  RetryConfig as CommonRetryConfig,
   TimeoutConfig,
   Coordinates,
   Location,
@@ -67,7 +66,6 @@ export type {
   DateRange,
   FormatConfig,
   ValidationResult as CommonValidationResult,
-  ValidationError as CommonValidationError,
   ValidationWarning
 } from '../../types/core/common';
 

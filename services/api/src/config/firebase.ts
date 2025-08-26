@@ -9,8 +9,7 @@ import * as admin from "firebase-admin";
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.applicationDefault(),
-    projectId: process.env.GOOGLE_CLOUD_PROJECT || "analisador-de-editais",
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "analisador-de-editais.firebasestorage.app",
+    projectId: process.env.GOOGLE_CLOUD_PROJECT || "licitareview-prod",
   });
 }
 
@@ -31,7 +30,7 @@ export const collections = {
 } as const;
 
 // Storage bucket reference
-export const bucket = storage.bucket();
+// export const bucket = storage.bucket();
 
 // Firestore settings for better performance
 firestore.settings({

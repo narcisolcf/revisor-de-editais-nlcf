@@ -36,10 +36,8 @@ export interface PushNotification {
 }
 
 export class NotificationService {
-  private projectId: string;
-
   constructor(projectId: string) {
-    this.projectId = projectId;
+    // projectId stored for future use
   }
 
   /**

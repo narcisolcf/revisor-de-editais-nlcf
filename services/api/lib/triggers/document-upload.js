@@ -15,7 +15,7 @@ const firebase_1 = require("../config/firebase");
 const types_1 = require("../types");
 const config_1 = require("../config");
 const utils_1 = require("../utils");
-const bucket = firebase_1.storage.bucket();
+// const bucket = storage.bucket();
 /**
  * Trigger when document is uploaded to Storage
  */
@@ -24,15 +24,15 @@ exports.onDocumentUpload = (0, storage_1.onObjectFinalized)({
     memory: "512MiB",
     timeoutSeconds: 540,
     maxInstances: 10,
-    bucket: config_1.config.storageBucket
+    // bucket: config.storageBucket // Temporarily disabled
 }, async (event) => {
     const filePath = event.data.name;
-    const fileSize = parseInt(event.data.size || "0", 10);
+    const fileSize = parseInt(String(event.data.size || "0"), 10);
     const contentType = event.data.contentType || "";
     const timeCreated = event.data.timeCreated;
     firebase_functions_1.logger.info(`Document upload detected: ${filePath}`, {
         filePath,
-        fileSize: (0, utils_1.formatFileSize)(fileSize),
+        fileSize: (0, utils_1.formatBytes)(fileSize),
         contentType,
         timeCreated
     });
@@ -58,8 +58,8 @@ exports.onDocumentUpload = (0, storage_1.onObjectFinalized)({
     }
     // Check file size
     if (fileSize > config_1.config.maxDocumentSize) {
-        firebase_functions_1.logger.warn(`File too large: ${(0, utils_1.formatFileSize)(fileSize)} for ${filePath}`);
-        await markDocumentAsError(filePath, `File too large: ${(0, utils_1.formatFileSize)(fileSize)}`);
+        firebase_functions_1.logger.warn(`File too large: ${(0, utils_1.formatBytes)(fileSize)} for ${filePath}`);
+        await markDocumentAsError(filePath, `File too large: ${(0, utils_1.formatBytes)(fileSize)}`);
         return;
     }
     try {
@@ -89,7 +89,7 @@ exports.onDocumentUpload = (0, storage_1.onObjectFinalized)({
             });
             return;
         }
-        const document = Object.assign({ id: docSnapshot.id }, docSnapshot.data());
+        const document = { id: docSnapshot.id, ...docSnapshot.data() };
         // Verify organization match
         if (document.organizationId !== organizationId) {
             firebase_functions_1.logger.error(`Organization mismatch: ${document.organizationId} vs ${organizationId}`);
@@ -105,7 +105,7 @@ exports.onDocumentUpload = (0, storage_1.onObjectFinalized)({
             "metadata.fileName": fileName,
             updatedAt: new Date()
         };
-        await (0, utils_1.retry)(async () => {
+        await (0, utils_1.retryWithBackoff)(async () => {
             await docRef.update(updateData);
         }, 3, 1000);
         firebase_functions_1.logger.info(`Document status updated to UPLOADED: ${documentId}`);
@@ -114,7 +114,7 @@ exports.onDocumentUpload = (0, storage_1.onObjectFinalized)({
         // Send success notification
         await createUploadNotification(organizationId, documentId, "success", {
             fileName,
-            fileSize: (0, utils_1.formatFileSize)(fileSize),
+            fileSize: (0, utils_1.formatBytes)(fileSize),
             message: "Document uploaded successfully and processing started"
         });
         firebase_functions_1.logger.info(`Document upload processing completed: ${documentId}`);
@@ -125,7 +125,7 @@ exports.onDocumentUpload = (0, storage_1.onObjectFinalized)({
         const pathParts = filePath.split("/");
         if (pathParts.length >= 3) {
             const documentId = pathParts[2];
-            await markDocumentAsError(documentId, `Upload processing error: ${error.message}`);
+            await markDocumentAsError(documentId, `Upload processing error: ${error instanceof Error ? error.message : String(error)}`);
         }
         throw error; // Re-throw to trigger retry
     }
@@ -183,7 +183,7 @@ async function startDocumentProcessing(document, filePath) {
             createdAt: new Date()
         };
         // Add to processing queue (could use Cloud Tasks or Pub/Sub)
-        await firebase_1.collections.firestore.collection("processing_queue").add(taskPayload);
+        await firebase_1.firestore.collection("processing_queue").add(taskPayload);
         firebase_functions_1.logger.info(`Document queued for analysis: ${document.id}`, {
             taskId: taskPayload.id,
             configId
@@ -191,7 +191,7 @@ async function startDocumentProcessing(document, filePath) {
     }
     catch (error) {
         firebase_functions_1.logger.error(`Error starting document processing: ${document.id}`, error);
-        await markDocumentAsError(document.id, `Processing start error: ${error.message}`);
+        await markDocumentAsError(document.id, `Processing start error: ${error instanceof Error ? error.message : String(error)}`);
         throw error;
     }
 }
@@ -224,10 +224,17 @@ async function createUploadNotification(organizationId, documentId, type, data) 
                 ? `Document ${documentId} uploaded and processing started`
                 : `Document ${documentId} upload failed: ${data.error}`,
             type: type === "success" ? "success" : "error",
-            data: Object.assign({ documentId }, data),
+            data: {
+                documentId,
+                ...data
+            },
             channels: ["push"] // Could include "email" if critical
         };
-        await firebase_1.collections.firestore.collection("notifications").add(Object.assign(Object.assign({}, notification), { createdAt: new Date(), processed: false }));
+        await firebase_1.firestore.collection("notifications").add({
+            ...notification,
+            createdAt: new Date(),
+            processed: false
+        });
         firebase_functions_1.logger.info(`Notification created for document: ${documentId}`, {
             type,
             organizationId
@@ -242,28 +249,8 @@ async function createUploadNotification(organizationId, documentId, type, data) 
  */
 async function extractDocumentContent(filePath) {
     try {
-        const file = bucket.file(filePath);
-        // Check if file exists
-        const [exists] = await file.exists();
-        if (!exists) {
-            throw new Error(`File not found: ${filePath}`);
-        }
-        // Get file metadata
-        const [metadata] = await file.getMetadata();
-        const contentType = metadata.contentType || "";
-        if (contentType === "text/plain") {
-            // For text files, read directly
-            const [buffer] = await file.download();
-            return buffer.toString("utf-8");
-        }
-        else if (contentType === "application/pdf" ||
-            contentType.includes("word")) {
-            // For PDF and Word documents, we would need to use
-            // document processing services like Google Document AI
-            // For now, return placeholder
-            return `[Content extraction for ${contentType} files requires document processing service]`;
-        }
-        throw new Error(`Unsupported content type for extraction: ${contentType}`);
+        // Storage bucket not configured - returning placeholder
+        throw new Error('Storage bucket not configured');
     }
     catch (error) {
         firebase_functions_1.logger.error(`Error extracting content from ${filePath}:`, error);
@@ -294,23 +281,15 @@ async function validateDocument(filePath, document) {
     const warnings = [];
     try {
         // Check file accessibility
-        const file = bucket.file(filePath);
-        const [exists] = await file.exists();
+        // const file = bucket.file(filePath);
+        // const [exists] = await file.exists();
+        const exists = false; // Temporarily disabled
         if (!exists) {
             errors.push("File not found in storage");
         }
         else {
-            // Get file metadata for additional validation
-            const [metadata] = await file.getMetadata();
-            const actualSize = parseInt(metadata.size || "0", 10);
-            // Validate file size matches metadata
-            if (Math.abs(actualSize - document.metadata.fileSize) > 1024) { // 1KB tolerance
-                warnings.push(`File size mismatch: expected ${document.metadata.fileSize}, actual ${actualSize}`);
-            }
-            // Validate content type
-            if (metadata.contentType !== document.metadata.fileType) {
-                warnings.push(`Content type mismatch: expected ${document.metadata.fileType}, actual ${metadata.contentType}`);
-            }
+            // Storage validation temporarily disabled
+            warnings.push("Storage validation temporarily disabled");
         }
         // Additional document-specific validations could be added here
         return {
@@ -320,7 +299,7 @@ async function validateDocument(filePath, document) {
         };
     }
     catch (error) {
-        errors.push(`Validation error: ${error.message}`);
+        errors.push(`Validation error: ${error instanceof Error ? error.message : String(error)}`);
         return { isValid: false, errors, warnings };
     }
 }

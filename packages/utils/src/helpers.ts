@@ -1,6 +1,13 @@
 import { debounce } from 'lodash-es';
-import { AnalysisWeights, ProblemSeverity } from '@licitareview/types';
 import { ANALYSIS_THRESHOLDS, CATEGORY_COLORS } from './constants';
+
+// Temporary types until @licitareview/types is built
+interface AnalysisWeights {
+  structural: number;
+  legal: number;
+  clarity: number;
+  abnt: number;
+}
 
 /**
  * 🚀 CORE DIFFERENTIATOR: Calculate weighted score based on organization config
@@ -57,7 +64,7 @@ export function deepClone<T>(obj: T): T {
 /**
  * Check if value is empty (null, undefined, empty string, empty array, empty object)
  */
-export function isEmpty(value: any): boolean {
+export function isEmpty(value: unknown): boolean {
   if (value === null || value === undefined) return true;
   if (typeof value === 'string') return value.trim().length === 0;
   if (Array.isArray(value)) return value.length === 0;
@@ -68,26 +75,28 @@ export function isEmpty(value: any): boolean {
 /**
  * Safely get nested object property
  */
-export function get(obj: any, path: string, defaultValue: any = undefined): any {
+export function get<T = unknown>(obj: Record<string, unknown>, path: string, defaultValue: T | undefined = undefined): T | undefined {
   const keys = path.split('.');
-  let result = obj;
+  let result: unknown = obj;
   
   for (const key of keys) {
     if (result === null || result === undefined) return defaultValue;
-    result = result[key];
+    result = (result as Record<string, unknown>)[key];
   }
   
-  return result !== undefined ? result : defaultValue;
+  return result !== undefined ? (result as T) : defaultValue;
 }
 
 /**
  * Create debounced function
  */
-export function createDebounce<T extends (...args: any[]) => any>(
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function createDebounce<T extends Function>(
   func: T,
   delay: number
 ): T {
-  return debounce(func, delay) as T;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return debounce(func as any, delay) as unknown as T;
 }
 
 /**
@@ -100,26 +109,26 @@ export function sleep(ms: number): Promise<void> {
 /**
  * Convert severity enum to display text
  */
-export function severityToText(severity: ProblemSeverity): string {
-  const severityMap: Record<ProblemSeverity, string> = {
-    [ProblemSeverity.CRITICA]: 'Crítica',
-    [ProblemSeverity.ALTA]: 'Alta',
-    [ProblemSeverity.MEDIA]: 'Média',
-    [ProblemSeverity.BAIXA]: 'Baixa'
+export function severityToText(severity: string): string {
+  const severityMap: Record<string, string> = {
+    'critical': 'Crítica',
+    'error': 'Alta',
+    'warning': 'Média',
+    'info': 'Baixa'
   };
   
-  return severityMap[severity] || severity;
+  return severityMap[severity] || 'Desconhecida';
 }
 
 /**
  * Get severity color
  */
-export function getSeverityColor(severity: ProblemSeverity): string {
-  const colorMap: Record<ProblemSeverity, string> = {
-    [ProblemSeverity.CRITICA]: '#dc2626',
-    [ProblemSeverity.ALTA]: '#ea580c',
-    [ProblemSeverity.MEDIA]: '#d97706',
-    [ProblemSeverity.BAIXA]: '#059669'
+export function getSeverityColor(severity: string): string {
+  const colorMap: Record<string, string> = {
+    'critical': '#dc2626',
+    'error': '#ea580c',
+    'warning': '#d97706',
+    'info': '#16a34a'
   };
   
   return colorMap[severity] || '#6b7280';

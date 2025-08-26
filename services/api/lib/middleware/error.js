@@ -59,7 +59,6 @@ exports.ServiceUnavailableError = ServiceUnavailableError;
  * Error handling middleware - should be the last middleware
  */
 const errorHandler = (error, req, res, next) => {
-    var _a, _b;
     // Ensure request ID exists
     if (!req.requestId) {
         req.requestId = (0, utils_1.generateRequestId)();
@@ -71,8 +70,8 @@ const errorHandler = (error, req, res, next) => {
         path: req.path,
         userAgent: req.get("User-Agent"),
         ip: req.ip,
-        userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.uid,
-        organizationId: (_b = req.user) === null || _b === void 0 ? void 0 : _b.organizationId,
+        userId: req.user?.uid,
+        organizationId: req.user?.organizationId,
         error: {
             name: error.name,
             message: error.message,
@@ -124,7 +123,7 @@ const errorHandler = (error, req, res, next) => {
         message = "Too many requests";
     }
     // Create error response
-    const errorResponse = (0, utils_1.createErrorResponse)(message, config_1.config.isDevelopment ? details || error.stack : details, req.requestId);
+    const errorResponse = (0, utils_1.createErrorResponse)('INTERNAL_ERROR', message, config_1.config.isDevelopment ? details || error.stack : details, req.requestId);
     // Add additional error metadata in development
     if (config_1.config.isDevelopment) {
         errorResponse.debug = {
@@ -141,7 +140,7 @@ exports.errorHandler = errorHandler;
  * Not found handler - for unmatched routes
  */
 const notFoundHandler = (req, res) => {
-    const error = (0, utils_1.createErrorResponse)(`Route not found: ${req.method} ${req.path}`, {
+    const error = (0, utils_1.createErrorResponse)("NOT_FOUND", `Route not found: ${req.method} ${req.path}`, {
         method: req.method,
         path: req.path,
         availableRoutes: "Check API documentation for available routes"
@@ -199,28 +198,28 @@ const dbErrorHandler = (operation, error) => {
     const errorMessage = `Database operation failed: ${operation}`;
     firebase_functions_1.logger.error(errorMessage, {
         operation,
-        error: (error === null || error === void 0 ? void 0 : error.message) || error,
-        code: error === null || error === void 0 ? void 0 : error.code,
-        details: error === null || error === void 0 ? void 0 : error.details
+        error: error?.message || error,
+        code: error?.code,
+        details: error?.details
     });
     // Map Firestore errors to appropriate HTTP status codes
-    if ((error === null || error === void 0 ? void 0 : error.code) === "not-found") {
+    if (error?.code === "not-found") {
         throw new NotFoundError("Resource");
     }
-    else if ((error === null || error === void 0 ? void 0 : error.code) === "permission-denied") {
+    else if (error?.code === "permission-denied") {
         throw new ForbiddenError("Insufficient permissions for database operation");
     }
-    else if ((error === null || error === void 0 ? void 0 : error.code) === "already-exists") {
+    else if (error?.code === "already-exists") {
         throw new ConflictError("Resource already exists");
     }
-    else if ((error === null || error === void 0 ? void 0 : error.code) === "resource-exhausted") {
+    else if (error?.code === "resource-exhausted") {
         throw new ServiceUnavailableError("Database resources exhausted");
     }
-    else if ((error === null || error === void 0 ? void 0 : error.code) === "deadline-exceeded") {
+    else if (error?.code === "deadline-exceeded") {
         throw new AppError("Database operation timeout", 408);
     }
     else {
-        throw new AppError(errorMessage, 500, { operation, originalError: error === null || error === void 0 ? void 0 : error.message });
+        throw new AppError(errorMessage, 500, { operation, originalError: error?.message });
     }
 };
 exports.dbErrorHandler = dbErrorHandler;
@@ -228,15 +227,14 @@ exports.dbErrorHandler = dbErrorHandler;
  * External service error handler
  */
 const externalServiceError = (serviceName, error) => {
-    var _a;
     const errorMessage = `External service error: ${serviceName}`;
     firebase_functions_1.logger.error(errorMessage, {
         service: serviceName,
-        error: (error === null || error === void 0 ? void 0 : error.message) || error,
-        status: (error === null || error === void 0 ? void 0 : error.status) || (error === null || error === void 0 ? void 0 : error.statusCode),
-        response: (_a = error === null || error === void 0 ? void 0 : error.response) === null || _a === void 0 ? void 0 : _a.data
+        error: error?.message || error,
+        status: error?.status || error?.statusCode,
+        response: error?.response?.data
     });
-    if ((error === null || error === void 0 ? void 0 : error.status) >= 400 && (error === null || error === void 0 ? void 0 : error.status) < 500) {
+    if (error?.status >= 400 && error?.status < 500) {
         throw new AppError(`${serviceName} service error: ${error.message}`, error.status, { service: serviceName });
     }
     else {
@@ -248,10 +246,10 @@ exports.externalServiceError = externalServiceError;
  * Rate limit error handler
  */
 const rateLimitError = (req, res) => {
-    const error = (0, utils_1.createErrorResponse)("Rate limit exceeded", {
+    const error = (0, utils_1.createErrorResponse)("RATE_LIMIT_EXCEEDED", "Rate limit exceeded", {
         limit: "100 requests per 15 minutes",
         retryAfter: "15 minutes",
-        documentation: "Check rate limiting documentation"
+        documentation: "https://docs.api.com/rate-limits"
     }, req.requestId);
     res.status(429).json(error);
 };
@@ -260,10 +258,10 @@ exports.rateLimitError = rateLimitError;
  * CORS error handler
  */
 const corsError = (req, res) => {
-    const error = (0, utils_1.createErrorResponse)("CORS policy violation", {
-        origin: req.get("Origin"),
+    const error = (0, utils_1.createErrorResponse)("CORS_VIOLATION", "CORS policy violation", {
+        origin: req.headers.origin,
         allowedOrigins: config_1.config.corsOrigin,
-        documentation: "Check CORS configuration"
+        documentation: "https://docs.api.com/cors"
     }, req.requestId);
     res.status(403).json(error);
 };
@@ -272,9 +270,9 @@ exports.corsError = corsError;
  * Validation error formatter
  */
 const formatValidationError = (error) => {
-    return (0, utils_1.createErrorResponse)(error.message, {
+    return (0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, {
         validationErrors: error.details,
-        documentation: "Check API documentation for proper request format"
+        documentation: "https://docs.api.com/validation"
     });
 };
 exports.formatValidationError = formatValidationError;
@@ -285,7 +283,7 @@ const setupGlobalErrorHandlers = () => {
     process.on("unhandledRejection", (reason, promise) => {
         firebase_functions_1.logger.error("Unhandled Rejection at:", {
             promise: promise.toString(),
-            reason: (reason === null || reason === void 0 ? void 0 : reason.message) || reason
+            reason: reason?.message || reason
         });
         // In production, you might want to exit the process
         if (config_1.config.nodeEnv === "production") {

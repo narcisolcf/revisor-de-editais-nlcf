@@ -1,5 +1,26 @@
 import { z } from 'zod';
-import { AnalysisWeights, WeightValidationResult, RuleTestResult } from '@licitareview/types';
+
+// Temporary types until @licitareview/types is built
+interface AnalysisWeights {
+  structural: number;
+  legal: number;
+  clarity: number;
+  abnt: number;
+}
+
+interface WeightValidationResult {
+  isValid: boolean;
+  errors: string[];
+  total: number;
+}
+
+interface RuleTestResult {
+  matches: boolean;
+  matchCount: number;
+  matchedText?: string[];
+  error?: string;
+  executionTime?: number;
+}
 
 /**
  * 🚀 CORE DIFFERENTIATOR: Weight validation utilities

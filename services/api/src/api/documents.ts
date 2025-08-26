@@ -9,14 +9,13 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 
 import { collections } from "../config/firebase";
 import { 
   Document,
   DocumentSchema,
-  CreateDocumentRequest,
   CreateDocumentRequestSchema,
-  UpdateDocumentRequest,
   UpdateDocumentRequestSchema,
   DocumentSummary,
   DocumentStatus,
@@ -25,14 +24,11 @@ import {
 import {
   authenticateUser,
   requireOrganization,
-  validateOrganizationAccess,
   requirePermissions,
   PERMISSIONS
 } from "../middleware/auth";
 import {
-  validateRequestBody,
-  validateQueryParams,
-  validatePathParams,
+  validateData,
   ValidationError,
   createSuccessResponse,
   createErrorResponse,
@@ -78,14 +74,26 @@ app.get("/",
   requirePermissions([PERMISSIONS.DOCUMENTS_READ]),
   async (req, res) => {
     try {
-      const query = validateQueryParams(
-        PaginationSchema.extend({
-          status: z.nativeEnum(DocumentStatus).optional(),
-          documentType: z.string().optional(),
-          search: z.string().optional()
-        }),
-        req
-      );
+      const querySchema = PaginationSchema.extend({
+        status: z.nativeEnum(DocumentStatus).optional(),
+        documentType: z.string().optional(),
+        search: z.string().optional(),
+        sortBy: z.enum(['title', 'status', 'createdAt']).default('createdAt'),
+        sortOrder: z.enum(['asc', 'desc']).default('desc')
+      });
+      
+      const validation = validateData(querySchema, req.query);
+      if (!validation.success) {
+        res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          'Invalid query parameters',
+          validation.details as Record<string, unknown>,
+          req.requestId
+        ));
+        return;
+      }
+      
+      const query = validation.data!;
       
       let firestoreQuery = collections.documents
         .where("organizationId", "==", req.user!.organizationId);
@@ -109,8 +117,10 @@ app.get("/",
       const total = countQuery.data().count;
       
       // Apply pagination
-      const offset = (query.page - 1) * query.limit;
-      firestoreQuery = firestoreQuery.offset(offset).limit(query.limit);
+      const page = query.page ?? 1;
+      const limit = query.limit ?? 20;
+      const offset = (page - 1) * limit;
+      firestoreQuery = firestoreQuery.offset(offset).limit(limit);
       
       const snapshot = await firestoreQuery.get();
       
@@ -142,18 +152,18 @@ app.get("/",
         );
       }
       
-      const totalPages = Math.ceil(total / query.limit);
+      const totalPages = Math.ceil(total / limit);
       
       const response: PaginatedResponse<DocumentSummary> = {
         success: true,
         data: filteredDocuments,
         pagination: {
-          page: query.page,
-          limit: query.limit,
+          page,
+          limit,
           total,
           totalPages,
-          hasNext: query.page < totalPages,
-          hasPrev: query.page > 1
+          hasNext: page < totalPages,
+          hasPrev: page > 1
         },
         timestamp: new Date().toISOString(),
         requestId: req.requestId
@@ -164,11 +174,17 @@ app.get("/",
       console.error("Error listing documents:", error);
       
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          (error as any).message,
+          (error as any).details,
+          req.requestId
+        ));
       } else {
         res.status(500).json(createErrorResponse(
+          "INTERNAL_ERROR",
           "Internal server error while listing documents",
-          null,
+          undefined,
           req.requestId
         ));
       }
@@ -184,16 +200,25 @@ app.get("/:id",
   requirePermissions([PERMISSIONS.DOCUMENTS_READ]),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(
-        z.object({ id: UUIDSchema }),
-        req.params
-      );
+      const pathValidation = validateData(z.object({ id: UUIDSchema }), req.params);
+      if (!pathValidation.success) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid path parameters",
+          pathValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+        return;
+      }
+      
+      const { id } = pathValidation.data!;
       
       const docRef = collections.documents.doc(id);
       const doc = await docRef.get();
       
       if (!doc.exists) {
         res.status(404).json(createErrorResponse(
+          "DOCUMENT_NOT_FOUND",
           "Document not found",
           { documentId: id },
           req.requestId
@@ -207,6 +232,7 @@ app.get("/:id",
       if (document.organizationId !== req.user!.organizationId && 
           !req.user!.roles.includes("super_admin")) {
         res.status(403).json(createErrorResponse(
+          "ACCESS_DENIED",
           "Access denied to document",
           { documentId: id },
           req.requestId
@@ -214,16 +240,17 @@ app.get("/:id",
         return;
       }
       
-      res.json(createSuccessResponse(document, undefined, req.requestId));
+      return res.json(createSuccessResponse(document, req.requestId));
     } catch (error) {
       console.error("Error getting document:", error);
       
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown> | undefined, req.requestId));
       } else {
-        res.status(500).json(createErrorResponse(
-          "Internal server error while getting document",
-          null,
+        return res.status(500).json(createErrorResponse(
+          "INTERNAL_ERROR",
+          "Internal server error while getting documents",
+          undefined,
           req.requestId
         ));
       }
@@ -239,17 +266,27 @@ app.post("/",
   requirePermissions([PERMISSIONS.DOCUMENTS_WRITE]),
   async (req, res) => {
     try {
-      const documentData = validateRequestBody(CreateDocumentRequestSchema)(req);
+      const bodyValidation = validateData(CreateDocumentRequestSchema, req.body);
+      if (!bodyValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          'Invalid request body',
+          bodyValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+      }
+      
+      const documentData = bodyValidation.data!;
       
       // Validate organization access
       if (documentData.organizationId !== req.user!.organizationId &&
           !req.user!.roles.includes("super_admin")) {
-        res.status(403).json(createErrorResponse(
+        return res.status(403).json(createErrorResponse(
+          "FORBIDDEN",
           "Cannot create document for different organization",
           { requestedOrg: documentData.organizationId, userOrg: req.user!.organizationId },
           req.requestId
         ));
-        return;
       }
       
       const document: Document = {
@@ -258,37 +295,48 @@ app.post("/",
         status: DocumentStatus.DRAFT,
         version: 1,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        // Ensure required fields are not undefined
+        classification: {
+          ...documentData.classification,
+          complexityLevel: documentData.classification.complexityLevel || 'media'
+        },
+        metadata: {
+          ...documentData.metadata,
+          language: documentData.metadata?.language || 'pt-BR',
+          uploadedAt: documentData.metadata?.uploadedAt || new Date()
+        },
+        tags: documentData.tags || []
       };
       
       // Validate complete document
-      const validation = DocumentSchema.safeParse(document);
-      if (!validation.success) {
-        res.status(400).json(createErrorResponse(
+      const docValidation = DocumentSchema.safeParse(document);
+      if (!docValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
           "Invalid document data",
-          validation.error.errors,
+          { errors: docValidation.error.errors },
           req.requestId
         ));
-        return;
       }
       
       // Save to Firestore
       await collections.documents.doc(document.id).set(document);
       
-      res.status(201).json(createSuccessResponse(
+      return res.status(201).json(createSuccessResponse(
         document,
-        "Document created successfully",
         req.requestId
       ));
     } catch (error) {
       console.error("Error creating document:", error);
       
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown> | undefined, req.requestId));
       } else {
-        res.status(500).json(createErrorResponse(
+        return res.status(500).json(createErrorResponse(
+          "INTERNAL_ERROR",
           "Internal server error while creating document",
-          null,
+          undefined,
           req.requestId
         ));
       }
@@ -304,23 +352,38 @@ app.put("/:id",
   requirePermissions([PERMISSIONS.DOCUMENTS_WRITE]),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(
-        z.object({ id: UUIDSchema }),
-        req.params
-      );
+      const pathValidation = validateData(z.object({ id: UUIDSchema }), req.params);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid path parameters",
+          pathValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+      }
+      const { id } = pathValidation.data!;
       
-      const updateData = validateRequestBody(UpdateDocumentRequestSchema)(req);
+      const bodyValidation = validateData(UpdateDocumentRequestSchema, req.body);
+      if (!bodyValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid request body",
+          bodyValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+      }
+      const updateData = bodyValidation.data;
       
       const docRef = collections.documents.doc(id);
       const doc = await docRef.get();
       
       if (!doc.exists) {
-        res.status(404).json(createErrorResponse(
+        return res.status(404).json(createErrorResponse(
+          "NOT_FOUND",
           "Document not found",
           { documentId: id },
           req.requestId
         ));
-        return;
       }
       
       const existingDocument = { id: doc.id, ...doc.data() } as Document;
@@ -328,51 +391,62 @@ app.put("/:id",
       // Verify organization access
       if (existingDocument.organizationId !== req.user!.organizationId &&
           !req.user!.roles.includes("super_admin")) {
-        res.status(403).json(createErrorResponse(
+        return res.status(403).json(createErrorResponse(
+          "FORBIDDEN",
           "Access denied to document",
           { documentId: id },
           req.requestId
         ));
-        return;
       }
       
       // Prepare updated document
       const updatedDocument: Document = {
         ...existingDocument,
-        ...updateData,
+        ...(updateData || {}),
         id: existingDocument.id, // Ensure ID doesn't change
         organizationId: existingDocument.organizationId, // Prevent org change
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        // Ensure required fields are not undefined
+        classification: {
+          ...existingDocument.classification,
+          ...(updateData?.classification || {}),
+          complexityLevel: updateData?.classification?.complexityLevel || existingDocument.classification.complexityLevel || 'media'
+        },
+        metadata: {
+          ...existingDocument.metadata,
+          ...(updateData?.metadata || {}),
+          language: updateData?.metadata?.language || existingDocument.metadata?.language || 'pt-BR'
+        }
       };
       
       // Validate updated document
       const validation = DocumentSchema.safeParse(updatedDocument);
       if (!validation.success) {
-        res.status(400).json(createErrorResponse(
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
           "Invalid document update data",
-          validation.error.errors,
+          validation.error.errors as unknown as Record<string, unknown>,
           req.requestId
         ));
-        return;
       }
       
       // Update in Firestore
       await docRef.set(updatedDocument);
       
-      res.json(createSuccessResponse(
+      return res.json(createSuccessResponse(
         updatedDocument,
-        "Document updated successfully",
         req.requestId
       ));
     } catch (error) {
       console.error("Error updating document:", error);
       
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown> | undefined, req.requestId));
       } else {
-        res.status(500).json(createErrorResponse(
-          "Internal server error while updating document",
-          null,
+          return res.status(500).json(createErrorResponse(
+            "INTERNAL_ERROR",
+            "Internal server error while updating document",
+            undefined,
           req.requestId
         ));
       }
@@ -388,16 +462,25 @@ app.delete("/:id",
   requirePermissions([PERMISSIONS.DOCUMENTS_DELETE]),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(
-        z.object({ id: UUIDSchema }),
-        req.params
-      );
+      const pathValidation = validateData(z.object({ id: UUIDSchema }), req.params);
+      if (!pathValidation.success) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid path parameters",
+          pathValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+        return;
+      }
+      
+      const { id } = pathValidation.data!;
       
       const docRef = collections.documents.doc(id);
       const doc = await docRef.get();
       
       if (!doc.exists) {
         res.status(404).json(createErrorResponse(
+          "NOT_FOUND",
           "Document not found",
           { documentId: id },
           req.requestId
@@ -411,6 +494,7 @@ app.delete("/:id",
       if (document.organizationId !== req.user!.organizationId &&
           !req.user!.roles.includes("super_admin")) {
         res.status(403).json(createErrorResponse(
+          "FORBIDDEN",
           "Access denied to document",
           { documentId: id },
           req.requestId
@@ -426,18 +510,18 @@ app.delete("/:id",
       
       res.json(createSuccessResponse(
         { id, status: DocumentStatus.ARCHIVED },
-        "Document archived successfully",
         req.requestId
       ));
     } catch (error) {
       console.error("Error deleting document:", error);
       
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+        res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown> | undefined, req.requestId));
       } else {
         res.status(500).json(createErrorResponse(
+          "INTERNAL_ERROR",
           "Internal server error while deleting document",
-          null,
+          undefined,
           req.requestId
         ));
       }
@@ -453,20 +537,40 @@ app.patch("/:id/status",
   requirePermissions([PERMISSIONS.DOCUMENTS_WRITE]),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(
-        z.object({ id: UUIDSchema }),
-        req.params
-      );
+      const pathValidation = validateData(z.object({ id: UUIDSchema }), req.params);
+      if (!pathValidation.success) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid path parameters",
+          pathValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+        return;
+      }
       
-      const { status } = validateRequestBody(
-        z.object({ status: z.nativeEnum(DocumentStatus) })
-      )(req);
+      const { id } = pathValidation.data!;
+      
+      const bodyValidation = validateData(z.object({
+        status: z.nativeEnum(DocumentStatus)
+      }), req.body);
+      if (!bodyValidation.success) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid request body",
+          bodyValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+        return;
+      }
+      
+      const { status } = bodyValidation.data!;
       
       const docRef = collections.documents.doc(id);
       const doc = await docRef.get();
       
       if (!doc.exists) {
         res.status(404).json(createErrorResponse(
+          "NOT_FOUND",
           "Document not found",
           { documentId: id },
           req.requestId
@@ -480,6 +584,7 @@ app.patch("/:id/status",
       if (document.organizationId !== req.user!.organizationId &&
           !req.user!.roles.includes("super_admin")) {
         res.status(403).json(createErrorResponse(
+          "FORBIDDEN",
           "Access denied to document",
           { documentId: id },
           req.requestId
@@ -494,18 +599,18 @@ app.patch("/:id/status",
       
       res.json(createSuccessResponse(
         { id, status },
-        "Document status updated successfully",
         req.requestId
       ));
     } catch (error) {
       console.error("Error updating document status:", error);
       
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+        res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown> | undefined, req.requestId));
       } else {
         res.status(500).json(createErrorResponse(
+          "INTERNAL_ERROR",
           "Internal server error while updating document status",
-          null,
+          undefined,
           req.requestId
         ));
       }
@@ -518,8 +623,9 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
   console.error("Unhandled error in documents API:", error);
   
   res.status(500).json(createErrorResponse(
+    "INTERNAL_ERROR",
     "Internal server error",
-    process.env.NODE_ENV === "development" ? error.stack : null,
+    process.env.NODE_ENV === "development" ? { stack: error.stack } : undefined,
     req.requestId
   ));
 });

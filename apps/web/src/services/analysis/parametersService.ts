@@ -131,7 +131,7 @@ class ParametersService {
       return response.data;
 
     } catch (error) {
-      this.logger.error('Erro ao obter parâmetros padrão', { documentType, error });
+      this.logger.error('Erro ao obter parâmetros padrão', error instanceof Error ? error : new Error(String(error)), { documentType });
       
       // Fallback para parâmetros hardcoded
       return this.getFallbackParameters(documentType);
@@ -170,8 +170,8 @@ class ParametersService {
       return response.data;
 
     } catch (error) {
-      this.logger.error('Erro ao salvar parâmetros personalizados', { error });
-      throw this.errorService.handleError(error);
+      this.logger.error('Erro ao salvar parâmetros personalizados', error instanceof Error ? error : new Error(String(error)));
+      throw this.errorService.handle(error as Error);
     }
   }
 
@@ -209,8 +209,8 @@ class ParametersService {
       return response.data;
 
     } catch (error) {
-      this.logger.error('Erro ao obter templates de parâmetros', { error });
-      throw this.errorService.handleError(error);
+      this.logger.error('Erro ao obter templates de parâmetros', error instanceof Error ? error : new Error(String(error)));
+      throw this.errorService.handle(error as Error);
     }
   }
 
@@ -227,8 +227,8 @@ class ParametersService {
       return response.data;
 
     } catch (error) {
-      this.logger.error('Erro ao obter template de parâmetros', { templateId, error });
-      throw this.errorService.handleError(error);
+      this.logger.error('Erro ao obter template de parâmetros', error instanceof Error ? error : new Error(String(error)), { templateId });
+      throw this.errorService.handle(error as Error);
     }
   }
 
@@ -260,8 +260,8 @@ class ParametersService {
       return response.data;
 
     } catch (error) {
-      this.logger.error('Erro ao atualizar template de parâmetros', { templateId, error });
-      throw this.errorService.handleError(error);
+      this.logger.error('Erro ao atualizar template de parâmetros', error instanceof Error ? error : new Error(String(error)), { templateId });
+      throw this.errorService.handle(error as Error);
     }
   }
 
@@ -278,8 +278,8 @@ class ParametersService {
       this.logger.info('Template de parâmetros deletado', { templateId });
 
     } catch (error) {
-      this.logger.error('Erro ao deletar template de parâmetros', { templateId, error });
-      throw this.errorService.handleError(error);
+      this.logger.error('Erro ao deletar template de parâmetros', error instanceof Error ? error : new Error(String(error)), { templateId });
+      throw this.errorService.handle(error as Error);
     }
   }
 
@@ -331,7 +331,7 @@ class ParametersService {
       };
 
     } catch (error) {
-      this.logger.error('Erro na validação de parâmetros', { error });
+      this.logger.error('Erro na validação de parâmetros', error instanceof Error ? error : new Error(String(error)));
       return {
         isValid: false,
         errors: ['Erro interno na validação'],
@@ -368,7 +368,7 @@ class ParametersService {
       return response.data;
 
     } catch (error) {
-      this.logger.error('Erro ao obter regras customizadas', { error });
+      this.logger.error('Erro ao obter regras customizadas', error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -390,8 +390,8 @@ class ParametersService {
       return response.data;
 
     } catch (error) {
-      this.logger.error('Erro ao criar regra customizada', { error });
-      throw this.errorService.handleError(error);
+      this.logger.error('Erro ao criar regra customizada', error instanceof Error ? error : new Error(String(error)));
+      throw this.errorService.handle(error as Error);
     }
   }
 
@@ -415,8 +415,8 @@ class ParametersService {
       return response.data;
 
     } catch (error) {
-      this.logger.error('Erro ao atualizar regra customizada', { ruleId, error });
-      throw this.errorService.handleError(error);
+      this.logger.error('Erro ao atualizar regra customizada', error instanceof Error ? error : new Error(String(error)), { ruleId });
+      throw this.errorService.handle(error as Error);
     }
   }
 
@@ -433,8 +433,8 @@ class ParametersService {
       this.logger.info('Regra customizada deletada', { ruleId });
 
     } catch (error) {
-      this.logger.error('Erro ao deletar regra customizada', { ruleId, error });
-      throw this.errorService.handleError(error);
+      this.logger.error('Erro ao deletar regra customizada', error instanceof Error ? error : new Error(String(error)), { ruleId });
+      throw this.errorService.handle(error as Error);
     }
   }
 
@@ -443,7 +443,7 @@ class ParametersService {
    */
   async exportParameters(templateId: string): Promise<Blob> {
     try {
-      const response = await this.api.get(
+      const response = await this.api.get<Blob>(
         `/analysis/parameters/templates/${templateId}/export`,
         { responseType: 'blob' }
       );
@@ -452,8 +452,8 @@ class ParametersService {
       return response.data;
 
     } catch (error) {
-      this.logger.error('Erro ao exportar parâmetros', { templateId, error });
-      throw this.errorService.handleError(error);
+      this.logger.error('Erro ao exportar parâmetros', error instanceof Error ? error : new Error(String(error)), { templateId });
+      throw this.errorService.handle(error as Error);
     }
   }
 
@@ -482,8 +482,8 @@ class ParametersService {
       return response.data;
 
     } catch (error) {
-      this.logger.error('Erro ao importar parâmetros', { error });
-      throw this.errorService.handleError(error);
+      this.logger.error('Erro ao importar parâmetros', error instanceof Error ? error : new Error(String(error)), { fileName: file.name });
+      throw this.errorService.handle(error as Error);
     }
   }
 

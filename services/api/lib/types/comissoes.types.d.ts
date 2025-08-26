@@ -498,7 +498,7 @@ export interface ComissaoHistoryEntry {
     id: string;
     comissaoId: string;
     action: 'created' | 'updated' | 'member_added' | 'member_removed' | 'member_updated' | 'status_changed';
-    changes: Record<string, any>;
+    changes: Record<string, unknown>;
     performedBy: string;
     timestamp: Date;
     details?: string;

@@ -1,5 +1,4 @@
 import { AnalysisContext, AnalysisResult } from '../analyzers/BaseAnalyzer';
-import { Problem } from '@/types/document';
 
 export interface FallbackConfig {
   enabled: boolean;
@@ -21,13 +20,13 @@ export interface FallbackStrategy {
 
 export interface FallbackCondition {
   type: 'error_type' | 'error_count' | 'timeout' | 'performance' | 'custom';
-  value: any;
+  value: string | number | boolean;
   operator: 'equals' | 'greater_than' | 'less_than' | 'contains' | 'regex';
 }
 
 export interface FallbackAction {
   type: 'retry' | 'use_basic_analyzer' | 'use_cached_result' | 'return_error' | 'custom';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface FallbackMetrics {
@@ -47,7 +46,7 @@ export interface FallbackLogEntry {
   action: string;
   result: 'success' | 'failure';
   duration: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export class FallbackSystem {
@@ -81,24 +80,13 @@ export class FallbackSystem {
     this.initializeBasicAnalyzers();
   }
 
-  async executeWithFallback<T>(
-    operation: () => Promise<T>,
-    context: AnalysisContext,
-    error?: Error
-  ): Promise<T> {
-    if (!this.config.enabled) {
-      if (error) throw error;
-      return await operation();
-    }
-
+  async executeWithFallback<T>(operation: () => Promise<T>, context: AnalysisContext): Promise<T> {
     const startTime = Date.now();
-    let lastError = error;
 
     try {
       // Tentar operação principal
       return await operation();
     } catch (error) {
-      lastError = error as Error;
       this.recordError(error as Error, context);
       
       // Executar estratégias de fallback
@@ -115,7 +103,7 @@ export class FallbackSystem {
     }
   }
 
-  async executeFallbackStrategies(context: AnalysisContext, error: Error): Promise<{ result: any; strategy: string } | null> {
+  async executeFallbackStrategies(context: AnalysisContext, error: Error): Promise<{ result: unknown; strategy: string } | null> {
     // Ordenar estratégias por prioridade
     const sortedStrategies = [...this.config.fallbackStrategies]
       .filter(s => s.enabled)
@@ -143,10 +131,11 @@ export class FallbackSystem {
       switch (condition.type) {
         case 'error_type':
           return this.evaluateCondition(error.constructor.name, condition);
-        case 'error_count':
+        case 'error_count': {
           const errorKey = this.getErrorKey(context);
           const count = this.errorCounts.get(errorKey) || 0;
           return this.evaluateCondition(count, condition);
+        }
         case 'timeout':
           return error.message.includes('timeout') && this.evaluateCondition(true, condition);
         case 'performance':
@@ -160,7 +149,7 @@ export class FallbackSystem {
     });
   }
 
-  private evaluateCondition(value: any, condition: FallbackCondition): boolean {
+  private evaluateCondition(value: string | number | boolean, condition: FallbackCondition): boolean {
     switch (condition.operator) {
       case 'equals':
         return value === condition.value;
@@ -169,20 +158,20 @@ export class FallbackSystem {
       case 'less_than':
         return value < condition.value;
       case 'contains':
-        return String(value).includes(condition.value);
+        return String(value).includes(String(condition.value));
       case 'regex':
-        return new RegExp(condition.value).test(String(value));
+        return new RegExp(String(condition.value)).test(String(value));
       default:
         return true;
     }
   }
 
-  private evaluateCustomCondition(condition: FallbackCondition, context: AnalysisContext, _error: Error): boolean {
+  private evaluateCustomCondition(_condition: FallbackCondition, _context: AnalysisContext, _error: Error): boolean {
     // Implementar lógica customizada se necessário
     return true;
   }
 
-  private async executeStrategy(strategy: FallbackStrategy, context: AnalysisContext, error: Error): Promise<any> {
+  private async executeStrategy(strategy: FallbackStrategy, context: AnalysisContext, error: Error): Promise<unknown> {
     for (const action of strategy.actions) {
       try {
         const result = await this.executeAction(action, context, error);
@@ -194,7 +183,7 @@ export class FallbackSystem {
     return null;
   }
 
-  private async executeAction(action: FallbackAction, context: AnalysisContext, error: Error): Promise<any> {
+  private async executeAction(action: FallbackAction, context: AnalysisContext, error: Error): Promise<unknown> {
     switch (action.type) {
       case 'retry':
         return await this.retryOperation(context, action.config);
@@ -211,9 +200,9 @@ export class FallbackSystem {
     }
   }
 
-  private async retryOperation(context: AnalysisContext, config: Record<string, any>): Promise<any> {
-    const maxRetries = config.maxRetries || this.config.maxRetries;
-    const delay = config.delay || this.config.retryDelay;
+  private async retryOperation(context: AnalysisContext, config: Record<string, unknown>): Promise<unknown> {
+    const maxRetries = Number(config.maxRetries) || this.config.maxRetries;
+    const delay = Number(config.delay) || this.config.retryDelay;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -241,13 +230,13 @@ export class FallbackSystem {
     return await analyzer.analyze(context);
   }
 
-  private async useCachedResult(context: AnalysisContext, config: Record<string, any>): Promise<any> {
+  private async useCachedResult(_context: AnalysisContext, _config: Record<string, unknown>): Promise<unknown> {
     // Implementar lógica para buscar resultado em cache
     // Por enquanto, retornamos null
     return null;
   }
 
-  private createErrorResult(error: Error, config: Record<string, any>): AnalysisResult {
+  private createErrorResult(error: Error, _config: Record<string, any>): AnalysisResult {
     return {
       problems: [{
         tipo: 'inconsistencia',
@@ -264,7 +253,7 @@ export class FallbackSystem {
     };
   }
 
-  private async executeCustomAction(action: FallbackAction, context: AnalysisContext, _error: Error): Promise<any> {
+  private async executeCustomAction(_action: FallbackAction, _context: AnalysisContext, _error: Error): Promise<unknown> {
     // Implementar ações customizadas se necessário
     return null;
   }
@@ -275,8 +264,8 @@ export class FallbackSystem {
     this.basicAnalyzers.set('legal', new LegalBasicAnalyzer());
   }
 
-  private recordError(error: Error, context: AnalysisContext): void {
-    const errorKey = this.getErrorKey(context);
+  private recordError(error: Error, _context: AnalysisContext): void {
+    const errorKey = this.getErrorKey(_context);
     const currentCount = this.errorCounts.get(errorKey) || 0;
     this.errorCounts.set(errorKey, currentCount + 1);
   }
@@ -413,7 +402,7 @@ abstract class BasicAnalyzer {
 }
 
 class GeneralBasicAnalyzer extends BasicAnalyzer {
-  async analyze(context: AnalysisContext): Promise<AnalysisResult> {
+  async analyze(_context: AnalysisContext): Promise<AnalysisResult> {
     return {
       problems: [{
         tipo: 'inconsistencia',
@@ -432,7 +421,7 @@ class GeneralBasicAnalyzer extends BasicAnalyzer {
 }
 
 class StructuralBasicAnalyzer extends BasicAnalyzer {
-  async analyze(context: AnalysisContext): Promise<AnalysisResult> {
+  async analyze(_context: AnalysisContext): Promise<AnalysisResult> {
     return {
       problems: [{
         tipo: 'inconsistencia',
@@ -451,7 +440,7 @@ class StructuralBasicAnalyzer extends BasicAnalyzer {
 }
 
 class LegalBasicAnalyzer extends BasicAnalyzer {
-  async analyze(context: AnalysisContext): Promise<AnalysisResult> {
+  async analyze(_context: AnalysisContext): Promise<AnalysisResult> {
     return {
       problems: [{
         tipo: 'inconsistencia',

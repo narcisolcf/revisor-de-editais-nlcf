@@ -1,7 +1,7 @@
 {
-  "name": "@licitareview/api",
+  "name": "@revisor-de-editais/api",
   "version": "1.0.0",
-  "description": "LicitaReview Cloud Functions API with Firestore integration",
+  "description": "Revisor de Editais Cloud Functions API with Firestore integration",
   "main": "./lib/index.js",
   "scripts": {
     "dev": "firebase emulators:start --only functions,firestore",
@@ -13,8 +13,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint src --ext .ts,.js",
-    "lint:fix": "eslint src --ext .ts,.js --fix",
+    "lint": "eslint src/**/*.{ts,js}",
+    "lint:fix": "eslint src/**/*.{ts,js} --fix",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf lib",
     "migrate": "npx tsx scripts/run-migrations.ts",
@@ -26,7 +26,7 @@
     "logs": "firebase functions:log"
   },
   "dependencies": {
-    "@licitareview/types": "*",
+    "@revisor-de-editais/types": "file:../../packages/types",
     "axios": "^1.6.0",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",

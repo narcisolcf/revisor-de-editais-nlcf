@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateExecutiveSummary = exports.groupFindingsByCategory = exports.groupFindingsBySeverity = exports.getSeverityWeight = exports.getSeverityColor = exports.getCategoryRating = exports.calculateWeightedScore = exports.calculateOverallScore = exports.AnalysisExecutiveSummarySchema = exports.AnalysisRequestSchema = exports.AnalysisResultSchema = exports.AnalysisFindingSchema = exports.ConformityScoreSchema = exports.ProblemCategorySchema = exports.ProblemSeveritySchema = exports.ProblemCategory = exports.ProblemSeverity = void 0;
 const zod_1 = require("zod");
 // Enums
+/* eslint-disable no-unused-vars */
 var ProblemSeverity;
 (function (ProblemSeverity) {
     ProblemSeverity["CRITICA"] = "CRITICA";
@@ -23,6 +24,7 @@ var ProblemCategory;
     ProblemCategory["CONFORMIDADE"] = "CONFORMIDADE";
     ProblemCategory["COMPLETUDE"] = "COMPLETUDE";
 })(ProblemCategory || (exports.ProblemCategory = ProblemCategory = {}));
+/* eslint-enable no-unused-vars */
 // Zod Schemas
 exports.ProblemSeveritySchema = zod_1.z.nativeEnum(ProblemSeverity);
 exports.ProblemCategorySchema = zod_1.z.nativeEnum(ProblemCategory);
@@ -170,17 +172,16 @@ const groupFindingsByCategory = (findings) => {
 };
 exports.groupFindingsByCategory = groupFindingsByCategory;
 const generateExecutiveSummary = (result) => {
-    var _a, _b, _c, _d;
     const findingsBySeverity = (0, exports.groupFindingsBySeverity)(result.findings);
     return {
         documentId: result.documentId,
         overallScore: result.conformityScores.overall,
         weightedScore: result.weightedScore,
         totalFindings: result.findings.length,
-        criticalIssues: ((_a = findingsBySeverity[ProblemSeverity.CRITICA]) === null || _a === void 0 ? void 0 : _a.length) || 0,
-        highPriorityIssues: ((_b = findingsBySeverity[ProblemSeverity.ALTA]) === null || _b === void 0 ? void 0 : _b.length) || 0,
-        mediumPriorityIssues: ((_c = findingsBySeverity[ProblemSeverity.MEDIA]) === null || _c === void 0 ? void 0 : _c.length) || 0,
-        lowPriorityIssues: ((_d = findingsBySeverity[ProblemSeverity.BAIXA]) === null || _d === void 0 ? void 0 : _d.length) || 0,
+        criticalIssues: findingsBySeverity[ProblemSeverity.CRITICA]?.length || 0,
+        highPriorityIssues: findingsBySeverity[ProblemSeverity.ALTA]?.length || 0,
+        mediumPriorityIssues: findingsBySeverity[ProblemSeverity.MEDIA]?.length || 0,
+        lowPriorityIssues: findingsBySeverity[ProblemSeverity.BAIXA]?.length || 0,
         recommendations: result.recommendations,
         topConcerns: result.findings
             .filter(f => f.severity === ProblemSeverity.CRITICA || f.severity === ProblemSeverity.ALTA)

@@ -9,7 +9,7 @@
  */
 
 import { Firestore } from 'firebase-admin/firestore';
-import { BaseRepository, QueryOptions, PaginatedResult } from './BaseRepository';
+import { BaseRepository, QueryOptions } from './BaseRepository';
 import {
   DocumentMetadata,
   AnalysisResult,
@@ -27,7 +27,7 @@ import {
  */
 export class DocumentRepository extends BaseRepository<DocumentMetadata> {
   constructor(db: Firestore) {
-    super(db, 'documents', DocumentMetadataSchema);
+    super(db, 'documents', DocumentMetadataSchema as any);
   }
 
   /**
@@ -198,7 +198,7 @@ export class DocumentRepository extends BaseRepository<DocumentMetadata> {
  */
 export class AnalysisRepository extends BaseRepository<AnalysisResult> {
   constructor(db: Firestore) {
-    super(db, 'analyses', AnalysisResultSchema);
+    super(db, 'analyses', AnalysisResultSchema as any);
   }
 
   /**
@@ -379,8 +379,11 @@ export class AnalysisRepository extends BaseRepository<AnalysisResult> {
       return acc;
     }, {} as Record<string, number>);
     
-    return Object.keys(configCounts).reduce((a, b) => 
-      configCounts[a] > configCounts[b] ? a : b, null
+    const keys = Object.keys(configCounts);
+    if (keys.length === 0) return null;
+    
+    return keys.reduce((a, b) => 
+      configCounts[a] > configCounts[b] ? a : b
     );
   }
 
@@ -400,7 +403,7 @@ export class AnalysisRepository extends BaseRepository<AnalysisResult> {
  */
 export class DocumentVersionRepository extends BaseRepository<DocumentVersion> {
   constructor(db: Firestore) {
-    super(db, 'versions', DocumentVersionSchema);
+    super(db, 'versions', DocumentVersionSchema as any);
   }
 
   /**
@@ -493,7 +496,7 @@ export class DocumentVersionRepository extends BaseRepository<DocumentVersion> {
  */
 export class ReviewCommentRepository extends BaseRepository<ReviewComment> {
   constructor(db: Firestore) {
-    super(db, 'comments', ReviewCommentSchema);
+    super(db, 'comments', ReviewCommentSchema as any);
   }
 
   /**

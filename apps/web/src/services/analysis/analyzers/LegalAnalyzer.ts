@@ -438,10 +438,11 @@ export class LegalAnalyzer extends BaseAnalyzer {
         categoria: 'juridico'
       }],
       metrics: { 
-        legalComplianceScore: 60, 
-        riskScore: 50,
-        rulesChecked: 0,
-        rulesFailed: 1
+        totalClauses: 0,
+        validClauses: 0,
+        missingClauses: 1,
+        inconsistencies: 0,
+        processingTime: 100
       },
       score: 60,
       confidence: 25,

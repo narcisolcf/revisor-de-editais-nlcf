@@ -31,11 +31,11 @@ app.post("/send", auth_1.authenticateService, async (req, res) => {
     try {
         const notification = req.body;
         const result = await processNotification(notification);
-        res.json((0, utils_1.createSuccessResponse)(result, "Notification processed successfully", req.requestId));
+        res.json((0, utils_1.createSuccessResponse)(result, req.requestId));
     }
     catch (error) {
         firebase_functions_1.logger.error("Error sending notification:", error);
-        res.status(500).json((0, utils_1.createErrorResponse)("Failed to send notification", { error: error.message }, req.requestId));
+        res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to send notification", { error: error instanceof Error ? error.message : String(error) }, req.requestId));
     }
 });
 /**
@@ -48,9 +48,8 @@ exports.onNotificationCreated = (0, firestore_1.onDocumentCreated)({
     timeoutSeconds: 300,
     maxInstances: 20
 }, async (event) => {
-    var _a;
     const notificationId = event.params.notificationId;
-    const notificationData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.data();
+    const notificationData = event.data?.data();
     if (!notificationData || notificationData.processed) {
         return;
     }
@@ -64,7 +63,7 @@ exports.onNotificationCreated = (0, firestore_1.onDocumentCreated)({
     try {
         await processNotification(notificationData);
         // Mark as processed
-        await firebase_1.collections.firestore
+        await firebase_1.firestore
             .collection("notifications")
             .doc(notificationId)
             .update({
@@ -76,12 +75,12 @@ exports.onNotificationCreated = (0, firestore_1.onDocumentCreated)({
     catch (error) {
         firebase_functions_1.logger.error(`Error processing notification ${notificationId}:`, error);
         // Mark as failed
-        await firebase_1.collections.firestore
+        await firebase_1.firestore
             .collection("notifications")
             .doc(notificationId)
             .update({
             processed: false,
-            processingError: error.message,
+            processingError: error instanceof Error ? error.message : String(error),
             failedAt: new Date()
         });
     }
@@ -115,7 +114,7 @@ async function processNotification(notification) {
             firebase_functions_1.logger.error(`Error sending notification via ${channel}:`, error);
             results[channel] = {
                 success: false,
-                details: { error: error.message }
+                details: { error: error instanceof Error ? error.message : String(error) }
             };
         }
     }
@@ -125,10 +124,9 @@ async function processNotification(notification) {
  * Send push notification via Firebase Messaging
  */
 async function sendPushNotification(notification) {
-    var _a;
     try {
         // Get user's FCM tokens
-        const userTokensSnapshot = await firebase_1.collections.firestore
+        const userTokensSnapshot = await firebase_1.firestore
             .collection("userTokens")
             .doc(notification.userId)
             .get();
@@ -138,7 +136,7 @@ async function sendPushNotification(notification) {
                 details: { error: "No FCM tokens found for user" }
             };
         }
-        const tokens = ((_a = userTokensSnapshot.data()) === null || _a === void 0 ? void 0 : _a.fcmTokens) || [];
+        const tokens = userTokensSnapshot.data()?.fcmTokens || [];
         if (tokens.length === 0) {
             return {
                 success: false,
@@ -151,7 +149,11 @@ async function sendPushNotification(notification) {
                 title: notification.title,
                 body: notification.message
             },
-            data: Object.assign({ type: notification.type, organizationId: notification.organizationId || "" }, (notification.data ? JSON.stringify(notification.data) : {})),
+            data: {
+                type: notification.type,
+                organizationId: notification.organizationId || "",
+                ...(notification.data ? { data: JSON.stringify(notification.data) } : {})
+            },
             tokens: tokens
         };
         // Send multicast message
@@ -165,10 +167,9 @@ async function sendPushNotification(notification) {
         if (response.failureCount > 0) {
             const invalidTokens = [];
             response.responses.forEach((resp, idx) => {
-                var _a, _b;
                 if (!resp.success &&
-                    (((_a = resp.error) === null || _a === void 0 ? void 0 : _a.code) === "messaging/invalid-registration-token" ||
-                        ((_b = resp.error) === null || _b === void 0 ? void 0 : _b.code) === "messaging/registration-token-not-registered")) {
+                    (resp.error?.code === "messaging/invalid-registration-token" ||
+                        resp.error?.code === "messaging/registration-token-not-registered")) {
                     invalidTokens.push(tokens[idx]);
                 }
             });
@@ -190,7 +191,7 @@ async function sendPushNotification(notification) {
         firebase_functions_1.logger.error("Error sending push notification:", error);
         return {
             success: false,
-            details: { error: error.message }
+            details: { error: error instanceof Error ? error.message : String(error) }
         };
     }
 }
@@ -202,7 +203,7 @@ async function sendEmailNotification(notification) {
         // In a real implementation, you would integrate with an email service
         // like SendGrid, AWS SES, or similar
         // For now, just store the email request
-        await firebase_1.collections.firestore.collection("emailQueue").add({
+        await firebase_1.firestore.collection("emailQueue").add({
             userId: notification.userId,
             organizationId: notification.organizationId,
             subject: notification.title,
@@ -222,7 +223,7 @@ async function sendEmailNotification(notification) {
         firebase_functions_1.logger.error("Error queuing email notification:", error);
         return {
             success: false,
-            details: { error: error.message }
+            details: { error: error instanceof Error ? error.message : String(error) }
         };
     }
 }
@@ -230,7 +231,6 @@ async function sendEmailNotification(notification) {
  * Send webhook notification
  */
 async function sendWebhookNotification(notification) {
-    var _a, _b;
     try {
         // Get organization webhook configuration
         const orgConfigSnapshot = await firebase_1.collections.configs
@@ -245,7 +245,7 @@ async function sendWebhookNotification(notification) {
             };
         }
         const config = orgConfigSnapshot.docs[0].data();
-        const webhookUrl = (_a = config.settings) === null || _a === void 0 ? void 0 : _a.webhookUrl;
+        const webhookUrl = config.settings?.webhookUrl;
         if (!webhookUrl) {
             return {
                 success: false,
@@ -274,7 +274,7 @@ async function sendWebhookNotification(notification) {
             headers: {
                 "Content-Type": "application/json",
                 "User-Agent": "LicitaReview-Webhook/1.0",
-                "X-Webhook-Signature": generateWebhookSignature(webhookPayload, (_b = config.settings) === null || _b === void 0 ? void 0 : _b.webhookSecret)
+                "X-Webhook-Signature": generateWebhookSignature(webhookPayload, config.settings?.webhookSecret)
             },
             body: JSON.stringify(webhookPayload)
         });
@@ -298,7 +298,7 @@ async function sendWebhookNotification(notification) {
         firebase_functions_1.logger.error("Error sending webhook notification:", error);
         return {
             success: false,
-            details: { error: error.message }
+            details: { error: error instanceof Error ? error.message : String(error) }
         };
     }
 }
@@ -314,44 +314,6 @@ function generateWebhookSignature(payload, secret) {
         .createHmac("sha256", secret)
         .update(payloadString)
         .digest("hex");
-}
-/**
- * Get user notification preferences
- */
-async function getUserNotificationPreferences(userId) {
-    var _a;
-    try {
-        const userPrefsSnapshot = await firebase_1.collections.firestore
-            .collection("userPreferences")
-            .doc(userId)
-            .get();
-        if (!userPrefsSnapshot.exists) {
-            // Default preferences
-            return {
-                push: true,
-                email: true,
-                webhook: false,
-                types: ["success", "error", "warning", "info"]
-            };
-        }
-        const prefs = ((_a = userPrefsSnapshot.data()) === null || _a === void 0 ? void 0 : _a.notifications) || {};
-        return {
-            push: prefs.push !== false,
-            email: prefs.email !== false,
-            webhook: prefs.webhook === true,
-            types: prefs.types || ["success", "error", "warning", "info"]
-        };
-    }
-    catch (error) {
-        firebase_functions_1.logger.error(`Error getting user notification preferences for ${userId}:`, error);
-        // Return defaults on error
-        return {
-            push: true,
-            email: false,
-            webhook: false,
-            types: ["error"] // Only critical notifications on error
-        };
-    }
 }
 // Export Cloud Function
 exports.notificationProcessor = (0, https_1.onRequest)({

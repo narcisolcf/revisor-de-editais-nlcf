@@ -9,7 +9,6 @@ import {
   DocumentReference, 
   CollectionReference, 
   Query, 
-  WriteBatch,
   Transaction,
   DocumentSnapshot,
   QuerySnapshot,
@@ -21,7 +20,7 @@ export interface QueryOptions {
   limit?: number;
   offset?: number;
   orderBy?: Array<{ field: string; direction: 'asc' | 'desc' }>;
-  where?: Array<{ field: string; operator: FirebaseFirestore.WhereFilterOp; value: any }>;
+  where?: Array<{ field: string; operator: any; value: any }>; // Using any for WhereFilterOp compatibility
 }
 
 export interface PaginatedResult<T> {

@@ -27,7 +27,6 @@ const utils_1 = require("../utils");
  * Request logging middleware
  */
 const requestLogger = (req, res, next) => {
-    var _a, _b;
     // Generate request ID if not exists
     if (!req.requestId) {
         req.requestId = (0, utils_1.generateRequestId)();
@@ -42,8 +41,8 @@ const requestLogger = (req, res, next) => {
         query: req.query,
         userAgent: req.get("User-Agent"),
         ip: req.ip,
-        userId: (_a = req.user) === null || _a === void 0 ? void 0 : _a.uid,
-        organizationId: (_b = req.user) === null || _b === void 0 ? void 0 : _b.organizationId
+        userId: req.user?.uid,
+        organizationId: req.user?.organizationId
     });
     // Log response when finished
     res.on("finish", () => {
@@ -189,7 +188,7 @@ const correlation = (req, res, next) => {
     // Add to all logs for this request
     const originalLog = firebase_functions_1.logger.info;
     firebase_functions_1.logger.info = (message, data) => {
-        originalLog(message, Object.assign(Object.assign({}, data), { correlationId }));
+        originalLog(message, { ...data, correlationId });
     };
     next();
 };

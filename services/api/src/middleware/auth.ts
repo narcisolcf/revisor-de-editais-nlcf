@@ -5,7 +5,7 @@
 
 import { Request, Response, NextFunction } from "express";
 import { auth } from "../config/firebase";
-import { UserContext, ErrorResponse } from "../types";
+import { UserContext } from "../types";
 import { createErrorResponse } from "../utils";
 
 // Extend Request type to include user context

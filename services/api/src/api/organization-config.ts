@@ -143,7 +143,7 @@ async function getOrganizationConfig(req: Request, res: Response): Promise<void>
       res.status(400).json(createErrorResponse(
         "INVALID_PARAMS",
         "Invalid organization ID",
-        paramsValidation.error.errors,
+        paramsValidation.error.errors as unknown as Record<string, unknown>,
         req.requestId
       ));
       return;
@@ -192,7 +192,7 @@ async function syncConfig(req: Request, res: Response): Promise<void> {
       res.status(400).json(createErrorResponse(
         "INVALID_PARAMS",
         "Invalid organization ID",
-        paramsValidation.error.errors,
+        paramsValidation.error.errors as unknown as Record<string, unknown>,
         req.requestId
       ));
       return;
@@ -241,7 +241,7 @@ async function validateConfig(req: Request, res: Response): Promise<void> {
       res.status(400).json(createErrorResponse(
         "INVALID_PARAMS",
         "Invalid organization ID",
-        paramsValidation.error.errors,
+        paramsValidation.error.errors as unknown as Record<string, unknown>,
         req.requestId
       ));
       return;
@@ -253,7 +253,7 @@ async function validateConfig(req: Request, res: Response): Promise<void> {
       res.status(400).json(createErrorResponse(
         "INVALID_CONFIG",
         "Invalid configuration data",
-        configValidation.error.errors,
+        configValidation.error.errors as unknown as Record<string, unknown>,
         req.requestId
       ));
       return;
@@ -315,7 +315,7 @@ async function getPresets(req: Request, res: Response): Promise<void> {
       res.status(400).json(createErrorResponse(
         "INVALID_PARAMS",
         "Invalid organization ID",
-        paramsValidation.error.errors,
+        paramsValidation.error.errors as unknown as Record<string, unknown>,
         req.requestId
       ));
       return;
@@ -364,7 +364,7 @@ async function createPreset(req: Request, res: Response): Promise<void> {
       res.status(400).json(createErrorResponse(
         "INVALID_PARAMS",
         "Invalid organization ID",
-        paramsValidation.error.errors,
+        paramsValidation.error.errors as unknown as Record<string, unknown>,
         req.requestId
       ));
       return;
@@ -413,7 +413,7 @@ async function clearCache(req: Request, res: Response): Promise<void> {
       res.status(400).json(createErrorResponse(
         "INVALID_PARAMS",
         "Invalid organization ID",
-        paramsValidation.error.errors,
+        paramsValidation.error.errors as unknown as Record<string, unknown>,
         req.requestId
       ));
       return;
@@ -462,7 +462,7 @@ async function getUsageStats(req: Request, res: Response): Promise<void> {
       res.status(400).json(createErrorResponse(
         "INVALID_PARAMS",
         "Invalid organization ID",
-        paramsValidation.error.errors,
+        paramsValidation.error.errors as unknown as Record<string, unknown>,
         req.requestId
       ));
       return;

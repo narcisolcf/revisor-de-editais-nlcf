@@ -30,17 +30,22 @@ app.use(auth_1.requireOrganization);
  */
 app.get("/usage", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ]), async (req, res) => {
     try {
-        const query = (0, utils_1.validateQueryParams)(zod_1.z.object({
+        const queryValidation = (0, utils_1.validateData)(zod_1.z.object({
             period: zod_1.z.enum(["day", "week", "month", "year"]).default("month"),
             startDate: zod_1.z.coerce.date().optional(),
             endDate: zod_1.z.coerce.date().optional()
-        }), req);
+        }), req.query);
+        if (!queryValidation.success) {
+            res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Invalid query parameters", queryValidation.details, req.requestId));
+            return;
+        }
+        const query = queryValidation.data;
         const organizationId = req.user.organizationId;
         // Calculate date range
         const endDate = query.endDate || new Date();
-        const startDate = query.startDate || getStartDateForPeriod(query.period, endDate);
+        const startDate = query.startDate || getStartDateForPeriod(query?.period || 'daily', endDate);
         // Query analytics data
-        const analyticsSnapshot = await firebase_1.collections.firestore
+        const analyticsSnapshot = await firebase_1.firestore
             .collection("organizationAnalytics")
             .doc(organizationId)
             .get();
@@ -51,22 +56,23 @@ app.get("/usage", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ]
                 startDate,
                 endDate,
                 metrics: getEmptyMetrics()
-            }, undefined, req.requestId));
+            }, req.requestId));
             return;
         }
         const analyticsData = analyticsSnapshot.data();
-        const metrics = aggregateMetricsForPeriod(analyticsData.daily || {}, startDate, endDate, query.period);
+        const metrics = aggregateMetricsForPeriod(analyticsData?.daily || {}, startDate, endDate, query?.period || 'daily');
         res.json((0, utils_1.createSuccessResponse)({
             organizationId,
             period: query.period,
             startDate,
             endDate,
             metrics
-        }, undefined, req.requestId));
+        }, req.requestId));
+        return;
     }
     catch (error) {
         console.error("Error getting usage analytics:", error);
-        res.status(500).json((0, utils_1.createErrorResponse)("Failed to get usage analytics", null, req.requestId));
+        return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to get usage analytics", undefined, req.requestId));
     }
 });
 /**
@@ -75,12 +81,17 @@ app.get("/usage", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ]
  */
 app.get("/documents", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ]), async (req, res) => {
     try {
-        const query = (0, utils_1.validateQueryParams)(zod_1.z.object({
+        const queryValidation = (0, utils_1.validateData)(zod_1.z.object({
             days: zod_1.z.coerce.number().min(1).max(365).default(30)
-        }), req);
+        }), req.query);
+        if (!queryValidation.success) {
+            res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Invalid query parameters", queryValidation.details, req.requestId));
+            return;
+        }
+        const query = queryValidation.data;
         const organizationId = req.user.organizationId;
         const startDate = new Date();
-        startDate.setDate(startDate.getDate() - query.days);
+        startDate.setDate(startDate.getDate() - (query?.days || 7));
         // Get document statistics
         const documentsQuery = firebase_1.collections.documents
             .where("organizationId", "==", organizationId)
@@ -93,10 +104,9 @@ app.get("/documents", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_R
             byDay: {}
         };
         documentsSnapshot.docs.forEach(doc => {
-            var _a;
             const data = doc.data();
             const status = data.status || "unknown";
-            const type = ((_a = data.classification) === null || _a === void 0 ? void 0 : _a.documentType) || "unknown";
+            const type = data.classification?.documentType || "unknown";
             const day = data.createdAt.toDate().toISOString().split('T')[0];
             documentStats.byStatus[status] = (documentStats.byStatus[status] || 0) + 1;
             documentStats.byType[type] = (documentStats.byType[type] || 0) + 1;
@@ -104,13 +114,14 @@ app.get("/documents", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_R
         });
         res.json((0, utils_1.createSuccessResponse)({
             organizationId,
-            period: `${query.days} days`,
+            period: `${query?.days || 7} days`,
             documentStats
-        }, undefined, req.requestId));
+        }));
+        return;
     }
     catch (error) {
         console.error("Error getting document analytics:", error);
-        res.status(500).json((0, utils_1.createErrorResponse)("Failed to get document analytics", null, req.requestId));
+        return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to get document analytics", undefined, req.requestId));
     }
 });
 /**
@@ -119,12 +130,17 @@ app.get("/documents", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_R
  */
 app.get("/analysis", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ]), async (req, res) => {
     try {
-        const query = (0, utils_1.validateQueryParams)(zod_1.z.object({
+        const queryValidation = (0, utils_1.validateData)(zod_1.z.object({
             days: zod_1.z.coerce.number().min(1).max(365).default(30)
-        }), req);
+        }), req.query);
+        if (!queryValidation.success) {
+            res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Invalid query parameters", queryValidation.details, req.requestId));
+            return;
+        }
+        const query = queryValidation.data;
         const organizationId = req.user.organizationId;
         const startDate = new Date();
-        startDate.setDate(startDate.getDate() - query.days);
+        startDate.setDate(startDate.getDate() - (query?.days || 30));
         // Get analysis results statistics
         const analysisQuery = firebase_1.collections.analysisResults
             .where("organizationId", "==", organizationId)
@@ -175,8 +191,7 @@ app.get("/analysis", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_RE
                 // Findings breakdown
                 if (data.findings) {
                     data.findings.forEach((finding) => {
-                        var _a;
-                        const severity = ((_a = finding.severity) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || "unknown";
+                        const severity = finding.severity?.toLowerCase() || "unknown";
                         if (severity === "critica") {
                             analysisStats.findingsBreakdown.critical++;
                         }
@@ -199,13 +214,14 @@ app.get("/analysis", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_RE
         }
         res.json((0, utils_1.createSuccessResponse)({
             organizationId,
-            period: `${query.days} days`,
+            period: `${query?.days || 30} days`,
             analysisStats
-        }, undefined, req.requestId));
+        }));
+        return;
     }
     catch (error) {
         console.error("Error getting analysis analytics:", error);
-        res.status(500).json((0, utils_1.createErrorResponse)("Failed to get analysis analytics", null, req.requestId));
+        return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to get analysis analytics", undefined, req.requestId));
     }
 });
 /**
@@ -214,13 +230,18 @@ app.get("/analysis", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_RE
  */
 app.get("/performance", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ]), async (req, res) => {
     try {
-        const query = (0, utils_1.validateQueryParams)(zod_1.z.object({
+        const queryValidation = (0, utils_1.validateData)(zod_1.z.object({
             hours: zod_1.z.coerce.number().min(1).max(168).default(24) // Max 1 week
-        }), req);
+        }), req.query);
+        if (!queryValidation.success) {
+            res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Invalid query parameters", queryValidation.details, req.requestId));
+            return;
+        }
+        const query = queryValidation.data;
         const startDate = new Date();
-        startDate.setHours(startDate.getHours() - query.hours);
+        startDate.setHours(startDate.getHours() - (query?.hours || 24));
         // Get performance metrics from logs or metrics collection
-        const metricsSnapshot = await firebase_1.collections.firestore
+        const metricsSnapshot = await firebase_1.firestore
             .collection("performanceMetrics")
             .where("timestamp", ">=", startDate)
             .orderBy("timestamp", "desc")
@@ -264,14 +285,15 @@ app.get("/performance", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT
             funcMetric.successRate = (funcMetric.successCount / funcMetric.totalCalls) * 100;
         });
         res.json((0, utils_1.createSuccessResponse)({
-            period: `${query.hours} hours`,
+            period: `${query?.hours || 24} hours`,
             totalMetrics: metrics.length,
             functionMetrics
-        }, undefined, req.requestId));
+        }));
+        return;
     }
     catch (error) {
         console.error("Error getting performance analytics:", error);
-        res.status(500).json((0, utils_1.createErrorResponse)("Failed to get performance analytics", null, req.requestId));
+        return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to get performance analytics", undefined, req.requestId));
     }
 });
 // Helper functions

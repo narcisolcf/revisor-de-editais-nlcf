@@ -613,9 +613,9 @@ export function withErrorHandling<T extends (..._args: any[]) => any>(
   fn: T,
   context?: Record<string, unknown>
 ): T {
-  return ((..._args: Parameters<T>) => {
+  return ((...args: Parameters<T>) => {
     try {
-      const result = fn(..._args);
+      const result = fn(...args);
       
       // Se retorna Promise, trata erros assíncronos
       if (result instanceof Promise) {

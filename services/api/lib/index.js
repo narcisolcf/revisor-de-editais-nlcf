@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cleanupOldAnalysisResults = exports.validateDocument = exports.generateDocumentPreview = exports.extractDocumentContent = exports.auditLogger = exports.notificationProcessor = exports.analyticsReporter = exports.healthCheck = exports.onAnalysisResultUpdated = exports.onAnalysisResultCreated = exports.onDocumentUpload = exports.analysisApi = exports.organizationConfig = exports.comissoesApi = exports.analysisConfigApi = exports.documentsApi = void 0;
+exports.cleanupOldAnalysisResults = exports.auditLogger = exports.notificationProcessor = exports.analyticsReporter = exports.healthCheck = exports.processAnalysis = exports.analysisApi = exports.organizationConfig = exports.comissoesApi = exports.analysisConfigApi = exports.documentsApi = void 0;
 // Setup global error handlers
 const error_1 = require("./middleware/error");
 (0, error_1.setupGlobalErrorHandlers)();
@@ -37,12 +37,12 @@ exports.analysisApi = (0, https_1.onRequest)({
     timeoutSeconds: 300,
     maxInstances: 50
 }, analysisApp);
+// Export Process Analysis Function
+var process_analysis_1 = require("./api/process-analysis");
+Object.defineProperty(exports, "processAnalysis", { enumerable: true, get: function () { return process_analysis_1.processAnalysis; } });
 // Export Trigger Functions  
-var document_upload_1 = require("./triggers/document-upload");
-Object.defineProperty(exports, "onDocumentUpload", { enumerable: true, get: function () { return document_upload_1.onDocumentUpload; } });
-var analysis_complete_1 = require("./triggers/analysis-complete");
-Object.defineProperty(exports, "onAnalysisResultCreated", { enumerable: true, get: function () { return analysis_complete_1.onAnalysisResultCreated; } });
-Object.defineProperty(exports, "onAnalysisResultUpdated", { enumerable: true, get: function () { return analysis_complete_1.onAnalysisResultUpdated; } });
+// export { onDocumentUpload } from "./triggers/document-upload"; // Temporarily disabled due to storage bucket issues
+// export { onAnalysisResultCreated, onAnalysisResultUpdated } from "./triggers/analysis-complete"; // Temporarily disabled due to deployment issues
 // Export Additional Functions
 var health_1 = require("./api/health");
 Object.defineProperty(exports, "healthCheck", { enumerable: true, get: function () { return health_1.healthCheck; } });
@@ -53,10 +53,11 @@ Object.defineProperty(exports, "notificationProcessor", { enumerable: true, get:
 var audit_1 = require("./api/audit");
 Object.defineProperty(exports, "auditLogger", { enumerable: true, get: function () { return audit_1.auditLogger; } });
 // Additional utility functions that might be called directly
-var document_upload_2 = require("./triggers/document-upload");
-Object.defineProperty(exports, "extractDocumentContent", { enumerable: true, get: function () { return document_upload_2.extractDocumentContent; } });
-Object.defineProperty(exports, "generateDocumentPreview", { enumerable: true, get: function () { return document_upload_2.generateDocumentPreview; } });
-Object.defineProperty(exports, "validateDocument", { enumerable: true, get: function () { return document_upload_2.validateDocument; } });
-var analysis_complete_2 = require("./triggers/analysis-complete");
-Object.defineProperty(exports, "cleanupOldAnalysisResults", { enumerable: true, get: function () { return analysis_complete_2.cleanupOldAnalysisResults; } });
+// export { 
+//   extractDocumentContent,
+//   generateDocumentPreview,
+//   validateDocument
+// } from "./triggers/document-upload"; // Temporarily disabled due to storage bucket issues
+var analysis_complete_1 = require("./triggers/analysis-complete");
+Object.defineProperty(exports, "cleanupOldAnalysisResults", { enumerable: true, get: function () { return analysis_complete_1.cleanupOldAnalysisResults; } });
 //# sourceMappingURL=index.js.map

@@ -4,11 +4,26 @@
  * LicitaReview Cloud Functions
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.testPatternMatch = exports.createConfigSummary = exports.generateConfigHash = exports.toPercentageDict = exports.getWeightDistributionType = exports.getDominantCategory = exports.validateWeights = exports.calculateWeightsSum = exports.createDefaultConfig = exports.PRESET_WEIGHTS = exports.ConfigSummarySchema = exports.UpdateConfigRequestSchema = exports.CreateConfigRequestSchema = exports.OrganizationConfigSchema = exports.OrganizationTemplateSchema = exports.TemplateSectionSchema = exports.CustomRuleSchema = exports.AnalysisWeightsSchema = exports.WeightDistributionTypeSchema = exports.AnalysisPresetSchema = exports.WeightDistributionType = exports.AnalysisPreset = void 0;
+exports.testPatternMatch = exports.createConfigSummary = exports.generateConfigHash = exports.toPercentageDict = exports.getWeightDistributionType = exports.getDominantCategory = exports.validateWeights = exports.calculateWeightsSum = exports.createDefaultConfig = exports.PRESET_WEIGHTS = exports.ConfigSummarySchema = exports.UpdateConfigRequestSchema = exports.CreateConfigRequestSchema = exports.OrganizationConfigSchema = exports.OrganizationTemplateSchema = exports.TemplateSectionSchema = exports.CustomRuleSchema = exports.AnalysisWeightsSchema = exports.WeightDistributionTypeSchema = exports.AnalysisPresetSchema = exports.AnalysisPrioritySchema = exports.AnalysisStatusSchema = exports.WeightDistributionType = exports.AnalysisPreset = exports.AnalysisPriority = exports.AnalysisStatus = void 0;
 const zod_1 = require("zod");
 const document_types_1 = require("./document.types");
 const analysis_types_1 = require("./analysis.types");
 // Enums
+/* eslint-disable no-unused-vars */
+var AnalysisStatus;
+(function (AnalysisStatus) {
+    AnalysisStatus["PENDING"] = "PENDING";
+    AnalysisStatus["PROCESSING"] = "PROCESSING";
+    AnalysisStatus["COMPLETED"] = "COMPLETED";
+    AnalysisStatus["FAILED"] = "FAILED";
+    AnalysisStatus["CANCELLED"] = "CANCELLED";
+})(AnalysisStatus || (exports.AnalysisStatus = AnalysisStatus = {}));
+var AnalysisPriority;
+(function (AnalysisPriority) {
+    AnalysisPriority["LOW"] = "LOW";
+    AnalysisPriority["NORMAL"] = "NORMAL";
+    AnalysisPriority["HIGH"] = "HIGH";
+})(AnalysisPriority || (exports.AnalysisPriority = AnalysisPriority = {}));
 var AnalysisPreset;
 (function (AnalysisPreset) {
     AnalysisPreset["RIGOROUS"] = "RIGOROUS";
@@ -25,7 +40,10 @@ var WeightDistributionType;
     WeightDistributionType["STRUCTURAL_FOCUSED"] = "STRUCTURAL_FOCUSED";
     WeightDistributionType["CUSTOM"] = "CUSTOM";
 })(WeightDistributionType || (exports.WeightDistributionType = WeightDistributionType = {}));
+/* eslint-enable no-unused-vars */
 // Zod Schemas
+exports.AnalysisStatusSchema = zod_1.z.nativeEnum(AnalysisStatus);
+exports.AnalysisPrioritySchema = zod_1.z.nativeEnum(AnalysisPriority);
 exports.AnalysisPresetSchema = zod_1.z.nativeEnum(AnalysisPreset);
 exports.WeightDistributionTypeSchema = zod_1.z.nativeEnum(WeightDistributionType);
 // 🚀 CORE DIFFERENTIATOR: Analysis Weights

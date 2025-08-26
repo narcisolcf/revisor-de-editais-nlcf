@@ -24,7 +24,7 @@ __exportStar(require("./firebase"), exports);
 exports.config = {
     // Firebase
     projectId: process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT_ID,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    // storageBucket: process.env.FIREBASE_STORAGE_BUCKET, // Temporarily disabled
     // API Configuration
     corsOrigin: process.env.CORS_ORIGIN || "*",
     maxRequestSize: process.env.MAX_REQUEST_SIZE || "10mb",
@@ -45,6 +45,9 @@ exports.config = {
     // Logging
     logLevel: process.env.LOG_LEVEL || "info",
     enableAuditLogs: process.env.ENABLE_AUDIT_LOGS === "true",
+    // Environment
+    nodeEnv: process.env.NODE_ENV || "development",
+    isDevelopment: process.env.NODE_ENV !== "production",
 };
 // Validation
 if (!exports.config.projectId) {

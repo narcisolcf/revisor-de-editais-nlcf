@@ -37,7 +37,7 @@ class BaseRepository {
     convertTimestamps(data) {
         if (!data)
             return data;
-        const converted = Object.assign({}, data);
+        const converted = { ...data };
         Object.keys(converted).forEach(key => {
             if (converted[key] instanceof firestore_1.Timestamp) {
                 converted[key] = converted[key].toDate();
@@ -54,7 +54,7 @@ class BaseRepository {
     prepareForStorage(data) {
         if (!data)
             return data;
-        const prepared = Object.assign({}, data);
+        const prepared = { ...data };
         Object.keys(prepared).forEach(key => {
             if (prepared[key] instanceof Date) {
                 prepared[key] = firestore_1.Timestamp.fromDate(prepared[key]);
@@ -70,10 +70,15 @@ class BaseRepository {
      */
     async create(data, id) {
         const docRef = id ? this.getDocRef(id) : this.getCollection().doc();
-        const createData = Object.assign(Object.assign({}, data), { id: docRef.id, createdAt: new Date(), updatedAt: new Date() });
+        const createData = {
+            ...data,
+            id: docRef.id,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
         const prepared = this.prepareForStorage(createData);
         await docRef.set(prepared);
-        return this.validate(Object.assign(Object.assign({}, createData), { id: docRef.id }));
+        return this.validate({ ...createData, id: docRef.id });
     }
     /**
      * Get document by ID
@@ -84,14 +89,17 @@ class BaseRepository {
             return null;
         }
         const data = this.convertTimestamps(doc.data());
-        return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+        return this.validate({ ...data, id: doc.id });
     }
     /**
      * Update document
      */
     async update(id, data) {
         const docRef = this.getDocRef(id);
-        const updateData = Object.assign(Object.assign({}, data), { updatedAt: new Date() });
+        const updateData = {
+            ...data,
+            updatedAt: new Date()
+        };
         const prepared = this.prepareForStorage(updateData);
         await docRef.update(prepared);
         return this.findById(id);
@@ -137,7 +145,7 @@ class BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const data = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+            return this.validate({ ...data, id: doc.id });
         });
     }
     /**
@@ -176,7 +184,7 @@ class BaseRepository {
         const hasMore = snapshot.docs.length > pageSize;
         const data = docs.map(doc => {
             const docData = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign(Object.assign({}, docData), { id: doc.id }));
+            return this.validate({ ...docData, id: doc.id });
         });
         const nextPageToken = hasMore && docs.length > 0 ? docs[docs.length - 1].id : undefined;
         return {
@@ -208,7 +216,12 @@ class BaseRepository {
         const results = [];
         for (const item of items) {
             const docRef = this.getCollection().doc();
-            const createData = Object.assign(Object.assign({}, item), { id: docRef.id, createdAt: new Date(), updatedAt: new Date() });
+            const createData = {
+                ...item,
+                id: docRef.id,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
             const prepared = this.prepareForStorage(createData);
             batch.set(docRef, prepared);
             results.push(this.validate(createData));
@@ -223,7 +236,10 @@ class BaseRepository {
         const batch = this.db.batch();
         for (const update of updates) {
             const docRef = this.getDocRef(update.id);
-            const updateData = Object.assign(Object.assign({}, update.data), { updatedAt: new Date() });
+            const updateData = {
+                ...update.data,
+                updatedAt: new Date()
+            };
             const prepared = this.prepareForStorage(updateData);
             batch.update(docRef, prepared);
         }
@@ -268,7 +284,7 @@ class BaseRepository {
         return query.onSnapshot((snapshot) => {
             const data = snapshot.docs.map(doc => {
                 const docData = this.convertTimestamps(doc.data());
-                return this.validate(Object.assign(Object.assign({}, docData), { id: doc.id }));
+                return this.validate({ ...docData, id: doc.id });
             });
             callback(data);
         }, errorCallback);
@@ -280,7 +296,7 @@ class BaseRepository {
         return this.getDocRef(id).onSnapshot((doc) => {
             if (doc.exists) {
                 const data = this.convertTimestamps(doc.data());
-                callback(this.validate(Object.assign(Object.assign({}, data), { id: doc.id })));
+                callback(this.validate({ ...data, id: doc.id }));
             }
             else {
                 callback(null);

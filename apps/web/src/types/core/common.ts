@@ -78,17 +78,7 @@ export interface CacheConfig {
   key?: string;
 }
 
-/** Configurações de retry */
-export interface RetryConfig {
-  /** Número máximo de tentativas */
-  maxAttempts: number;
-  /** Delay inicial em milissegundos */
-  initialDelay: number;
-  /** Multiplicador para backoff exponencial */
-  backoffMultiplier: number;
-  /** Delay máximo em milissegundos */
-  maxDelay: number;
-}
+// RetryConfig movido para ./api.ts para evitar conflitos
 
 /** Configurações de timeout */
 export interface TimeoutConfig {
@@ -155,21 +145,9 @@ export interface ValidationResult {
   /** Se a validação passou */
   isValid: boolean;
   /** Lista de erros encontrados */
-  errors: ValidationError[];
+  errors: import('./errors').ValidationError[];
   /** Avisos (não impedem a operação) */
   warnings: ValidationWarning[];
-}
-
-/** Erro de validação */
-export interface ValidationError {
-  /** Campo que falhou na validação */
-  field: string;
-  /** Código do erro */
-  code: string;
-  /** Mensagem de erro */
-  message: string;
-  /** Valor que causou o erro */
-  value?: unknown;
 }
 
 /** Aviso de validação */

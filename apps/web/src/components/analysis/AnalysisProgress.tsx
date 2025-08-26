@@ -15,7 +15,7 @@ import {
   X,
   Loader2
 } from 'lucide-react';
-import { DocumentAnalysis } from '@/types/document';
+// DocumentAnalysis import removido - não utilizado
 
 interface AnalysisStep {
   id: string;
@@ -31,7 +31,7 @@ interface AnalysisProgressProps {
   documentId: string;
   isAnalyzing: boolean;
   onCancel?: () => void;
-  onComplete?: (analysis: DocumentAnalysis) => void;
+  onComplete?: () => void;
   className?: string;
 }
 
@@ -237,49 +237,7 @@ export const AnalysisProgress: React.FC<AnalysisProgressProps> = ({
 
       // Análise concluída
       if (onComplete) {
-        // Simular resultado da análise
-        const mockAnalysis: DocumentAnalysis = {
-          id: `analysis-${documentId}-${Date.now()}`,
-          documentoId: documentId,
-          textoExtraido: 'Texto extraído do documento...',
-          scoreConformidade: 85.5,
-          classification: {
-            tipoObjeto: 'obra_servicos_eng',
-            modalidadePrincipal: 'processo_licitatorio',
-            subtipo: 'processo_licitatorio',
-            tipoDocumento: 'edital'
-          },
-          problemasEncontrados: [
-            {
-              tipo: 'prazo_inadequado',
-              descricao: 'Prazo de entrega das propostas inferior ao mínimo legal',
-              gravidade: 'alta',
-              categoria: 'juridico',
-              localizacao: 'Seção 3.2',
-              sugestaoCorrecao: 'Alterar prazo para no mínimo 30 dias corridos'
-            }
-          ],
-          recomendacoes: [
-            'Revisar cláusulas de habilitação técnica',
-            'Incluir critérios de sustentabilidade'
-          ],
-          metricas: {
-            totalClauses: 45,
-            validClauses: 38,
-            missingClauses: 3,
-            inconsistencies: 4,
-            processingTime: Math.round(elapsedTime)
-          },
-          specificAnalysis: {
-            prazosAdequados: false,
-            modalidadeCorreta: true,
-            criteriosHabilitacaoClaros: true,
-            especificacoesDetalhadas: true
-          },
-          createdAt: new Date()
-        };
-        
-        onComplete(mockAnalysis);
+        onComplete();
       }
     };
 

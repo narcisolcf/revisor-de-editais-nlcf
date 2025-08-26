@@ -23,30 +23,41 @@ class DocumentRepository extends BaseRepository_1.BaseRepository {
      * Find documents by organization
      */
     async findByOrganization(organizationId, options = {}) {
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'organizationId', operator: '==', value: organizationId },
                 ...(options.where || [])
-            ] }));
+            ]
+        });
     }
     /**
      * Find documents by type
      */
     async findByDocumentType(organizationId, documentType, options = {}) {
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'organizationId', operator: '==', value: organizationId },
                 { field: 'documentType', operator: '==', value: documentType },
                 ...(options.where || [])
-            ], orderBy: [{ field: 'createdAt', direction: 'desc' }] }));
+            ],
+            orderBy: [{ field: 'createdAt', direction: 'desc' }]
+        });
     }
     /**
      * Find documents by status
      */
     async findByStatus(organizationId, status, options = {}) {
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'organizationId', operator: '==', value: organizationId },
                 { field: 'status', operator: '==', value: status },
                 ...(options.where || [])
-            ], orderBy: [{ field: 'updatedAt', direction: 'desc' }] }));
+            ],
+            orderBy: [{ field: 'updatedAt', direction: 'desc' }]
+        });
     }
     /**
      * Search documents by title
@@ -122,12 +133,14 @@ class DocumentRepository extends BaseRepository_1.BaseRepository {
      * Add processing error
      */
     async addProcessingError(id, error) {
-        var _a, _b;
         const docRef = this.getDocRef(id);
         const doc = await docRef.get();
         if (doc.exists) {
-            const currentErrors = ((_b = (_a = doc.data()) === null || _a === void 0 ? void 0 : _a.processing) === null || _b === void 0 ? void 0 : _b.errors) || [];
-            const newError = Object.assign(Object.assign({}, error), { timestamp: new Date() });
+            const currentErrors = doc.data()?.processing?.errors || [];
+            const newError = {
+                ...error,
+                timestamp: new Date()
+            };
             await docRef.update({
                 'processing.errors': [...currentErrors, newError],
                 updatedAt: new Date()
@@ -138,11 +151,10 @@ class DocumentRepository extends BaseRepository_1.BaseRepository {
      * Update view statistics
      */
     async incrementViewCount(id) {
-        var _a, _b;
         const docRef = this.getDocRef(id);
         const doc = await docRef.get();
         if (doc.exists) {
-            const currentCount = ((_b = (_a = doc.data()) === null || _a === void 0 ? void 0 : _a.statistics) === null || _b === void 0 ? void 0 : _b.viewCount) || 0;
+            const currentCount = doc.data()?.statistics?.viewCount || 0;
             await docRef.update({
                 'statistics.viewCount': currentCount + 1,
                 'statistics.lastViewed': new Date(),
@@ -182,7 +194,7 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const data = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+            return this.validate({ ...data, id: doc.id });
         });
     }
     /**
@@ -197,10 +209,14 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
      */
     async findByOrganization(organizationId, options = {}) {
         // Note: This requires a composite index on organizationId and createdAt
-        return this.find(Object.assign(Object.assign({}, options), { where: [
+        return this.find({
+            ...options,
+            where: [
                 { field: 'organizationId', operator: '==', value: organizationId },
                 ...(options.where || [])
-            ], orderBy: [{ field: 'createdAt', direction: 'desc' }] }));
+            ],
+            orderBy: [{ field: 'createdAt', direction: 'desc' }]
+        });
     }
     /**
      * Find analyses by configuration (🚀 CORE: Track which custom parameters were used)
@@ -235,7 +251,12 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
     async createForDocument(documentId, data) {
         const collection = this.db.collection(this.getCollectionPath(documentId));
         const docRef = collection.doc();
-        const createData = Object.assign(Object.assign({}, data), { id: docRef.id, documentId, createdAt: new Date() });
+        const createData = {
+            ...data,
+            id: docRef.id,
+            documentId,
+            createdAt: new Date()
+        };
         const prepared = this.prepareForStorage(createData);
         await docRef.set(prepared);
         return this.validate(createData);
@@ -279,13 +300,13 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
         // Calculate statistics
         const totalAnalyses = analyses.length;
         const averageScore = totalAnalyses > 0
-            ? analyses.reduce((sum, a) => { var _a; return sum + (((_a = a.scores) === null || _a === void 0 ? void 0 : _a.overall) || 0); }, 0) / totalAnalyses
+            ? analyses.reduce((sum, a) => sum + (a.scores?.overall || 0), 0) / totalAnalyses
             : 0;
         const scoreDistribution = {
-            excellent: analyses.filter(a => { var _a; return (((_a = a.scores) === null || _a === void 0 ? void 0 : _a.overall) || 0) >= 90; }).length,
-            good: analyses.filter(a => { var _a, _b; return (((_a = a.scores) === null || _a === void 0 ? void 0 : _a.overall) || 0) >= 75 && (((_b = a.scores) === null || _b === void 0 ? void 0 : _b.overall) || 0) < 90; }).length,
-            acceptable: analyses.filter(a => { var _a, _b; return (((_a = a.scores) === null || _a === void 0 ? void 0 : _a.overall) || 0) >= 60 && (((_b = a.scores) === null || _b === void 0 ? void 0 : _b.overall) || 0) < 75; }).length,
-            poor: analyses.filter(a => { var _a; return (((_a = a.scores) === null || _a === void 0 ? void 0 : _a.overall) || 0) < 60; }).length
+            excellent: analyses.filter(a => (a.scores?.overall || 0) >= 90).length,
+            good: analyses.filter(a => (a.scores?.overall || 0) >= 75 && (a.scores?.overall || 0) < 90).length,
+            acceptable: analyses.filter(a => (a.scores?.overall || 0) >= 60 && (a.scores?.overall || 0) < 75).length,
+            poor: analyses.filter(a => (a.scores?.overall || 0) < 60).length
         };
         return {
             totalAnalyses,
@@ -303,11 +324,14 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
             }
             return acc;
         }, {});
-        return Object.keys(configCounts).reduce((a, b) => configCounts[a] > configCounts[b] ? a : b, null);
+        const keys = Object.keys(configCounts);
+        if (keys.length === 0)
+            return null;
+        return keys.reduce((a, b) => configCounts[a] > configCounts[b] ? a : b);
     }
     getAverageAnalysisTime(analyses) {
         const validDurations = analyses
-            .filter(a => { var _a; return (_a = a.analysis) === null || _a === void 0 ? void 0 : _a.duration; })
+            .filter(a => a.analysis?.duration)
             .map(a => a.analysis.duration);
         return validDurations.length > 0
             ? validDurations.reduce((sum, d) => sum + d, 0) / validDurations.length
@@ -345,7 +369,7 @@ class DocumentVersionRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const data = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+            return this.validate({ ...data, id: doc.id });
         });
     }
     /**
@@ -364,7 +388,12 @@ class DocumentVersionRepository extends BaseRepository_1.BaseRepository {
     async createForDocument(documentId, data) {
         const collection = this.db.collection(this.getCollectionPath(documentId));
         const docRef = collection.doc();
-        const createData = Object.assign(Object.assign({}, data), { id: docRef.id, documentId, createdAt: new Date() });
+        const createData = {
+            ...data,
+            id: docRef.id,
+            documentId,
+            createdAt: new Date()
+        };
         const prepared = this.prepareForStorage(createData);
         await docRef.set(prepared);
         return this.validate(createData);
@@ -417,7 +446,7 @@ class ReviewCommentRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const data = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+            return this.validate({ ...data, id: doc.id });
         });
     }
     /**
@@ -452,8 +481,14 @@ class ReviewCommentRepository extends BaseRepository_1.BaseRepository {
         const docRef = collection.doc();
         // Generate thread ID if not provided and it's not a reply
         const threadId = data.parentCommentId ? data.threadId : (data.threadId || docRef.id);
-        const createData = Object.assign(Object.assign({}, data), { id: docRef.id, documentId,
-            threadId, createdAt: new Date(), updatedAt: new Date() });
+        const createData = {
+            ...data,
+            id: docRef.id,
+            documentId,
+            threadId,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
         const prepared = this.prepareForStorage(createData);
         await docRef.set(prepared);
         return this.validate(createData);

@@ -5,7 +5,8 @@
   },
   "functions": {
     "source": "services/api",
-    "runtime": "nodejs18"
+    "runtime": "nodejs18",
+    "region": "us-central1"
   },
   "emulators": {
     "functions": {
@@ -18,5 +19,8 @@
       "enabled": true,
       "port": 4000
     }
+  },
+  "storage": {
+    "rules": "storage.rules"
   }
 }

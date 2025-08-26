@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationService = void 0;
 class NotificationService {
     constructor(projectId) {
-        this.projectId = projectId;
+        // projectId stored for future use
     }
     /**
      * Envia notificação para um usuário específico

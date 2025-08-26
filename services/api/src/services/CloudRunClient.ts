@@ -4,7 +4,7 @@
  */
 
 import { GoogleAuth } from 'google-auth-library';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 export interface CloudRunAnalysisRequest {
   document_content: string;
@@ -205,8 +205,6 @@ export class CloudRunClient {
   // Métodos privados
 
   private async setupHttpClient(): Promise<void> {
-    const client = await this.auth.getIdTokenClient(this.serviceUrl);
-    
     this.httpClient = axios.create({
       baseURL: this.serviceUrl,
       timeout: 60000, // 1 minuto timeout padrão
@@ -218,12 +216,12 @@ export class CloudRunClient {
     // Interceptor para adicionar token de autenticação
     this.httpClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
       try {
-        const token = await client.getAccessToken();
-        if (token.token) {
+        const token = await this.auth.getAccessToken();
+        if (token) {
           if (!config.headers) {
-            config.headers = new AxiosHeaders();
+            config.headers = {} as any;
           }
-          config.headers.Authorization = `Bearer ${token.token}`;
+          config.headers['Authorization'] = `Bearer ${token}`;
         }
       } catch (error) {
         console.error('Erro ao obter token de autenticação:', error);

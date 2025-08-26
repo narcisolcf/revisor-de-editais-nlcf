@@ -1,7 +1,7 @@
 {
-  "name": "@licitareview/types",
+  "name": "@revisor-de-editais/types",
   "version": "1.0.0",
-  "description": "Shared TypeScript types for LicitaReview",
+  "description": "Shared TypeScript types for Revisor de Editais",
   "private": true,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

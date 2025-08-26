@@ -15,7 +15,7 @@
  * - Importação/exportação de regras
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +25,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import {
   Select,
   SelectContent,
@@ -67,10 +67,8 @@ import {
   Info,
   Settings,
   Filter,
-  Target,
   MoreVertical,
-  Eye,
-  EyeOff
+  Eye
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -189,14 +187,12 @@ interface CustomRulesEditorProps {
   config: any;
   onConfigChange: (config: any) => void;
   onProgressChange: (progress: number) => void;
-  isLoading?: boolean;
 }
 
 export const CustomRulesEditor: React.FC<CustomRulesEditorProps> = ({
   config,
   onConfigChange,
-  onProgressChange,
-  isLoading = false
+  onProgressChange
 }) => {
   const { toast } = useToast();
   
@@ -204,7 +200,7 @@ export const CustomRulesEditor: React.FC<CustomRulesEditorProps> = ({
   const [rules, setRules] = useState<CustomRule[]>([]);
   const [selectedRule, setSelectedRule] = useState<CustomRule | null>(null);
   const [isCreatingRule, setIsCreatingRule] = useState(false);
-  const [isEditingRule, setIsEditingRule] = useState(false);
+
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -232,8 +228,8 @@ export const CustomRulesEditor: React.FC<CustomRulesEditorProps> = ({
     const validRules = activeRules.filter(rule => 
       rule.conditions.length > 0 && rule.actions.length > 0
     );
-    const progress = rules.length > 0 ? (validRules.length / rules.length) * 100 : 0;
-    onProgressChange(Math.min(progress, 100));
+    const progressValue = rules.length > 0 ? (validRules.length / rules.length) * 100 : 0;
+    onProgressChange(Math.min(progressValue, 100));
   }, [rules, onProgressChange]);
   
   // Atualizar configuração quando regras mudarem

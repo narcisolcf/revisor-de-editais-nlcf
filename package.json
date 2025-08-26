@@ -1,5 +1,5 @@
 {
-  "name": "licitareview",
+  "name": "revisor-de-editais",
   "version": "1.0.0",
   "description": "Sistema inteligente de análise de documentos licitatórios com parâmetros personalizáveis por organização",
   "type": "module",
@@ -38,8 +38,8 @@
     "parâmetros-personalizados"
   ],
   "author": {
-    "name": "LicitaReview Team",
-    "email": "dev@licitareview.com"
+    "name": "Revisor de Editais Team",
+    "email": "dev@revisor-de-editais.com"
   },
   "license": "MIT",
   "repository": {
@@ -55,6 +55,7 @@
     "@commitlint/config-conventional": "^19.0.3",
     "@turbo/gen": "^1.12.4",
     "@types/node": "^20.11.24",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "commitizen": "^4.3.0",

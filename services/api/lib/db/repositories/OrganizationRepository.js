@@ -104,7 +104,7 @@ class TemplateRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const data = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+            return this.validate({ ...data, id: doc.id });
         });
     }
     /**
@@ -142,7 +142,13 @@ class TemplateRepository extends BaseRepository_1.BaseRepository {
     async createForOrganization(organizationId, data) {
         const collection = this.db.collection(this.getCollectionPath(organizationId));
         const docRef = collection.doc();
-        const createData = Object.assign(Object.assign({}, data), { id: docRef.id, organizationId, createdAt: new Date(), updatedAt: new Date() });
+        const createData = {
+            ...data,
+            id: docRef.id,
+            organizationId,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
         const prepared = this.prepareForStorage(createData);
         await docRef.set(prepared);
         return this.validate(createData);
@@ -151,10 +157,9 @@ class TemplateRepository extends BaseRepository_1.BaseRepository {
      * Update template usage statistics
      */
     async updateUsageStats(organizationId, templateId) {
-        var _a, _b;
         const docRef = this.db.collection(this.getCollectionPath(organizationId)).doc(templateId);
         await docRef.update({
-            'usage.documentsCreated': ((_b = (_a = (await docRef.get()).data()) === null || _a === void 0 ? void 0 : _a.usage) === null || _b === void 0 ? void 0 : _b.documentsCreated) + 1 || 1,
+            'usage.documentsCreated': (await docRef.get()).data()?.usage?.documentsCreated + 1 || 1,
             'usage.lastUsed': new Date(),
             updatedAt: new Date()
         });
@@ -191,7 +196,7 @@ class AnalysisRuleRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const data = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+            return this.validate({ ...data, id: doc.id });
         });
     }
     /**
@@ -223,7 +228,13 @@ class AnalysisRuleRepository extends BaseRepository_1.BaseRepository {
     async createForOrganization(organizationId, data) {
         const collection = this.db.collection(this.getCollectionPath(organizationId));
         const docRef = collection.doc();
-        const createData = Object.assign(Object.assign({}, data), { id: docRef.id, organizationId, createdAt: new Date(), updatedAt: new Date() });
+        const createData = {
+            ...data,
+            id: docRef.id,
+            organizationId,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
         const prepared = this.prepareForStorage(createData);
         await docRef.set(prepared);
         return this.validate(createData);
@@ -232,13 +243,12 @@ class AnalysisRuleRepository extends BaseRepository_1.BaseRepository {
      * Update rule performance stats
      */
     async updatePerformanceStats(organizationId, ruleId, executionTime) {
-        var _a, _b;
         const docRef = this.db.collection(this.getCollectionPath(organizationId)).doc(ruleId);
         const doc = await docRef.get();
         if (doc.exists) {
             const currentData = doc.data();
-            const currentCount = ((_a = currentData === null || currentData === void 0 ? void 0 : currentData.performance) === null || _a === void 0 ? void 0 : _a.executionCount) || 0;
-            const currentAverage = ((_b = currentData === null || currentData === void 0 ? void 0 : currentData.performance) === null || _b === void 0 ? void 0 : _b.averageExecutionTime) || 0;
+            const currentCount = currentData?.performance?.executionCount || 0;
+            const currentAverage = currentData?.performance?.averageExecutionTime || 0;
             // Calculate new average
             const newAverage = (currentAverage * currentCount + executionTime) / (currentCount + 1);
             await docRef.update({
@@ -273,7 +283,7 @@ class CustomParametersRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const data = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+            return this.validate({ ...data, id: doc.id });
         });
     }
     /**
@@ -285,7 +295,7 @@ class CustomParametersRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const data = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+            return this.validate({ ...data, id: doc.id });
         });
     }
     /**
@@ -299,7 +309,7 @@ class CustomParametersRepository extends BaseRepository_1.BaseRepository {
             return null;
         const doc = snapshot.docs[0];
         const data = this.convertTimestamps(doc.data());
-        return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+        return this.validate({ ...data, id: doc.id });
     }
     /**
      * Create parameters for organization
@@ -307,7 +317,13 @@ class CustomParametersRepository extends BaseRepository_1.BaseRepository {
     async createForOrganization(organizationId, data) {
         const collection = this.db.collection(this.getCollectionPath(organizationId));
         const docRef = collection.doc();
-        const createData = Object.assign(Object.assign({}, data), { id: docRef.id, organizationId, createdAt: new Date(), updatedAt: new Date() });
+        const createData = {
+            ...data,
+            id: docRef.id,
+            organizationId,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
         const prepared = this.prepareForStorage(createData);
         await docRef.set(prepared);
         return this.validate(createData);
@@ -332,13 +348,12 @@ class CustomParametersRepository extends BaseRepository_1.BaseRepository {
      * Update usage statistics
      */
     async updateUsageStats(organizationId, parametersId, analysisTime) {
-        var _a, _b;
         const docRef = this.db.collection(this.getCollectionPath(organizationId)).doc(parametersId);
         const doc = await docRef.get();
         if (doc.exists) {
             const currentData = doc.data();
-            const currentCount = ((_a = currentData === null || currentData === void 0 ? void 0 : currentData.usage) === null || _a === void 0 ? void 0 : _a.documentsAnalyzed) || 0;
-            const currentTotal = ((_b = currentData === null || currentData === void 0 ? void 0 : currentData.usage) === null || _b === void 0 ? void 0 : _b.totalAnalysisTime) || 0;
+            const currentCount = currentData?.usage?.documentsAnalyzed || 0;
+            const currentTotal = currentData?.usage?.totalAnalysisTime || 0;
             await docRef.update({
                 'usage.documentsAnalyzed': currentCount + 1,
                 'usage.totalAnalysisTime': currentTotal + analysisTime,
@@ -379,7 +394,7 @@ class OrganizationUserRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const data = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign(Object.assign({}, data), { id: doc.id }));
+            return this.validate({ ...data, id: doc.id });
         });
     }
     /**
@@ -414,7 +429,13 @@ class OrganizationUserRepository extends BaseRepository_1.BaseRepository {
     async createForOrganization(organizationId, data) {
         const collection = this.db.collection(this.getCollectionPath(organizationId));
         const docRef = collection.doc();
-        const createData = Object.assign(Object.assign({}, data), { id: docRef.id, organizationId, createdAt: new Date(), updatedAt: new Date() });
+        const createData = {
+            ...data,
+            id: docRef.id,
+            organizationId,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
         const prepared = this.prepareForStorage(createData);
         await docRef.set(prepared);
         return this.validate(createData);

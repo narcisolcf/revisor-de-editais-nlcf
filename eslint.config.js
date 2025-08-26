@@ -29,7 +29,18 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
-        ...globals.es2020
+        ...globals.es2020,
+        // DOM types
+        IntersectionObserverInit: "readonly",
+        RequestInit: "readonly",
+        NodeJS: "readonly",
+        // Test globals
+        expect: "readonly",
+        test: "readonly",
+        describe: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+        afterEach: "readonly"
       },
       parser: tseslintParser,
       parserOptions: {
@@ -52,7 +63,7 @@ export default [
         "warn",
         { allowConstantExport: true },
       ],
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/ban-ts-comment": "warn",
       "no-unused-vars": "off",
@@ -70,7 +81,7 @@ export default [
     },
     rules: {
       ...js.configs.recommended.rules,
-      "no-unused-vars": "warn",
+      "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
       "no-console": "off",
       "no-inner-declarations": "warn",
     },
@@ -88,7 +99,7 @@ export default [
     },
     rules: {
       ...js.configs.recommended.rules,
-      "no-unused-vars": "warn",
+      "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
       "no-console": "off",
     },
   },

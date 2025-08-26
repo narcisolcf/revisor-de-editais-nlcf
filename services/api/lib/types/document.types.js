@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDocumentTypeDisplayName = exports.validateDocumentType = exports.createDocumentSummary = exports.DocumentSummarySchema = exports.UpdateDocumentRequestSchema = exports.CreateDocumentRequestSchema = exports.DocumentSchema = exports.DocumentClassificationSchema = exports.DocumentMetadataSchema = exports.LicitationModalitySchema = exports.DocumentStatusSchema = exports.DocumentTypeSchema = exports.LicitationModality = exports.DocumentStatus = exports.DocumentType = void 0;
 const zod_1 = require("zod");
 // Enums
+/* eslint-disable no-unused-vars */
 var DocumentType;
 (function (DocumentType) {
     DocumentType["EDITAL"] = "EDITAL";
@@ -38,6 +39,7 @@ var LicitationModality;
     LicitationModality["LEILAO"] = "LEILAO";
     LicitationModality["CREDENCIAMENTO"] = "CREDENCIAMENTO";
 })(LicitationModality || (exports.LicitationModality = LicitationModality = {}));
+/* eslint-enable no-unused-vars */
 // Zod Schemas
 exports.DocumentTypeSchema = zod_1.z.nativeEnum(DocumentType);
 exports.DocumentStatusSchema = zod_1.z.nativeEnum(DocumentStatus);

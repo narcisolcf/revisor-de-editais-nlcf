@@ -10,5 +10,4 @@ export * from './helpers';
 // Constants
 export * from './constants';
 
-// Re-export types for convenience
-export * from '@licitareview/types';
+// Note: Types are available separately from @licitareview/types package

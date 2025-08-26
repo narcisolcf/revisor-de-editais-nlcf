@@ -46,7 +46,7 @@ class ComissaoRepository extends BaseRepository_1.BaseRepository {
         const hasMore = snapshot.docs.length > limit;
         const data = docs.map(doc => {
             const docData = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign({ id: doc.id }, docData));
+            return this.validate({ id: doc.id, ...docData });
         });
         // Get total count for pagination
         let countQuery = this.getCollection();
@@ -84,34 +84,46 @@ class ComissaoRepository extends BaseRepository_1.BaseRepository {
                     .get();
                 if (servidorDoc.exists) {
                     const servidorData = servidorDoc.data();
-                    return Object.assign(Object.assign({}, membro), { servidor: {
+                    return {
+                        ...membro,
+                        servidor: {
                             id: servidorDoc.id,
                             nome: servidorData.nome || 'Nome não disponível',
                             email: servidorData.email || 'Email não disponível',
                             cargo: servidorData.cargo || 'Cargo não disponível'
-                        } });
+                        }
+                    };
                 }
                 else {
                     // Servidor not found, return with placeholder data
-                    return Object.assign(Object.assign({}, membro), { servidor: {
+                    return {
+                        ...membro,
+                        servidor: {
                             id: membro.servidorId,
                             nome: 'Servidor não encontrado',
                             email: 'N/A',
                             cargo: 'N/A'
-                        } });
+                        }
+                    };
                 }
             }
             catch (error) {
                 console.error(`Error fetching servidor ${membro.servidorId}:`, error);
-                return Object.assign(Object.assign({}, membro), { servidor: {
+                return {
+                    ...membro,
+                    servidor: {
                         id: membro.servidorId,
                         nome: 'Erro ao carregar',
                         email: 'N/A',
                         cargo: 'N/A'
-                    } });
+                    }
+                };
             }
         }));
-        return Object.assign(Object.assign({}, comissao), { membrosDetalhados });
+        return {
+            ...comissao,
+            membrosDetalhados
+        };
     }
     /**
      * Check if comissão name is unique within organization
@@ -130,7 +142,11 @@ class ComissaoRepository extends BaseRepository_1.BaseRepository {
      */
     async adicionarMembro(comissaoId, membro) {
         const docRef = this.getDocRef(comissaoId);
-        const novoMembro = Object.assign(Object.assign({}, membro), { dataDeIngresso: new Date(), ativo: true });
+        const novoMembro = {
+            ...membro,
+            dataDeIngresso: new Date(),
+            ativo: true
+        };
         await docRef.update({
             membros: firestore_1.FieldValue.arrayUnion(this.prepareForStorage(novoMembro)),
             updatedAt: firestore_1.FieldValue.serverTimestamp()
@@ -162,7 +178,10 @@ class ComissaoRepository extends BaseRepository_1.BaseRepository {
             throw new Error('Membro não encontrado na comissão');
         }
         const membrosAtualizados = [...comissao.membros];
-        membrosAtualizados[membroIndex] = Object.assign(Object.assign({}, membrosAtualizados[membroIndex]), updates);
+        membrosAtualizados[membroIndex] = {
+            ...membrosAtualizados[membroIndex],
+            ...updates
+        };
         await this.update(comissaoId, {
             membros: membrosAtualizados
         });
@@ -176,7 +195,7 @@ class ComissaoRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const docData = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign({ id: doc.id }, docData));
+            return this.validate({ id: doc.id, ...docData });
         });
     }
     /**
@@ -189,7 +208,7 @@ class ComissaoRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const docData = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign({ id: doc.id }, docData));
+            return this.validate({ id: doc.id, ...docData });
         });
     }
     /**
@@ -206,7 +225,7 @@ class ComissaoRepository extends BaseRepository_1.BaseRepository {
         const snapshot = await query.get();
         return snapshot.docs.map(doc => {
             const docData = this.convertTimestamps(doc.data());
-            return this.validate(Object.assign({ id: doc.id }, docData));
+            return this.validate({ id: doc.id, ...docData });
         });
     }
     /**

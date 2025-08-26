@@ -9,7 +9,6 @@ export * from "./error";
 import { Request, Response, NextFunction } from "express";
 import { logger } from "firebase-functions";
 import { generateRequestId } from "../utils";
-import { config } from "../config";
 
 /**
  * Request logging middleware

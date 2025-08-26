@@ -10,26 +10,8 @@ ENV PYTHONUNBUFFERED=1 \
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    # For OpenCV and image processing
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libgomp1 \
-    libglib2.0-0 \
-    # For Tesseract OCR
-    tesseract-ocr \
-    tesseract-ocr-por \
-    libtesseract-dev \
-    # For PDF processing
-    poppler-utils \
-    # For general utilities
+    # For health checks
     curl \
-    wget \
-    unzip \
-    # For building Python packages
-    gcc \
-    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
@@ -41,14 +23,8 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Download spaCy Portuguese model
-RUN python -m spacy download pt_core_news_sm
-
-# Download NLTK data
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('vader_lexicon')"
-
 # Copy application code
-COPY . .
+COPY main.py .
 
 # Create necessary directories
 RUN mkdir -p /app/temp /app/cache /app/models /app/logs
@@ -75,5 +51,5 @@ ENV PORT=8080 \
     FLASK_ENV=production \
     PYTHONPATH=/app
 
-# Run the application
-CMD ["python", "main.py"]
+# Run the application with gunicorn for production
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--timeout", "120", "main:app"]

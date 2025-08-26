@@ -16,7 +16,7 @@ import {
   createSuccessResponse,
   createErrorResponse,
   generateRequestId,
-  validateQueryParams,
+  validateData,
   PaginationSchema
 } from "../utils";
 import { AuditLog } from "../types";
@@ -43,7 +43,7 @@ app.get("/logs",
   requirePermissions([PERMISSIONS.AUDIT_READ]),
   async (req, res) => {
     try {
-      const query = validateQueryParams(
+      const queryValidation = validateData(
         PaginationSchema.extend({
           action: z.string().optional(),
           resourceType: z.string().optional(),
@@ -52,8 +52,19 @@ app.get("/logs",
           startDate: z.coerce.date().optional(),
           endDate: z.coerce.date().optional()
         }),
-        req
+        req.query
       );
+      
+      if (!queryValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid query parameters",
+          queryValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+      }
+      
+      const query = queryValidation.data;
       
       const organizationId = req.user!.organizationId;
       
@@ -61,27 +72,27 @@ app.get("/logs",
         .where("organizationId", "==", organizationId);
       
       // Apply filters
-      if (query.action) {
+      if (query?.action) {
         auditQuery = auditQuery.where("action", "==", query.action);
       }
       
-      if (query.resourceType) {
+      if (query?.resourceType) {
         auditQuery = auditQuery.where("resourceType", "==", query.resourceType);
       }
       
-      if (query.resourceId) {
+      if (query?.resourceId) {
         auditQuery = auditQuery.where("resourceId", "==", query.resourceId);
       }
       
-      if (query.userId) {
+      if (query?.userId) {
         auditQuery = auditQuery.where("userId", "==", query.userId);
       }
       
-      if (query.startDate) {
+      if (query?.startDate) {
         auditQuery = auditQuery.where("timestamp", ">=", query.startDate);
       }
       
-      if (query.endDate) {
+      if (query?.endDate) {
         auditQuery = auditQuery.where("timestamp", "<=", query.endDate);
       }
       
@@ -93,8 +104,10 @@ app.get("/logs",
       const total = countQuery.data().count;
       
       // Apply pagination
-      const offset = (query.page - 1) * query.limit;
-      auditQuery = auditQuery.offset(offset).limit(query.limit);
+      const page = query?.page ?? 1;
+      const limit = query?.limit ?? 20;
+      const offset = (page - 1) * limit;
+      auditQuery = auditQuery.offset(offset).limit(limit);
       
       const snapshot = await auditQuery.get();
       
@@ -103,28 +116,27 @@ app.get("/logs",
         ...doc.data()
       } as AuditLog));
       
-      const totalPages = Math.ceil(total / query.limit);
+      const totalPages = Math.ceil(total / limit);
       
-      res.json({
-        success: true,
-        data: auditLogs,
+      res.json(createSuccessResponse({
+        auditLogs,
         pagination: {
-          page: query.page,
-          limit: query.limit,
+          page,
+          limit,
           total,
           totalPages,
-          hasNext: query.page < totalPages,
-          hasPrev: query.page > 1
-        },
-        timestamp: new Date().toISOString(),
-        requestId: req.requestId
-      });
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      }, req.requestId));
+      return;
       
     } catch (error) {
       console.error("Error getting audit logs:", error);
-      res.status(500).json(createErrorResponse(
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
         "Failed to get audit logs",
-        null,
+        undefined,
         req.requestId
       ));
     }
@@ -139,16 +151,28 @@ app.get("/summary",
   requirePermissions([PERMISSIONS.AUDIT_READ]),
   async (req, res) => {
     try {
-      const query = validateQueryParams(
+      const queryValidation = validateData(
         z.object({
           days: z.coerce.number().min(1).max(365).default(30)
         }),
-        req
+        req.query
       );
       
+      if (!queryValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid query parameters",
+          queryValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+      }
+      
+      const query = queryValidation.data;
+      
       const organizationId = req.user!.organizationId;
+      const days = query?.days ?? 30;
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - query.days);
+      startDate.setDate(startDate.getDate() - days);
       
       const auditQuery = collections.auditLogs
         .where("organizationId", "==", organizationId)
@@ -174,7 +198,7 @@ app.get("/summary",
         const action = log.action || "unknown";
         const resourceType = log.resourceType || "unknown";
         const userId = log.userId || "unknown";
-        const day = log.timestamp.toDate().toISOString().split('T')[0];
+        const day = (log.timestamp instanceof Date ? log.timestamp : (log.timestamp as any)?.toDate?.() || new Date()).toISOString().split('T')[0];
         
         summary.byAction[action] = (summary.byAction[action] || 0) + 1;
         summary.byResourceType[resourceType] = (summary.byResourceType[resourceType] || 0) + 1;
@@ -189,15 +213,17 @@ app.get("/summary",
       
       res.json(createSuccessResponse({
         organizationId,
-        period: `${query.days} days`,
+        period: `${days} days`,
         summary
-      }, undefined, req.requestId));
+      }, req.requestId));
+      return;
       
     } catch (error) {
       console.error("Error getting audit summary:", error);
-      res.status(500).json(createErrorResponse(
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
         "Failed to get audit summary",
-        null,
+        undefined,
         req.requestId
       ));
     }
@@ -231,7 +257,7 @@ app.get("/actions", (req, res) => {
     "permission_revoked"
   ];
   
-  res.json(createSuccessResponse(actions, undefined, req.requestId));
+  res.json(createSuccessResponse(actions, req.requestId));
 });
 
 /**
@@ -250,7 +276,7 @@ app.get("/resource-types", (req, res) => {
     "api_key"
   ];
   
-  res.json(createSuccessResponse(resourceTypes, undefined, req.requestId));
+  res.json(createSuccessResponse(resourceTypes, req.requestId));
 });
 
 /**
@@ -302,6 +328,7 @@ app.post("/export",
         contentType = "application/json";
       } else {
         res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
           "Unsupported export format",
           { supportedFormats: ["csv", "json"] },
           req.requestId
@@ -314,12 +341,14 @@ app.post("/export",
       res.setHeader("Content-Type", contentType);
       res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
       res.send(exportData);
+      return;
       
     } catch (error) {
       console.error("Error exporting audit logs:", error);
-      res.status(500).json(createErrorResponse(
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
         "Failed to export audit logs",
-        null,
+        undefined,
         req.requestId
       ));
     }

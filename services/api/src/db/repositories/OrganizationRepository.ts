@@ -10,7 +10,7 @@
  */
 
 import { Firestore } from 'firebase-admin/firestore';
-import { BaseRepository, QueryOptions, PaginatedResult } from './BaseRepository';
+import { BaseRepository, QueryOptions } from './BaseRepository';
 import {
   OrganizationProfile,
   DocumentTemplate,
@@ -30,7 +30,7 @@ import {
  */
 export class OrganizationRepository extends BaseRepository<OrganizationProfile> {
   constructor(db: Firestore) {
-    super(db, 'organizations', OrganizationProfileSchema);
+    super(db, 'organizations', OrganizationProfileSchema as any);
   }
 
   /**
@@ -98,7 +98,7 @@ export class OrganizationRepository extends BaseRepository<OrganizationProfile> 
  */
 export class TemplateRepository extends BaseRepository<DocumentTemplate> {
   constructor(db: Firestore) {
-    super(db, 'templates', DocumentTemplateSchema);
+    super(db, 'templates', DocumentTemplateSchema as any);
   }
 
   /**
@@ -205,7 +205,7 @@ export class TemplateRepository extends BaseRepository<DocumentTemplate> {
  */
 export class AnalysisRuleRepository extends BaseRepository<AnalysisRule> {
   constructor(db: Firestore) {
-    super(db, 'analysis_rules', AnalysisRuleSchema);
+    super(db, 'analysis_rules', AnalysisRuleSchema as any);
   }
 
   /**
@@ -319,7 +319,7 @@ export class AnalysisRuleRepository extends BaseRepository<AnalysisRule> {
  */
 export class CustomParametersRepository extends BaseRepository<CustomParameters> {
   constructor(db: Firestore) {
-    super(db, 'custom_params', CustomParametersSchema);
+    super(db, 'custom_params', CustomParametersSchema as any);
   }
 
   /**
@@ -441,7 +441,7 @@ export class CustomParametersRepository extends BaseRepository<CustomParameters>
  */
 export class OrganizationUserRepository extends BaseRepository<OrganizationUser> {
   constructor(db: Firestore) {
-    super(db, 'users', OrganizationUserSchema);
+    super(db, 'users', OrganizationUserSchema as any);
   }
 
   /**

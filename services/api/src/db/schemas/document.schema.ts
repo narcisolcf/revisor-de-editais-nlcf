@@ -6,7 +6,6 @@
  */
 
 import { z } from 'zod';
-import { Timestamp } from 'firebase-admin/firestore';
 
 // Document Metadata Schema
 export const DocumentMetadataSchema = z.object({

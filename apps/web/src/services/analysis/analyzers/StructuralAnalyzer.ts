@@ -52,7 +52,7 @@ export class StructuralAnalyzer extends BaseAnalyzer {
 
     // Contar seções principais
     const sections = this.extractSections(text);
-    metrics.totalSections = sections.length;
+    metrics.totalClauses = sections.length;
     metrics.sectionNames = sections.map(s => s.name);
 
     // Verificar seções obrigatórias
@@ -432,7 +432,7 @@ export class StructuralAnalyzer extends BaseAnalyzer {
     let confidence = 80;
     
     // Aumentar confiança se há muitas seções bem estruturadas
-    if (metrics.totalSections && metrics.totalSections > 5) {
+    if (metrics.totalClauses && metrics.totalClauses > 5) {
       confidence += 10;
     }
     
@@ -466,7 +466,13 @@ export class StructuralAnalyzer extends BaseAnalyzer {
         sugestaoCorrecao: 'Verificar configurações do analisador estrutural',
         categoria: 'formal'
       }],
-      metrics: { totalSections: 0, formattingIssues: 1 },
+      metrics: { 
+        totalClauses: 0,
+        validClauses: 0,
+        missingClauses: 1,
+        inconsistencies: 1,
+        processingTime: 0
+      },
       score: 70,
       confidence: 30,
       processingTime: 0

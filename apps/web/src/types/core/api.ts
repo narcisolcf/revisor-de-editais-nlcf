@@ -104,7 +104,7 @@ export type ResponseInterceptor = {
   /** Interceptor para respostas de sucesso */
   onSuccess?: <T>(response: ApiResponse<T>) => ApiResponse<T> | Promise<ApiResponse<T>>;
   /** Interceptor para respostas de erro */
-  onError?: (_error: NetworkError) => NetworkError | Promise<NetworkError>;
+  onError?: (error: NetworkError) => NetworkError | Promise<NetworkError>;
 };
 
 /** Configuração de retry */
@@ -120,7 +120,7 @@ export interface RetryConfig {
   /** Status codes que devem ser retentados */
   retryableStatusCodes: HttpStatusCode[];
   /** Função para determinar se deve retentar */
-  shouldRetry?: (error: NetworkError, attempt: number) => boolean;
+  shouldRetry?: (_error: NetworkError, _attempt: number) => boolean;
 }
 
 /** Opções para cache de requisições */

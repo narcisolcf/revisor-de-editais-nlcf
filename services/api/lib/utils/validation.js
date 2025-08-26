@@ -1,10 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AnalysisRequestSchema = exports.PaginationSchema = exports.AnalysisIdSchema = exports.DocumentIdSchema = exports.ValidationError = void 0;
+exports.UUIDSchema = exports.AnalysisRequestSchema = exports.PaginationSchema = exports.AnalysisIdSchema = exports.DocumentIdSchema = exports.ValidationError = void 0;
 exports.validateData = validateData;
 exports.validateBody = validateBody;
 exports.validateQuery = validateQuery;
 exports.validatePathParams = validatePathParams;
+exports.validateRequestBody = validateRequestBody;
+exports.validateQueryParams = validateQueryParams;
 const zod_1 = require("zod");
 /**
  * Classe de erro de validação
@@ -52,8 +54,8 @@ function validateBody(schema) {
         if (!validation.success) {
             throw new ValidationError(validation.error, validation.details);
         }
-        req.validatedBody = validation.data;
-        next();
+        req.body = validation.data;
+        return next();
     };
 }
 /**
@@ -65,8 +67,8 @@ function validateQuery(schema) {
         if (!validation.success) {
             throw new ValidationError(validation.error, validation.details);
         }
-        req.validatedQuery = validation.data;
-        next();
+        req.query = validation.data;
+        return next();
     };
 }
 /**
@@ -78,8 +80,8 @@ function validatePathParams(schema) {
         if (!validation.success) {
             throw new ValidationError(validation.error, validation.details);
         }
-        req.validatedParams = validation.data;
-        next();
+        req.params = validation.data;
+        return next();
     };
 }
 // Schemas comuns
@@ -103,4 +105,36 @@ exports.AnalysisRequestSchema = zod_1.z.object({
         detailedMetrics: zod_1.z.boolean().default(false)
     }).optional()
 });
+// Schemas adicionais
+exports.UUIDSchema = zod_1.z.string().uuid('ID deve ser um UUID válido');
+// Função para validar corpo da requisição
+function validateRequestBody(schema) {
+    return (req, res, next) => {
+        const result = validateData(schema, req.body);
+        if (!result.success) {
+            return res.status(400).json({
+                success: false,
+                error: result.error,
+                details: result.details
+            });
+        }
+        req.body = result.data;
+        return next();
+    };
+}
+// Função para validar parâmetros de query
+function validateQueryParams(schema) {
+    return (req, res, next) => {
+        const result = validateData(schema, req.query);
+        if (!result.success) {
+            return res.status(400).json({
+                success: false,
+                error: result.error,
+                details: result.details
+            });
+        }
+        req.query = result.data;
+        return next();
+    };
+}
 //# sourceMappingURL=validation.js.map

@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ComissoesQueryOptionsSchema = exports.AtualizarMembroRequestSchema = exports.AdicionarMembroRequestSchema = exports.UpdateComissaoRequestSchema = exports.CreateComissaoRequestSchema = exports.ComissaoSchema = exports.ConfiguracoesComissaoSchema = exports.MembroComissaoSchema = exports.PapelMembroSchema = exports.StatusComissaoSchema = exports.TipoComissaoSchema = exports.PapelMembro = exports.StatusComissao = exports.TipoComissao = void 0;
 const zod_1 = require("zod");
 // Enums
+/* eslint-disable no-unused-vars */
 var TipoComissao;
 (function (TipoComissao) {
     TipoComissao["PERMANENTE"] = "Permanente";
@@ -27,6 +28,7 @@ var PapelMembro;
     PapelMembro["MEMBRO"] = "Membro";
     PapelMembro["SUPLENTE"] = "Suplente";
 })(PapelMembro || (exports.PapelMembro = PapelMembro = {}));
+/* eslint-enable no-unused-vars */
 // Schemas for validation
 exports.TipoComissaoSchema = zod_1.z.nativeEnum(TipoComissao);
 exports.StatusComissaoSchema = zod_1.z.nativeEnum(StatusComissao);

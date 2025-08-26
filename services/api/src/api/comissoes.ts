@@ -47,6 +47,7 @@ export const listComissoes = async (req: Request, res: Response) => {
       data: result.data,
       pagination: result.pagination
     });
+    return;
   } catch (error) {
     console.error('Error listing comissões:', error);
     
@@ -58,7 +59,7 @@ export const listComissoes = async (req: Request, res: Response) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });
@@ -102,9 +103,10 @@ export const getComissaoById = async (req: Request, res: Response) => {
       success: true,
       data: comissao
     });
+    return;
   } catch (error) {
     console.error('Error getting comissão:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });
@@ -138,6 +140,7 @@ export const createComissao = async (req: Request, res: Response) => {
       data: comissao,
       message: 'Comissão created successfully'
     });
+    return;
   } catch (error) {
     console.error('Error creating comissão:', error);
     
@@ -156,7 +159,7 @@ export const createComissao = async (req: Request, res: Response) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });
@@ -205,6 +208,7 @@ export const updateComissao = async (req: Request, res: Response) => {
       data: comissao,
       message: 'Comissão updated successfully'
     });
+    return;
   } catch (error) {
     console.error('Error updating comissão:', error);
     
@@ -223,7 +227,7 @@ export const updateComissao = async (req: Request, res: Response) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });
@@ -261,6 +265,7 @@ export const deleteComissao = async (req: Request, res: Response) => {
       success: true,
       message: 'Comissão deleted successfully'
     });
+    return;
   } catch (error) {
     console.error('Error deleting comissão:', error);
     
@@ -271,7 +276,7 @@ export const deleteComissao = async (req: Request, res: Response) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });
@@ -312,6 +317,7 @@ export const adicionarMembro = async (req: Request, res: Response) => {
       success: true,
       message: 'Member added successfully'
     });
+    return;
   } catch (error) {
     console.error('Error adding member:', error);
     
@@ -330,7 +336,7 @@ export const adicionarMembro = async (req: Request, res: Response) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });
@@ -368,6 +374,7 @@ export const removerMembro = async (req: Request, res: Response) => {
       success: true,
       message: 'Member removed successfully'
     });
+    return;
   } catch (error) {
     console.error('Error removing member:', error);
     
@@ -378,7 +385,7 @@ export const removerMembro = async (req: Request, res: Response) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });
@@ -419,6 +426,7 @@ export const atualizarMembro = async (req: Request, res: Response) => {
       success: true,
       message: 'Member updated successfully'
     });
+    return;
   } catch (error) {
     console.error('Error updating member:', error);
     
@@ -437,7 +445,7 @@ export const atualizarMembro = async (req: Request, res: Response) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });
@@ -474,6 +482,7 @@ export const getComissaoStats = async (req: Request, res: Response) => {
       success: true,
       data: stats
     });
+    return;
   } catch (error) {
     console.error('Error getting comissão stats:', error);
     
@@ -484,7 +493,7 @@ export const getComissaoStats = async (req: Request, res: Response) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });
@@ -530,6 +539,7 @@ export const getComissaoHistory = async (req: Request, res: Response) => {
         hasMore: result.hasMore
       }
     });
+    return;
   } catch (error) {
     console.error('Error getting comissão history:', error);
     
@@ -540,7 +550,7 @@ export const getComissaoHistory = async (req: Request, res: Response) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Internal server error'
     });

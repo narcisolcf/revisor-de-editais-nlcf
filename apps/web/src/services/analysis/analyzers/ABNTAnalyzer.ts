@@ -690,10 +690,11 @@ export class ABNTAnalyzer extends BaseAnalyzer {
         categoria: 'tecnico'
       }],
       metrics: { 
-        formattingScore: 65, 
-        structureIssues: 1,
-        totalReferences: 0,
-        preTextualElements: 0
+        totalClauses: 0,
+        validClauses: 0,
+        missingClauses: 0,
+        inconsistencies: 1,
+        processingTime: 0
       },
       score: 65,
       confidence: 25,

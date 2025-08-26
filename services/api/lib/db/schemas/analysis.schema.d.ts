@@ -105,24 +105,24 @@ export declare const AnalysisSchema: z.ZodObject<{
             code: string;
             message: string;
             retryCount: number;
-            details?: Record<string, any> | undefined;
             stack?: string | undefined;
+            details?: Record<string, any> | undefined;
         }, {
             code: string;
             message: string;
-            details?: Record<string, any> | undefined;
             stack?: string | undefined;
+            details?: Record<string, any> | undefined;
             retryCount?: number | undefined;
         }>>;
     }, "strip", z.ZodTypeAny, {
-        status: "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED" | "PENDING" | "INITIALIZING" | "TIMEOUT";
+        status: "PROCESSING" | "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "INITIALIZING" | "TIMEOUT";
         progress: number;
         error?: {
             code: string;
             message: string;
             retryCount: number;
-            details?: Record<string, any> | undefined;
             stack?: string | undefined;
+            details?: Record<string, any> | undefined;
         } | undefined;
         completedAt?: Date | undefined;
         currentStep?: string | undefined;
@@ -141,13 +141,13 @@ export declare const AnalysisSchema: z.ZodObject<{
         } | undefined;
         estimatedTimeRemaining?: number | undefined;
     }, {
-        status: "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED" | "PENDING" | "INITIALIZING" | "TIMEOUT";
+        status: "PROCESSING" | "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "INITIALIZING" | "TIMEOUT";
         progress: number;
         error?: {
             code: string;
             message: string;
-            details?: Record<string, any> | undefined;
             stack?: string | undefined;
+            details?: Record<string, any> | undefined;
             retryCount?: number | undefined;
         } | undefined;
         completedAt?: Date | undefined;
@@ -585,14 +585,14 @@ export declare const AnalysisSchema: z.ZodObject<{
         fallbackUsed: z.ZodDefault<z.ZodBoolean>;
         cacheHit: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        version: string;
         name: string;
+        version: string;
         fallbackUsed: boolean;
         cacheHit: boolean;
         cloudRunEndpoint?: string | undefined;
     }, {
-        version?: string | undefined;
         name?: string | undefined;
+        version?: string | undefined;
         cloudRunEndpoint?: string | undefined;
         fallbackUsed?: boolean | undefined;
         cacheHit?: boolean | undefined;
@@ -612,14 +612,14 @@ export declare const AnalysisSchema: z.ZodObject<{
     createdAt: Date;
     updatedAt: Date;
     processing: {
-        status: "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED" | "PENDING" | "INITIALIZING" | "TIMEOUT";
+        status: "PROCESSING" | "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "INITIALIZING" | "TIMEOUT";
         progress: number;
         error?: {
             code: string;
             message: string;
             retryCount: number;
-            details?: Record<string, any> | undefined;
             stack?: string | undefined;
+            details?: Record<string, any> | undefined;
         } | undefined;
         completedAt?: Date | undefined;
         currentStep?: string | undefined;
@@ -641,8 +641,8 @@ export declare const AnalysisSchema: z.ZodObject<{
     userId: string;
     configurationId: string;
     engine: {
-        version: string;
         name: string;
+        version: string;
         fallbackUsed: boolean;
         cacheHit: boolean;
         cloudRunEndpoint?: string | undefined;
@@ -748,13 +748,13 @@ export declare const AnalysisSchema: z.ZodObject<{
     id: string;
     createdBy: string;
     processing: {
-        status: "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED" | "PENDING" | "INITIALIZING" | "TIMEOUT";
+        status: "PROCESSING" | "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "INITIALIZING" | "TIMEOUT";
         progress: number;
         error?: {
             code: string;
             message: string;
-            details?: Record<string, any> | undefined;
             stack?: string | undefined;
+            details?: Record<string, any> | undefined;
             retryCount?: number | undefined;
         } | undefined;
         completedAt?: Date | undefined;
@@ -777,8 +777,8 @@ export declare const AnalysisSchema: z.ZodObject<{
     userId: string;
     configurationId: string;
     engine: {
-        version?: string | undefined;
         name?: string | undefined;
+        version?: string | undefined;
         cloudRunEndpoint?: string | undefined;
         fallbackUsed?: boolean | undefined;
         cacheHit?: boolean | undefined;
@@ -896,10 +896,10 @@ export declare const AnalysisHistoryEntrySchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     documentId: string;
     analysisId: string;
+    timestamp: Date;
     organizationId: string;
     id: string;
     description: string;
-    timestamp: Date;
     changeType: "CANCELLED" | "STATUS_CHANGE" | "PROGRESS_UPDATE" | "ERROR_OCCURRED" | "RESULT_UPDATED";
     triggeredBy: string;
     metadata?: Record<string, any> | undefined;
@@ -908,10 +908,10 @@ export declare const AnalysisHistoryEntrySchema: z.ZodObject<{
 }, {
     documentId: string;
     analysisId: string;
+    timestamp: Date;
     organizationId: string;
     id: string;
     description: string;
-    timestamp: Date;
     changeType: "CANCELLED" | "STATUS_CHANGE" | "PROGRESS_UPDATE" | "ERROR_OCCURRED" | "RESULT_UPDATED";
     triggeredBy: string;
     metadata?: Record<string, any> | undefined;
@@ -940,14 +940,14 @@ export declare const AnalysisStatisticsSchema: z.ZodObject<{
         excellent: number;
         good: number;
         poor: number;
-        acceptable: number;
         critical: number;
+        acceptable: number;
     }, {
         excellent: number;
         good: number;
         poor: number;
-        acceptable: number;
         critical: number;
+        acceptable: number;
     }>;
     commonProblems: z.ZodArray<z.ZodObject<{
         category: z.ZodString;
@@ -986,8 +986,8 @@ export declare const AnalysisStatisticsSchema: z.ZodObject<{
         excellent: number;
         good: number;
         poor: number;
-        acceptable: number;
         critical: number;
+        acceptable: number;
     };
     commonProblems: {
         type: string;
@@ -1015,8 +1015,8 @@ export declare const AnalysisStatisticsSchema: z.ZodObject<{
         excellent: number;
         good: number;
         poor: number;
-        acceptable: number;
         critical: number;
+        acceptable: number;
     };
     commonProblems: {
         type: string;

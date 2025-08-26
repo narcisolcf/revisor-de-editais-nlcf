@@ -10,22 +10,18 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 
-import { collections } from "../config/firebase";
+import { collections, firestore } from "../config/firebase";
 import {
   OrganizationConfig,
   OrganizationConfigSchema,
-  CreateConfigRequest,
   CreateConfigRequestSchema,
-  UpdateConfigRequest,
   UpdateConfigRequestSchema,
   ConfigSummary,
   AnalysisPreset,
-  AnalysisWeights,
-  CustomRule,
   createDefaultConfig,
   createConfigSummary,
-  generateConfigHash,
   PRESET_WEIGHTS
 } from "../types";
 import {
@@ -36,9 +32,7 @@ import {
   PERMISSIONS
 } from "../middleware/auth";
 import {
-  validateRequestBody,
-  validateQueryParams,
-  validatePathParams,
+  validateData,
   ValidationError,
   createSuccessResponse,
   createErrorResponse,
@@ -84,58 +78,68 @@ app.get("/",
   requirePermissions([PERMISSIONS.CONFIG_READ]),
   async (req, res) => {
     try {
-      const query = validateQueryParams(PaginationSchema, req);
+      // Validate query parameters
+      const queryValidation = validateData(PaginationSchema, req.query);
+      if (!queryValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Parâmetros de consulta inválidos",
+          queryValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+      }
+      
+      const { page = 1, limit = 10 } = queryValidation.data || {};
       
       // Super admin can see all configs, others only their org
-      let firestoreQuery = collections.configs;
+      let firestoreQuery: any = collections.configs;
       
       if (!req.user!.roles.includes("super_admin")) {
         firestoreQuery = firestoreQuery.where("organizationId", "==", req.user!.organizationId);
       }
       
       // Apply sorting
-      firestoreQuery = firestoreQuery.orderBy("updatedAt", query.sortOrder);
+      firestoreQuery = firestoreQuery.orderBy("updatedAt", "desc");
       
       // Count total
       const countQuery = await firestoreQuery.count().get();
       const total = countQuery.data().count;
       
       // Apply pagination
-      const offset = (query.page - 1) * query.limit;
-      firestoreQuery = firestoreQuery.offset(offset).limit(query.limit);
+      const offset = (page - 1) * limit;
+      firestoreQuery = firestoreQuery.offset(offset).limit(limit);
       
       const snapshot = await firestoreQuery.get();
       
-      const configs: ConfigSummary[] = snapshot.docs.map(doc => {
+      const configs: ConfigSummary[] = snapshot.docs.map((doc: any) => {
         const data = { id: doc.id, ...doc.data() } as OrganizationConfig;
         return createConfigSummary(data);
       });
       
-      const totalPages = Math.ceil(total / query.limit);
+      const totalPages = Math.ceil(total / limit);
       
-      res.json({
-        success: true,
-        data: configs,
+      res.json(createSuccessResponse({
+        configs,
         pagination: {
-          page: query.page,
-          limit: query.limit,
+          page,
+          limit,
           total,
           totalPages,
-          hasNext: query.page < totalPages,
-          hasPrev: query.page > 1
-        },
-        timestamp: new Date().toISOString(),
-        requestId: req.requestId
-      });
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      }, req.requestId));
+      return;
     } catch (error) {
       console.error("Error listing configs:", error);
       
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message));
       } else {
-        res.status(500).json(createErrorResponse(
-          "Internal server error while listing configs",
-          null,
+        return res.status(500).json(createErrorResponse(
+          "INTERNAL_ERROR",
+          "Erro interno do servidor",
+          undefined,
           req.requestId
         ));
       }
@@ -172,7 +176,6 @@ app.get("/current",
         
         res.json(createSuccessResponse(
           configWithId,
-          "Default configuration created",
           req.requestId
         ));
         return;
@@ -181,12 +184,14 @@ app.get("/current",
       const configDoc = snapshot.docs[0];
       const config = { id: configDoc.id, ...configDoc.data() } as OrganizationConfig;
       
-      res.json(createSuccessResponse(config, undefined, req.requestId));
+      res.json(createSuccessResponse(config, req.requestId));
+      return;
     } catch (error) {
       console.error("Error getting current config:", error);
-      res.status(500).json(createErrorResponse(
-        "Internal server error while getting config",
-        null,
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
+        "Erro interno do servidor",
+        undefined,
         req.requestId
       ));
     }
@@ -202,15 +207,32 @@ app.get("/:id",
   validateOrganizationAccess("organizationId"),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(
-        z.object({ id: UUIDSchema }),
-        req.params
-      );
+      const pathValidation = validateData(z.object({ id: UUIDSchema }), req.params);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid path parameters",
+          pathValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+      }
+      
+      if (!pathValidation.data) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Parâmetros de caminho inválidos",
+          {},
+          req.requestId
+        ));
+      }
+
+      const { id } = pathValidation.data;
       
       const configDoc = await collections.configs.doc(id).get();
       
       if (!configDoc.exists) {
         res.status(404).json(createErrorResponse(
+          "NOT_FOUND",
           "Configuration not found",
           { configId: id },
           req.requestId
@@ -224,6 +246,7 @@ app.get("/:id",
       if (config.organizationId !== req.user!.organizationId &&
           !req.user!.roles.includes("super_admin")) {
         res.status(403).json(createErrorResponse(
+          "FORBIDDEN",
           "Access denied to configuration",
           { configId: id },
           req.requestId
@@ -231,16 +254,18 @@ app.get("/:id",
         return;
       }
       
-      res.json(createSuccessResponse(config, undefined, req.requestId));
+      res.json(createSuccessResponse(config, req.requestId));
+      return;
     } catch (error) {
       console.error("Error getting config:", error);
       
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown> | undefined, req.requestId));
       } else {
-        res.status(500).json(createErrorResponse(
-          "Internal server error while getting config",
-          null,
+        return res.status(500).json(createErrorResponse(
+          "INTERNAL_ERROR",
+          "Erro interno do servidor",
+          undefined,
           req.requestId
         ));
       }
@@ -256,14 +281,25 @@ app.post("/",
   requirePermissions([PERMISSIONS.CONFIG_WRITE]),
   async (req, res) => {
     try {
-      const configData = validateRequestBody(CreateConfigRequestSchema)(req);
+      const bodyValidation = validateData(CreateConfigRequestSchema, req.body);
+      if (!bodyValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          'Dados da requisição inválidos',
+          bodyValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
+      
+      const configData = bodyValidation.data;
       
       // Validate organization access
-      if (configData.organizationId !== req.user!.organizationId &&
+      if (configData?.organizationId !== req.user!.organizationId &&
           !req.user!.roles.includes("super_admin")) {
         res.status(403).json(createErrorResponse(
+          "FORBIDDEN",
           "Cannot create config for different organization",
-          { requestedOrg: configData.organizationId, userOrg: req.user!.organizationId },
+          { requestedOrg: configData?.organizationId, userOrg: req.user!.organizationId },
           req.requestId
         ));
         return;
@@ -271,12 +307,13 @@ app.post("/",
       
       // Check if active config already exists
       const existingSnapshot = await collections.configs
-        .where("organizationId", "==", configData.organizationId)
+        .where("organizationId", "==", configData?.organizationId)
         .where("isActive", "==", true)
         .get();
       
       if (!existingSnapshot.empty && !req.body.allowMultiple) {
         res.status(409).json(createErrorResponse(
+          "CONFLICT",
           "Active configuration already exists for organization",
           { 
             existingConfigId: existingSnapshot.docs[0].id,
@@ -287,29 +324,68 @@ app.post("/",
         return;
       }
       
+      if (!configData) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Dados de configuração inválidos"
+        ));
+        return;
+      }
+
       const config: OrganizationConfig = {
         id: uuidv4(),
         ...configData,
         version: 1,
         isActive: true,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        // Ensure customRules have required properties
+        customRules: configData.customRules?.map(rule => ({
+          ...rule,
+          createdAt: rule.createdAt || new Date(),
+          updatedAt: rule.updatedAt || new Date(),
+          patternType: rule.patternType || 'regex',
+          isActive: rule.isActive !== undefined ? rule.isActive : true,
+          weight: rule.weight !== undefined ? rule.weight : 1
+        })) || [],
+        // Ensure templates have required properties
+        templates: configData.templates?.map(template => ({
+          ...template,
+          createdAt: template.createdAt || new Date(),
+          updatedAt: template.updatedAt || new Date(),
+          isActive: template.isActive !== undefined ? template.isActive : true,
+          sections: template.sections.map(section => ({
+            ...section,
+            optionalFields: section.optionalFields || [],
+            validationRules: section.validationRules || []
+          }))
+        })) || [],
+        // Ensure settings have required properties
+        settings: {
+          enableAIAnalysis: configData.settings?.enableAIAnalysis ?? false,
+          enableCustomRules: configData.settings?.enableCustomRules ?? true,
+          strictMode: configData.settings?.strictMode ?? false,
+          autoApproval: configData.settings?.autoApproval ?? false,
+          requireDualApproval: configData.settings?.requireDualApproval ?? false,
+          maxDocumentSize: configData.settings?.maxDocumentSize ?? 52428800,
+          allowedDocumentTypes: configData.settings?.allowedDocumentTypes ?? ["pdf", "doc", "docx"],
+          retentionDays: configData.settings?.retentionDays ?? 365
+        }
       };
       
       // Validate complete config
       const validation = OrganizationConfigSchema.safeParse(config);
       if (!validation.success) {
         res.status(400).json(createErrorResponse(
-          "Invalid configuration data",
-          validation.error.errors,
-          req.requestId
+          "VALIDATION_ERROR",
+          "Dados de configuração inválidos"
         ));
         return;
       }
       
       // Deactivate existing configs if creating new active one
       if (config.isActive && !existingSnapshot.empty) {
-        const batch = collections.configs.firestore.batch();
+        const batch = firestore.batch();
         existingSnapshot.docs.forEach(doc => {
           batch.update(doc.ref, { isActive: false, updatedAt: new Date() });
         });
@@ -321,18 +397,19 @@ app.post("/",
       
       res.status(201).json(createSuccessResponse(
         config,
-        "Configuration created successfully",
         req.requestId
       ));
+      return;
     } catch (error) {
       console.error("Error creating config:", error);
       
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown> | undefined, req.requestId));
       } else {
-        res.status(500).json(createErrorResponse(
-          "Internal server error while creating config",
-          null,
+        return res.status(500).json(createErrorResponse(
+          "INTERNAL_ERROR",
+          "Erro interno do servidor",
+          undefined,
           req.requestId
         ));
       }
@@ -348,17 +425,58 @@ app.put("/:id",
   requirePermissions([PERMISSIONS.CONFIG_WRITE]),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(
+      const pathValidation = validateData(
         z.object({ id: UUIDSchema }),
         req.params
       );
       
-      const updateData = validateRequestBody(UpdateConfigRequestSchema)(req);
+      if (!pathValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid path parameters",
+          pathValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+      }
+      
+      if (!pathValidation.data) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Parâmetros de caminho inválidos",
+          {},
+          req.requestId
+        ));
+      }
+
+      const { id } = pathValidation.data;
+      
+      const bodyValidation = validateData(UpdateConfigRequestSchema, req.body);
+      
+      if (!bodyValidation.success) {
+        return res.status(400).json(createErrorResponse(
+          'VALIDATION_ERROR',
+          'Dados da requisição inválidos',
+          bodyValidation.details as Record<string, unknown>,
+          req.headers['x-request-id'] as string
+        ));
+      }
+      
+      if (!bodyValidation.data) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Dados de atualização inválidos",
+          {},
+          req.requestId
+        ));
+      }
+
+      const updateData = bodyValidation.data;
       
       const configDoc = await collections.configs.doc(id).get();
       
       if (!configDoc.exists) {
         res.status(404).json(createErrorResponse(
+          "NOT_FOUND",
           "Configuration not found",
           { configId: id },
           req.requestId
@@ -372,6 +490,7 @@ app.put("/:id",
       if (existingConfig.organizationId !== req.user!.organizationId &&
           !req.user!.roles.includes("super_admin")) {
         res.status(403).json(createErrorResponse(
+          "FORBIDDEN",
           "Access denied to configuration",
           { configId: id },
           req.requestId
@@ -387,15 +506,48 @@ app.put("/:id",
         organizationId: existingConfig.organizationId,
         version: existingConfig.version + 1,
         updatedAt: new Date(),
-        lastModifiedBy: req.user!.uid
+        lastModifiedBy: req.user!.uid,
+        // Ensure customRules have required dates and properties
+        customRules: updateData.customRules?.map(rule => ({
+          ...rule,
+          createdAt: rule.createdAt || new Date(),
+          updatedAt: rule.updatedAt || new Date(),
+          patternType: rule.patternType || 'regex',
+          isActive: rule.isActive !== undefined ? rule.isActive : true,
+          weight: rule.weight !== undefined ? rule.weight : 1
+        })) || existingConfig.customRules,
+        // Ensure templates have required dates and properties
+        templates: updateData.templates?.map(template => ({
+          ...template,
+          createdAt: template.createdAt || new Date(),
+          updatedAt: template.updatedAt || new Date(),
+          isActive: template.isActive !== undefined ? template.isActive : true,
+          sections: template.sections.map(section => ({
+            ...section,
+            optionalFields: section.optionalFields || [],
+            validationRules: section.validationRules || []
+          }))
+        })) || existingConfig.templates,
+        // Ensure settings have required properties
+        settings: {
+          enableAIAnalysis: updateData.settings?.enableAIAnalysis ?? existingConfig.settings?.enableAIAnalysis ?? false,
+          enableCustomRules: updateData.settings?.enableCustomRules ?? existingConfig.settings?.enableCustomRules ?? true,
+          strictMode: updateData.settings?.strictMode ?? existingConfig.settings?.strictMode ?? false,
+          autoApproval: updateData.settings?.autoApproval ?? existingConfig.settings?.autoApproval ?? false,
+          requireDualApproval: updateData.settings?.requireDualApproval ?? existingConfig.settings?.requireDualApproval ?? false,
+          maxDocumentSize: updateData.settings?.maxDocumentSize ?? existingConfig.settings?.maxDocumentSize ?? 52428800,
+          allowedDocumentTypes: updateData.settings?.allowedDocumentTypes ?? existingConfig.settings?.allowedDocumentTypes ?? ["pdf", "doc", "docx"],
+          retentionDays: updateData.settings?.retentionDays ?? existingConfig.settings?.retentionDays ?? 365
+        }
       };
       
       // Validate updated config
       const validation = OrganizationConfigSchema.safeParse(updatedConfig);
       if (!validation.success) {
         res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
           "Invalid configuration update data",
-          validation.error.errors,
+          { errors: validation.error.errors as any },
           req.requestId
         ));
         return;
@@ -406,18 +558,19 @@ app.put("/:id",
       
       res.json(createSuccessResponse(
         updatedConfig,
-        "Configuration updated successfully",
         req.requestId
       ));
+      return;
     } catch (error) {
       console.error("Error updating config:", error);
       
       if (error instanceof ValidationError) {
-        res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown>, req.requestId));
       } else {
-        res.status(500).json(createErrorResponse(
+        return res.status(500).json(createErrorResponse(
+          "INTERNAL_ERROR",
           "Internal server error while updating config",
-          null,
+          undefined,
           req.requestId
         ));
       }
@@ -433,15 +586,23 @@ app.post("/:id/clone",
   requirePermissions([PERMISSIONS.CONFIG_WRITE]),
   async (req, res) => {
     try {
-      const { id } = validatePathParams(
+      const pathValidation = validateData(
         z.object({ id: UUIDSchema }),
         req.params
       );
+      if (!pathValidation.success || !pathValidation.data) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid path parameters"
+        ));
+      }
+      const { id } = pathValidation.data;
       
       const configDoc = await collections.configs.doc(id).get();
       
       if (!configDoc.exists) {
         res.status(404).json(createErrorResponse(
+          "NOT_FOUND",
           "Configuration not found",
           { configId: id },
           req.requestId
@@ -455,6 +616,7 @@ app.post("/:id/clone",
       if (sourceConfig.organizationId !== req.user!.organizationId &&
           !req.user!.roles.includes("super_admin")) {
         res.status(403).json(createErrorResponse(
+          "FORBIDDEN",
           "Access denied to configuration",
           { configId: id },
           req.requestId
@@ -479,14 +641,15 @@ app.post("/:id/clone",
       
       res.status(201).json(createSuccessResponse(
         clonedConfig,
-        "Configuration cloned successfully",
         req.requestId
       ));
+      return;
     } catch (error) {
       console.error("Error cloning config:", error);
-      res.status(500).json(createErrorResponse(
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
         "Internal server error while cloning config",
-        null,
+        undefined,
         req.requestId
       ));
     }
@@ -505,7 +668,8 @@ app.get("/presets", (req, res) => {
     description: getPresetDescription(preset as AnalysisPreset)
   }));
   
-  res.json(createSuccessResponse(presets, undefined, req.requestId));
+  res.json(createSuccessResponse(presets, req.requestId));
+  return;
 });
 
 /**
@@ -514,14 +678,14 @@ app.get("/presets", (req, res) => {
  */
 app.post("/validate-weights", (req, res) => {
   try {
-    const weights = validateRequestBody(
-      z.object({
-        structural: z.number().min(0).max(100),
-        legal: z.number().min(0).max(100),
-        clarity: z.number().min(0).max(100),
-        abnt: z.number().min(0).max(100)
-      })
-    )(req);
+    const weightsSchema = z.object({
+      structural: z.number().min(0).max(100),
+      legal: z.number().min(0).max(100),
+      clarity: z.number().min(0).max(100),
+      abnt: z.number().min(0).max(100)
+    });
+    
+    const weights = weightsSchema.parse(req.body);
     
     const total = weights.structural + weights.legal + weights.clarity + weights.abnt;
     const isValid = Math.abs(total - 100) < 0.01;
@@ -531,14 +695,16 @@ app.post("/validate-weights", (req, res) => {
       total,
       weights,
       error: !isValid ? `Weights must sum to 100%. Current sum: ${total.toFixed(2)}%` : null
-    }, undefined, req.requestId));
+    }, req.requestId));
+    return;
   } catch (error) {
-    if (error instanceof ValidationError) {
-      res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
+    if (error instanceof z.ZodError) {
+      return res.status(400).json(createErrorResponse("VALIDATION_ERROR", "Invalid weights format", { issues: error.issues }, req.requestId));
     } else {
-      res.status(500).json(createErrorResponse(
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
         "Error validating weights",
-        null,
+        undefined,
         req.requestId
       ));
     }
@@ -551,13 +717,22 @@ app.post("/validate-weights", (req, res) => {
  */
 app.post("/test-rule", (req, res) => {
   try {
-    const { pattern, text, patternType } = validateRequestBody(
-      z.object({
-        pattern: z.string(),
-        text: z.string(),
-        patternType: z.enum(["regex", "keyword", "phrase"]).default("regex")
-      })
-    )(req);
+    const validation = z.object({
+      pattern: z.string(),
+      text: z.string(),
+      patternType: z.enum(["regex", "keyword", "phrase"]).default("regex")
+    }).safeParse(req.body);
+    
+    if (!validation.success) {
+      return res.status(400).json(createErrorResponse(
+        "VALIDATION_ERROR",
+        "Invalid request body",
+        { issues: validation.error.errors },
+        req.requestId
+      ));
+    }
+    
+    const { pattern, text, patternType } = validation.data;
     
     let matches = false;
     let error = null;
@@ -570,7 +745,7 @@ app.post("/test-rule", (req, res) => {
         matches = text.toLowerCase().includes(pattern.toLowerCase());
       }
     } catch (err) {
-      error = `Invalid pattern: ${err.message}`;
+      error = `Invalid pattern: ${(err as Error).message}`;
     }
     
     res.json(createSuccessResponse({
@@ -579,17 +754,15 @@ app.post("/test-rule", (req, res) => {
       text: text.substring(0, 200) + (text.length > 200 ? "..." : ""),
       patternType,
       error
-    }, undefined, req.requestId));
+    }, req.requestId));
+    return;
   } catch (error) {
-    if (error instanceof ValidationError) {
-      res.status(400).json(createErrorResponse(error.message, error.details, req.requestId));
-    } else {
-      res.status(500).json(createErrorResponse(
-        "Error testing rule",
-        null,
-        req.requestId
-      ));
-    }
+    return res.status(500).json(createErrorResponse(
+      "INTERNAL_ERROR",
+      "Error testing rule",
+      undefined,
+      req.requestId
+    ));
   }
 });
 
@@ -610,8 +783,9 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
   console.error("Unhandled error in analysis-config API:", error);
   
   res.status(500).json(createErrorResponse(
+    "INTERNAL_ERROR",
     "Internal server error",
-    process.env.NODE_ENV === "development" ? error.stack : null,
+    process.env.NODE_ENV === "development" ? { stack: error.stack } : undefined,
     req.requestId
   ));
 });

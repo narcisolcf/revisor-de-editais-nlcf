@@ -7,7 +7,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import express from "express";
 import { logger } from "firebase-functions";
-import { collections, messaging } from "../config/firebase";
+import { collections, messaging, firestore } from "../config/firebase";
 import { NotificationPayload } from "../types";
 import { authenticateService } from "../middleware/auth";
 import { createSuccessResponse, createErrorResponse, generateRequestId } from "../utils";
@@ -36,14 +36,14 @@ app.post("/send",
       
       res.json(createSuccessResponse(
         result,
-        "Notification processed successfully",
         req.requestId
       ));
     } catch (error) {
       logger.error("Error sending notification:", error);
       res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
         "Failed to send notification",
-        { error: error.message },
+        { error: error instanceof Error ? error.message : String(error) },
         req.requestId
       ));
     }
@@ -79,7 +79,7 @@ export const onNotificationCreated = onDocumentCreated({
     await processNotification(notificationData as NotificationPayload);
     
     // Mark as processed
-    await collections.firestore
+    await firestore
       .collection("notifications")
       .doc(notificationId)
       .update({
@@ -92,12 +92,12 @@ export const onNotificationCreated = onDocumentCreated({
     logger.error(`Error processing notification ${notificationId}:`, error);
     
     // Mark as failed
-    await collections.firestore
+    await firestore
       .collection("notifications")
       .doc(notificationId)
       .update({
         processed: false,
-        processingError: error.message,
+        processingError: error instanceof Error ? error.message : String(error),
         failedAt: new Date()
       });
   }
@@ -134,7 +134,7 @@ async function processNotification(notification: NotificationPayload): Promise<{
       logger.error(`Error sending notification via ${channel}:`, error);
       results[channel] = { 
         success: false, 
-        details: { error: error.message }
+        details: { error: error instanceof Error ? error.message : String(error) }
       };
     }
   }
@@ -151,7 +151,7 @@ async function sendPushNotification(notification: NotificationPayload): Promise<
 }> {
   try {
     // Get user's FCM tokens
-    const userTokensSnapshot = await collections.firestore
+    const userTokensSnapshot = await firestore
       .collection("userTokens")
       .doc(notification.userId)
       .get();
@@ -181,7 +181,7 @@ async function sendPushNotification(notification: NotificationPayload): Promise<
       data: {
         type: notification.type,
         organizationId: notification.organizationId || "",
-        ...(notification.data ? JSON.stringify(notification.data) : {})
+        ...(notification.data ? { data: JSON.stringify(notification.data) } : {})
       },
       tokens: tokens
     };
@@ -226,7 +226,7 @@ async function sendPushNotification(notification: NotificationPayload): Promise<
     logger.error("Error sending push notification:", error);
     return {
       success: false,
-      details: { error: error.message }
+      details: { error: error instanceof Error ? error.message : String(error) }
     };
   }
 }
@@ -243,7 +243,7 @@ async function sendEmailNotification(notification: NotificationPayload): Promise
     // like SendGrid, AWS SES, or similar
     
     // For now, just store the email request
-    await collections.firestore.collection("emailQueue").add({
+    await firestore.collection("emailQueue").add({
       userId: notification.userId,
       organizationId: notification.organizationId,
       subject: notification.title,
@@ -265,7 +265,7 @@ async function sendEmailNotification(notification: NotificationPayload): Promise
     logger.error("Error queuing email notification:", error);
     return {
       success: false,
-      details: { error: error.message }
+      details: { error: error instanceof Error ? error.message : String(error) }
     };
   }
 }
@@ -352,7 +352,7 @@ async function sendWebhookNotification(notification: NotificationPayload): Promi
     logger.error("Error sending webhook notification:", error);
     return {
       success: false,
-      details: { error: error.message }
+      details: { error: error instanceof Error ? error.message : String(error) }
     };
   }
 }
@@ -372,52 +372,7 @@ function generateWebhookSignature(payload: any, secret?: string): string {
     .digest("hex");
 }
 
-/**
- * Get user notification preferences
- */
-async function getUserNotificationPreferences(userId: string): Promise<{
-  push: boolean;
-  email: boolean;
-  webhook: boolean;
-  types: string[];
-}> {
-  try {
-    const userPrefsSnapshot = await collections.firestore
-      .collection("userPreferences")
-      .doc(userId)
-      .get();
-    
-    if (!userPrefsSnapshot.exists) {
-      // Default preferences
-      return {
-        push: true,
-        email: true,
-        webhook: false,
-        types: ["success", "error", "warning", "info"]
-      };
-    }
-    
-    const prefs = userPrefsSnapshot.data()?.notifications || {};
-    
-    return {
-      push: prefs.push !== false,
-      email: prefs.email !== false,
-      webhook: prefs.webhook === true,
-      types: prefs.types || ["success", "error", "warning", "info"]
-    };
-    
-  } catch (error) {
-    logger.error(`Error getting user notification preferences for ${userId}:`, error);
-    
-    // Return defaults on error
-    return {
-      push: true,
-      email: false,
-      webhook: false,
-      types: ["error"] // Only critical notifications on error
-    };
-  }
-}
+
 
 // Export Cloud Function
 export const notificationProcessor = onRequest({

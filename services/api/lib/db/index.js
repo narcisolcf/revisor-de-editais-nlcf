@@ -62,7 +62,7 @@ __exportStar(require("./migrations/migration-runner"), exports);
 __exportStar(require("./migrations/001-initial-data"), exports);
 // Database initialization utility
 const firestore_1 = require("firebase-admin/firestore");
-const firestore_2 = require("firebase-admin/firestore");
+const app_1 = require("firebase-admin/app");
 const admin = __importStar(require("firebase-admin"));
 let db;
 /**
@@ -74,24 +74,25 @@ function initializeDatabase(serviceAccountKey) {
     }
     try {
         // Check if Firebase app is already initialized
-        if ((0, firestore_1.getApps)().length === 0) {
-            const app = admin.initializeApp({
-                credential: serviceAccountKey
-                    ? (0, firestore_1.cert)(serviceAccountKey)
-                    : admin.credential.applicationDefault(),
-                projectId: process.env.GCP_PROJECT_ID
-            });
-            db = (0, firestore_2.getFirestore)(app);
+        if ((0, app_1.getApps)().length === 0) {
+            if (serviceAccountKey) {
+                admin.initializeApp({
+                    credential: admin.credential.cert(serviceAccountKey),
+                    projectId: serviceAccountKey.project_id
+                });
+            }
+            else {
+                // Use default credentials (for Cloud Functions/Cloud Run)
+                admin.initializeApp();
+            }
         }
-        else {
-            db = (0, firestore_2.getFirestore)();
-        }
-        console.log('✅ Firestore initialized successfully');
+        db = (0, firestore_1.getFirestore)();
+        console.log('✅ Firestore database initialized successfully');
         return db;
     }
     catch (error) {
         console.error('❌ Failed to initialize Firestore:', error);
-        throw error;
+        throw new Error(`Database initialization failed: ${error}`);
     }
 }
 /**
@@ -130,7 +131,7 @@ async function healthCheck() {
     }
 }
 // Repository factory functions for easy access
-function createOrganizationRepository(database) {
+async function createOrganizationRepository(database) {
     const dbInstance = database || getDatabase();
     return {
         organizations: new (await Promise.resolve().then(() => __importStar(require('./repositories/OrganizationRepository')))).OrganizationRepository(dbInstance),
@@ -140,7 +141,7 @@ function createOrganizationRepository(database) {
         users: new (await Promise.resolve().then(() => __importStar(require('./repositories/OrganizationRepository')))).OrganizationUserRepository(dbInstance)
     };
 }
-function createDocumentRepository(database) {
+async function createDocumentRepository(database) {
     const dbInstance = database || getDatabase();
     return {
         documents: new (await Promise.resolve().then(() => __importStar(require('./repositories/DocumentRepository')))).DocumentRepository(dbInstance),

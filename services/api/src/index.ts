@@ -32,9 +32,12 @@ export const analysisApi = onRequest({
   maxInstances: 50
 }, analysisApp);
 
+// Export Process Analysis Function
+export { processAnalysis } from "./api/process-analysis";
+
 // Export Trigger Functions  
-export { onDocumentUpload } from "./triggers/document-upload";
-export { onAnalysisResultCreated, onAnalysisResultUpdated } from "./triggers/analysis-complete";
+// export { onDocumentUpload } from "./triggers/document-upload"; // Temporarily disabled due to storage bucket issues
+// export { onAnalysisResultCreated, onAnalysisResultUpdated } from "./triggers/analysis-complete"; // Temporarily disabled due to deployment issues
 
 // Export Additional Functions
 export { healthCheck } from "./api/health";
@@ -43,11 +46,11 @@ export { notificationProcessor } from "./api/notifications";
 export { auditLogger } from "./api/audit";
 
 // Additional utility functions that might be called directly
-export { 
-  extractDocumentContent,
-  generateDocumentPreview,
-  validateDocument
-} from "./triggers/document-upload";
+// export { 
+//   extractDocumentContent,
+//   generateDocumentPreview,
+//   validateDocument
+// } from "./triggers/document-upload"; // Temporarily disabled due to storage bucket issues
 
 export {
   cleanupOldAnalysisResults

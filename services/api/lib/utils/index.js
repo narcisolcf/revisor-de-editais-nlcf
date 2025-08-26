@@ -34,6 +34,7 @@ exports.isRetryableError = isRetryableError;
 exports.truncateText = truncateText;
 exports.normalizeFileName = normalizeFileName;
 exports.isValidEmail = isValidEmail;
+exports.validateOrganizationAccess = validateOrganizationAccess;
 const uuid_1 = require("uuid");
 const zod_1 = require("zod");
 // Re-exportar validação
@@ -143,15 +144,15 @@ async function retryWithBackoff(fn, maxRetries = 3, initialDelay = 1000, backoff
  * Verificar se um erro é retryable
  */
 function isRetryableError(error) {
-    var _a, _b;
     if (!error)
         return false;
+    const err = error;
     // Erros de rede
-    if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+    if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
         return true;
     }
     // Erros HTTP 5xx e 429
-    if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) >= 500 || ((_b = error.response) === null || _b === void 0 ? void 0 : _b.status) === 429) {
+    if (err.response?.status >= 500 || err.response?.status === 429) {
         return true;
     }
     return false;
@@ -196,4 +197,10 @@ exports.CommonSchemas = {
         limit: zod_1.z.number().int().min(1).max(100).default(20)
     })
 };
+/**
+ * Validar acesso à organização
+ */
+function validateOrganizationAccess(userOrgId, targetOrgId) {
+    return userOrgId === targetOrgId;
+}
 //# sourceMappingURL=index.js.map

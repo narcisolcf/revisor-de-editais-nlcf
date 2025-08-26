@@ -43,7 +43,7 @@ type ReportFormData = z.infer<typeof reportSchema>;
 
 interface ErrorReportDialogProps {
   open: boolean;
-  onOpenChange: (isOpen: boolean) => void;
+  onOpenChange: (_isOpen: boolean) => void;
   errorId: string;
   error?: Error;
 }

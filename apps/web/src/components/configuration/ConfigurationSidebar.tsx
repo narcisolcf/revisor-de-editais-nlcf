@@ -10,7 +10,6 @@ import React, { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -37,17 +36,14 @@ import {
   CheckCircle,
   AlertTriangle,
   Clock,
-  Info,
   Save,
   Download,
   Upload,
   RefreshCw,
   Zap,
-  Target,
   BarChart3,
   Users,
-  Shield,
-  Database
+  Shield
 } from 'lucide-react';
 import { useAnalysisConfig } from '@/hooks/useAnalysisConfig';
 import { cn } from '@/lib/utils';

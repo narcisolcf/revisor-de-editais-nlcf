@@ -32,7 +32,6 @@ export interface PushNotification {
     sound?: string;
 }
 export declare class NotificationService {
-    private projectId;
     constructor(projectId: string);
     /**
      * Envia notificação para um usuário específico

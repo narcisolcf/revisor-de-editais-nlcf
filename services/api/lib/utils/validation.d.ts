@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import { Request, Response, NextFunction } from 'express';
 /**
  * Classe de erro de validação
  */
 export declare class ValidationError extends Error {
-    details: any;
-    constructor(message: string, details?: any);
+    details: unknown;
+    constructor(message: string, details?: unknown);
 }
 /**
  * Resultado da validação
@@ -13,24 +14,24 @@ export interface ValidationResult<T> {
     success: boolean;
     data?: T;
     error?: string;
-    details?: any;
+    details?: unknown;
 }
 /**
  * Valida dados usando schema Zod
  */
-export declare function validateData<T>(schema: z.ZodSchema<T>, data: any): ValidationResult<T>;
+export declare function validateData<T>(schema: z.ZodSchema<T>, data: unknown): ValidationResult<T>;
 /**
  * Middleware para validar body da requisição
  */
-export declare function validateBody<T>(schema: z.ZodSchema<T>): (req: any, res: any, next: any) => void;
+export declare function validateBody<T>(schema: z.ZodSchema<T>): (req: Request, res: Response, next: NextFunction) => void;
 /**
  * Middleware para validar query parameters
  */
-export declare function validateQuery<T>(schema: z.ZodSchema<T>): (req: any, res: any, next: any) => void;
+export declare function validateQuery<T>(schema: z.ZodSchema<T>): (req: Request, res: Response, next: NextFunction) => void;
 /**
  * Middleware para validar path parameters
  */
-export declare function validatePathParams<T>(schema: z.ZodSchema<T>): (req: any, res: any, next: any) => void;
+export declare function validatePathParams<T>(schema: z.ZodSchema<T>): (req: Request, res: Response, next: NextFunction) => void;
 export declare const DocumentIdSchema: z.ZodObject<{
     documentId: z.ZodString;
 }, "strip", z.ZodTypeAny, {
@@ -91,4 +92,7 @@ export declare const AnalysisRequestSchema: z.ZodObject<{
     priority?: "low" | "normal" | "high" | undefined;
     analysisType?: "basic" | "detailed" | "comprehensive" | undefined;
 }>;
+export declare const UUIDSchema: z.ZodString;
+export declare function validateRequestBody<T>(schema: z.ZodSchema<T>): (req: Request, res: Response, next: NextFunction) => void | Response<any, Record<string, any>>;
+export declare function validateQueryParams<T>(schema: z.ZodSchema<T>): (req: Request, res: Response, next: NextFunction) => void | Response<any, Record<string, any>>;
 //# sourceMappingURL=validation.d.ts.map

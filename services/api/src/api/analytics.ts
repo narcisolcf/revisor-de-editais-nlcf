@@ -5,7 +5,7 @@
 
 import { onRequest } from "firebase-functions/v2/https";
 import express from "express";
-import { collections } from "../config/firebase";
+import { collections, firestore } from "../config/firebase";
 import { 
   authenticateUser,
   requireOrganization,
@@ -16,7 +16,7 @@ import {
   createSuccessResponse,
   createErrorResponse,
   generateRequestId,
-  validateQueryParams
+  validateData
 } from "../utils";
 import { UsageMetrics, PerformanceMetrics } from "../types";
 import { z } from "zod";
@@ -42,23 +42,35 @@ app.get("/usage",
   requirePermissions([PERMISSIONS.AUDIT_READ]),
   async (req, res) => {
     try {
-      const query = validateQueryParams(
+      const queryValidation = validateData(
         z.object({
           period: z.enum(["day", "week", "month", "year"]).default("month"),
           startDate: z.coerce.date().optional(),
           endDate: z.coerce.date().optional()
         }),
-        req
+        req.query
       );
+      
+      if (!queryValidation.success) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid query parameters",
+          queryValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+        return;
+      }
+      
+      const query = queryValidation.data!;
       
       const organizationId = req.user!.organizationId;
       
       // Calculate date range
       const endDate = query.endDate || new Date();
-      const startDate = query.startDate || getStartDateForPeriod(query.period, endDate);
+      const startDate = query.startDate || getStartDateForPeriod(query?.period || 'daily', endDate);
       
       // Query analytics data
-      const analyticsSnapshot = await collections.firestore
+      const analyticsSnapshot = await firestore
         .collection("organizationAnalytics")
         .doc(organizationId)
         .get();
@@ -70,16 +82,16 @@ app.get("/usage",
           startDate,
           endDate,
           metrics: getEmptyMetrics()
-        }, undefined, req.requestId));
+        }, req.requestId));
         return;
       }
       
       const analyticsData = analyticsSnapshot.data();
       const metrics = aggregateMetricsForPeriod(
-        analyticsData.daily || {},
+        analyticsData?.daily || {},
         startDate,
         endDate,
-        query.period
+        query?.period || 'daily'
       );
       
       res.json(createSuccessResponse({
@@ -88,13 +100,15 @@ app.get("/usage",
         startDate,
         endDate,
         metrics
-      }, undefined, req.requestId));
+      }, req.requestId));
+      return;
       
     } catch (error) {
       console.error("Error getting usage analytics:", error);
-      res.status(500).json(createErrorResponse(
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
         "Failed to get usage analytics",
-        null,
+        undefined,
         req.requestId
       ));
     }
@@ -109,16 +123,28 @@ app.get("/documents",
   requirePermissions([PERMISSIONS.AUDIT_READ]),
   async (req, res) => {
     try {
-      const query = validateQueryParams(
+      const queryValidation = validateData(
         z.object({
           days: z.coerce.number().min(1).max(365).default(30)
         }),
-        req
+        req.query
       );
+      
+      if (!queryValidation.success) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid query parameters",
+          queryValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+        return;
+      }
+      
+      const query = queryValidation.data!;
       
       const organizationId = req.user!.organizationId;
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - query.days);
+      startDate.setDate(startDate.getDate() - (query?.days || 7));
       
       // Get document statistics
       const documentsQuery = collections.documents
@@ -147,15 +173,17 @@ app.get("/documents",
       
       res.json(createSuccessResponse({
         organizationId,
-        period: `${query.days} days`,
+        period: `${query?.days || 7} days`,
         documentStats
-      }, undefined, req.requestId));
+      }));
+      return;
       
     } catch (error) {
       console.error("Error getting document analytics:", error);
-      res.status(500).json(createErrorResponse(
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
         "Failed to get document analytics",
-        null,
+        undefined,
         req.requestId
       ));
     }
@@ -170,16 +198,28 @@ app.get("/analysis",
   requirePermissions([PERMISSIONS.AUDIT_READ]),
   async (req, res) => {
     try {
-      const query = validateQueryParams(
+      const queryValidation = validateData(
         z.object({
           days: z.coerce.number().min(1).max(365).default(30)
         }),
-        req
+        req.query
       );
+      
+      if (!queryValidation.success) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid query parameters",
+          queryValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+        return;
+      }
+      
+      const query = queryValidation.data!;
       
       const organizationId = req.user!.organizationId;
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - query.days);
+      startDate.setDate(startDate.getDate() - (query?.days || 30));
       
       // Get analysis results statistics
       const analysisQuery = collections.analysisResults
@@ -258,15 +298,17 @@ app.get("/analysis",
       
       res.json(createSuccessResponse({
         organizationId,
-        period: `${query.days} days`,
+        period: `${query?.days || 30} days`,
         analysisStats
-      }, undefined, req.requestId));
+      }));
+      return;
       
     } catch (error) {
       console.error("Error getting analysis analytics:", error);
-      res.status(500).json(createErrorResponse(
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
         "Failed to get analysis analytics",
-        null,
+        undefined,
         req.requestId
       ));
     }
@@ -281,18 +323,30 @@ app.get("/performance",
   requirePermissions([PERMISSIONS.AUDIT_READ]),
   async (req, res) => {
     try {
-      const query = validateQueryParams(
+      const queryValidation = validateData(
         z.object({
           hours: z.coerce.number().min(1).max(168).default(24) // Max 1 week
         }),
-        req
+        req.query
       );
       
+      if (!queryValidation.success) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid query parameters",
+          queryValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+        return;
+      }
+      
+      const query = queryValidation.data!;
+      
       const startDate = new Date();
-      startDate.setHours(startDate.getHours() - query.hours);
+      startDate.setHours(startDate.getHours() - (query?.hours || 24));
       
       // Get performance metrics from logs or metrics collection
-      const metricsSnapshot = await collections.firestore
+      const metricsSnapshot = await firestore
         .collection("performanceMetrics")
         .where("timestamp", ">=", startDate)
         .orderBy("timestamp", "desc")
@@ -345,16 +399,18 @@ app.get("/performance",
       });
       
       res.json(createSuccessResponse({
-        period: `${query.hours} hours`,
+        period: `${query?.hours || 24} hours`,
         totalMetrics: metrics.length,
         functionMetrics
-      }, undefined, req.requestId));
+      }));
+      return;
       
     } catch (error) {
       console.error("Error getting performance analytics:", error);
-      res.status(500).json(createErrorResponse(
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
         "Failed to get performance analytics",
-        null,
+        undefined,
         req.requestId
       ));
     }

@@ -6,7 +6,7 @@ export * from "./document.types";
 export * from "./analysis.types";
 export * from "./config.types";
 export * from "./comissoes.types";
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
     success: boolean;
     data?: T;
     error?: string;
@@ -27,8 +27,14 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 export interface ErrorResponse extends ApiResponse {
     success: false;
     error: string;
-    details?: any;
+    details?: Record<string, unknown>;
     stack?: string;
+}
+export interface PaginatedResult<T> {
+    data: T[];
+    total: number;
+    hasMore: boolean;
+    nextPageToken?: string;
 }
 export interface AuditLog {
     id: string;
@@ -37,8 +43,8 @@ export interface AuditLog {
     action: string;
     resourceType: string;
     resourceId: string;
-    changes?: Record<string, any>;
-    metadata?: Record<string, any>;
+    changes?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
     ipAddress?: string;
     userAgent?: string;
     timestamp: Date;
@@ -62,7 +68,7 @@ export interface FileUploadResult {
 export interface WebhookEvent {
     id: string;
     type: string;
-    data: any;
+    data: Record<string, unknown>;
     organizationId: string;
     timestamp: Date;
     source: string;
@@ -70,7 +76,7 @@ export interface WebhookEvent {
 export interface TaskPayload {
     id: string;
     type: string;
-    data: any;
+    data: Record<string, unknown>;
     priority: "low" | "normal" | "high";
     maxRetries: number;
     currentRetries: number;
@@ -83,7 +89,7 @@ export interface NotificationPayload {
     title: string;
     message: string;
     type: "info" | "success" | "warning" | "error";
-    data?: any;
+    data?: Record<string, unknown>;
     channels: ("email" | "push" | "webhook")[];
 }
 export interface HealthCheckResult {
@@ -91,7 +97,7 @@ export interface HealthCheckResult {
     status: "healthy" | "unhealthy" | "degraded";
     timestamp: Date;
     responseTime?: number;
-    details?: Record<string, any>;
+    details?: Record<string, unknown>;
     dependencies?: HealthCheckResult[];
 }
 export interface SystemHealth {
@@ -133,12 +139,6 @@ export interface RateLimitInfo {
     reset: Date;
     retryAfter?: number;
 }
-export type DeepPartial<T> = {
-    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
-export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> & {
-    [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>;
-}[Keys];
 export type Timestamp = {
     createdAt: Date;
     updatedAt: Date;
@@ -148,8 +148,11 @@ export type WithId<T> = T & {
 };
 export type WithTimestamp<T> = T & Timestamp;
 export type WithMetadata<T> = T & {
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 };
+export type Status = 'active' | 'inactive' | 'pending' | 'archived';
+export type Priority = 'low' | 'medium' | 'high' | 'critical';
+export type Severity = 'info' | 'warning' | 'error' | 'critical';
 export interface Environment {
     nodeEnv: "development" | "staging" | "production";
     projectId: string;

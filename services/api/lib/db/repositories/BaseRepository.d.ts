@@ -14,7 +14,7 @@ export interface QueryOptions {
     }>;
     where?: Array<{
         field: string;
-        operator: FirebaseFirestore.WhereFilterOp;
+        operator: any;
         value: any;
     }>;
 }

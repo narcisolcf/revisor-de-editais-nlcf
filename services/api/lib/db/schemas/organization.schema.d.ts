@@ -106,12 +106,12 @@ export declare const OrganizationProfileSchema: z.ZodObject<{
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING_APPROVAL";
+    name: string;
     id: string;
     createdBy: string;
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
-    name: string;
     settings: {
         language: string;
         enableAIAnalysis: boolean;
@@ -146,9 +146,9 @@ export declare const OrganizationProfileSchema: z.ZodObject<{
     lastModifiedBy?: string | undefined;
     displayName?: string | undefined;
 }, {
+    name: string;
     id: string;
     createdBy: string;
-    name: string;
     settings: {
         language?: string | undefined;
         enableAIAnalysis?: boolean | undefined;
@@ -232,8 +232,8 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
             defaultValue: z.ZodOptional<z.ZodAny>;
         }, "strip", z.ZodTypeAny, {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            id: string;
             name: string;
+            id: string;
             required: boolean;
             validation?: {
                 options?: string[] | undefined;
@@ -248,8 +248,8 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
             defaultValue?: any;
         }, {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            id: string;
             name: string;
+            id: string;
             validation?: {
                 options?: string[] | undefined;
                 pattern?: string | undefined;
@@ -266,15 +266,15 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
         validationRules: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
         conditionalLogic: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         name: string;
+        id: string;
         validationRules: string[];
         order: number;
         required: boolean;
         fields: {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            id: string;
             name: string;
+            id: string;
             required: boolean;
             validation?: {
                 options?: string[] | undefined;
@@ -291,13 +291,13 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
         description?: string | undefined;
         conditionalLogic?: Record<string, any> | undefined;
     }, {
-        id: string;
         name: string;
+        id: string;
         order: number;
         fields: {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            id: string;
             name: string;
+            id: string;
             validation?: {
                 options?: string[] | undefined;
                 pattern?: string | undefined;
@@ -342,6 +342,7 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     status: "DRAFT" | "ARCHIVED" | "ACTIVE" | "DEPRECATED";
+    name: string;
     organizationId: string;
     documentType: "EDITAL" | "TERMO_REFERENCIA" | "PROJETO_BASICO" | "ATA_SESSAO" | "CONTRATO" | "RECURSO" | "IMPUGNACAO" | "ESCLARECIMENTO";
     id: string;
@@ -350,18 +351,17 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
-    name: string;
     requiredFields: string[];
     sections: {
-        id: string;
         name: string;
+        id: string;
         validationRules: string[];
         order: number;
         required: boolean;
         fields: {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            id: string;
             name: string;
+            id: string;
             required: boolean;
             validation?: {
                 options?: string[] | undefined;
@@ -390,19 +390,19 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
         averageCompletionTime?: number | undefined;
     } | undefined;
 }, {
+    name: string;
     organizationId: string;
     documentType: "EDITAL" | "TERMO_REFERENCIA" | "PROJETO_BASICO" | "ATA_SESSAO" | "CONTRATO" | "RECURSO" | "IMPUGNACAO" | "ESCLARECIMENTO";
     id: string;
     createdBy: string;
-    name: string;
     sections: {
-        id: string;
         name: string;
+        id: string;
         order: number;
         fields: {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            id: string;
             name: string;
+            id: string;
             validation?: {
                 options?: string[] | undefined;
                 pattern?: string | undefined;
@@ -508,13 +508,13 @@ export declare const AnalysisRuleSchema: z.ZodObject<{
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     priority: number;
+    name: string;
     organizationId: string;
     id: string;
     createdBy: string;
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
-    name: string;
     category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
     severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
     description: string;
@@ -546,10 +546,10 @@ export declare const AnalysisRuleSchema: z.ZodObject<{
         lastExecuted?: Date | undefined;
     } | undefined;
 }, {
+    name: string;
     organizationId: string;
     id: string;
     createdBy: string;
-    name: string;
     category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
     severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
     description: string;
@@ -628,14 +628,14 @@ export declare const CustomParametersSchema: z.ZodObject<{
         excellent: number;
         good: number;
         poor: number;
-        acceptable: number;
         critical: number;
+        acceptable: number;
     }, {
         excellent?: number | undefined;
         good?: number | undefined;
         poor?: number | undefined;
-        acceptable?: number | undefined;
         critical?: number | undefined;
+        acceptable?: number | undefined;
     }>;
     advanced: z.ZodOptional<z.ZodObject<{
         enableContextualAnalysis: z.ZodDefault<z.ZodBoolean>;
@@ -692,6 +692,7 @@ export declare const CustomParametersSchema: z.ZodObject<{
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     status: "DRAFT" | "ARCHIVED" | "ACTIVE";
+    name: string;
     organizationId: string;
     id: string;
     createdBy: string;
@@ -699,7 +700,6 @@ export declare const CustomParametersSchema: z.ZodObject<{
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
-    name: string;
     weights: {
         structural: number;
         legal: number;
@@ -713,8 +713,8 @@ export declare const CustomParametersSchema: z.ZodObject<{
         excellent: number;
         good: number;
         poor: number;
-        acceptable: number;
         critical: number;
+        acceptable: number;
     };
     metadata?: Record<string, any> | undefined;
     description?: string | undefined;
@@ -736,10 +736,10 @@ export declare const CustomParametersSchema: z.ZodObject<{
         parallelProcessing: boolean;
     } | undefined;
 }, {
+    name: string;
     organizationId: string;
     id: string;
     createdBy: string;
-    name: string;
     weights: {
         structural: number;
         legal: number;
@@ -751,8 +751,8 @@ export declare const CustomParametersSchema: z.ZodObject<{
         excellent?: number | undefined;
         good?: number | undefined;
         poor?: number | undefined;
-        acceptable?: number | undefined;
         critical?: number | undefined;
+        acceptable?: number | undefined;
     };
     status?: "DRAFT" | "ARCHIVED" | "ACTIVE" | undefined;
     metadata?: Record<string, any> | undefined;

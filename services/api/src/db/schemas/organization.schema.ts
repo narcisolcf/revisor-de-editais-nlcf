@@ -6,7 +6,6 @@
  */
 
 import { z } from 'zod';
-import { Timestamp } from 'firebase-admin/firestore';
 
 // Base Organization Profile Schema
 export const OrganizationProfileSchema = z.object({

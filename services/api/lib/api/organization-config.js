@@ -167,7 +167,6 @@ async function syncConfig(req, res) {
  * Validar configurações de análise
  */
 async function validateConfig(req, res) {
-    var _a, _b, _c, _d;
     try {
         // Autenticação e autorização
         await (0, auth_1.authenticateUser)(req, res, () => { });
@@ -194,10 +193,10 @@ async function validateConfig(req, res) {
         const configData = {
             organizationId: paramsValidation.data.organizationId,
             weights: {
-                structural: ((_a = configValidation.data.weights) === null || _a === void 0 ? void 0 : _a.structural) || 25,
-                legal: ((_b = configValidation.data.weights) === null || _b === void 0 ? void 0 : _b.legal) || 25,
-                clarity: ((_c = configValidation.data.weights) === null || _c === void 0 ? void 0 : _c.clarity) || 25,
-                abnt: ((_d = configValidation.data.weights) === null || _d === void 0 ? void 0 : _d.abnt) || 25
+                structural: configValidation.data.weights?.structural || 25,
+                legal: configValidation.data.weights?.legal || 25,
+                clarity: configValidation.data.weights?.clarity || 25,
+                abnt: configValidation.data.weights?.abnt || 25
             },
             maxRetries: configValidation.data.maxRetries || 3,
             customRules: configValidation.data.customRules || [],

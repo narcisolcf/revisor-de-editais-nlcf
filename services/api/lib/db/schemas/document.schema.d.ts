@@ -90,13 +90,13 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
             totalProcessingTime?: number | undefined;
         }>>;
     }, "strip", z.ZodTypeAny, {
-        progress: number;
         errors: {
             code: string;
             message: string;
             timestamp: Date;
             step?: string | undefined;
         }[];
+        progress: number;
         completedAt?: Date | undefined;
         currentStep?: string | undefined;
         startedAt?: Date | undefined;
@@ -108,16 +108,16 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         } | undefined;
     }, {
         completedAt?: Date | undefined;
-        currentStep?: string | undefined;
-        progress?: number | undefined;
-        startedAt?: Date | undefined;
-        estimatedCompletion?: Date | undefined;
         errors?: {
             code: string;
             message: string;
             timestamp: Date;
             step?: string | undefined;
         }[] | undefined;
+        currentStep?: string | undefined;
+        progress?: number | undefined;
+        startedAt?: Date | undefined;
+        estimatedCompletion?: Date | undefined;
         metrics?: {
             ocrTime?: number | undefined;
             analysisTime?: number | undefined;
@@ -284,13 +284,13 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
     category?: string | undefined;
     description?: string | undefined;
     processing?: {
-        progress: number;
         errors: {
             code: string;
             message: string;
             timestamp: Date;
             step?: string | undefined;
         }[];
+        progress: number;
         completedAt?: Date | undefined;
         currentStep?: string | undefined;
         startedAt?: Date | undefined;
@@ -374,16 +374,16 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
     description?: string | undefined;
     processing?: {
         completedAt?: Date | undefined;
-        currentStep?: string | undefined;
-        progress?: number | undefined;
-        startedAt?: Date | undefined;
-        estimatedCompletion?: Date | undefined;
         errors?: {
             code: string;
             message: string;
             timestamp: Date;
             step?: string | undefined;
         }[] | undefined;
+        currentStep?: string | undefined;
+        progress?: number | undefined;
+        startedAt?: Date | undefined;
+        estimatedCompletion?: Date | undefined;
         metrics?: {
             ocrTime?: number | undefined;
             analysisTime?: number | undefined;
@@ -848,19 +848,19 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         code: string;
         message: string;
-        details?: Record<string, any> | undefined;
         stack?: string | undefined;
+        details?: Record<string, any> | undefined;
     }, {
         code: string;
         message: string;
-        details?: Record<string, any> | undefined;
         stack?: string | undefined;
+        details?: Record<string, any> | undefined;
     }>>;
     createdAt: z.ZodDefault<z.ZodDate>;
     createdBy: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     documentId: string;
-    status: "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED";
+    status: "COMPLETED" | "FAILED" | "CANCELLED" | "RUNNING";
     analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
     organizationId: string;
     id: string;
@@ -958,8 +958,8 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     error?: {
         code: string;
         message: string;
-        details?: Record<string, any> | undefined;
         stack?: string | undefined;
+        details?: Record<string, any> | undefined;
     } | undefined;
     templateId?: string | undefined;
 }, {
@@ -1057,12 +1057,12 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             apiCallsCount?: number | undefined;
         } | undefined;
     };
-    status?: "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED" | undefined;
+    status?: "COMPLETED" | "FAILED" | "CANCELLED" | "RUNNING" | undefined;
     error?: {
         code: string;
         message: string;
-        details?: Record<string, any> | undefined;
         stack?: string | undefined;
+        details?: Record<string, any> | undefined;
     } | undefined;
     createdAt?: Date | undefined;
     templateId?: string | undefined;

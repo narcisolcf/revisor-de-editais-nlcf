@@ -1,215 +1,240 @@
 "use strict";
 /**
- * API de análise de documentos
- * Sprint 1 - LicitaReview
+ * Analysis API - Endpoints para análise de documentos
+ * LicitaReview Cloud Functions
  */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const zod_1 = require("zod");
-const firestore_1 = require("firebase-admin/firestore");
-const validation_1 = require("../utils/validation");
-const utils_1 = require("../utils");
-const AnalysisOrchestrator_1 = require("../services/AnalysisOrchestrator");
+const express = __importStar(require("express"));
 const auth_1 = require("../middleware/auth");
+const AnalysisOrchestrator_1 = require("../services/AnalysisOrchestrator");
+const firebase_1 = require("../config/firebase");
+const zod_1 = require("zod");
 const error_1 = require("../middleware/error");
-const router = (0, express_1.Router)();
-const firestore = (0, firestore_1.getFirestore)();
-// Inicializar AnalysisOrchestrator
-const orchestrator = new AnalysisOrchestrator_1.AnalysisOrchestrator(firestore, process.env.CLOUD_RUN_SERVICE_URL || 'https://document-analyzer-123456789-uc.a.run.app', process.env.GOOGLE_CLOUD_PROJECT || 'analisador-de-editais');
+const auth_2 = require("../middleware/auth");
+const utils_1 = require("../utils");
+// Schemas de validação
+const StartAnalysisRequestSchema = zod_1.z.object({
+    documentId: zod_1.z.string().min(1, 'Document ID is required'),
+    analysisType: zod_1.z.enum(['compliance', 'risk', 'completeness', 'all']).default('all'),
+    options: zod_1.z.object({
+        priority: zod_1.z.enum(['low', 'normal', 'high']).default('normal'),
+        includeRecommendations: zod_1.z.boolean().default(true),
+        detailedReport: zod_1.z.boolean().default(false)
+    }).default({})
+});
+const AnalysisIdSchema = zod_1.z.object({
+    analysisId: zod_1.z.string().min(1, 'Analysis ID is required')
+});
+const DocumentIdSchema = zod_1.z.object({
+    documentId: zod_1.z.string().min(1, 'Document ID is required')
+});
+// Inicializar o orquestrador de análises
+const orchestrator = new AnalysisOrchestrator_1.AnalysisOrchestrator(firebase_1.firestore, process.env.CLOUD_RUN_SERVICE_URL || 'https://analysis-service-url', process.env.GOOGLE_CLOUD_PROJECT || 'default-project');
+// Helper functions - using imported utilities
+// Path validation handled inline with validateData
+const router = express.Router();
 /**
- * POST /analysis
- * Criar nova análise de documento
+ * POST /analysis/start
+ * Inicia uma nova análise de documento
  */
-router.post('/', auth_1.authenticateUser, (0, validation_1.validateBody)(validation_1.AnalysisRequestSchema), async (req, res) => {
-    var _a, _b;
-    const requestId = (0, utils_1.getRequestId)(req);
+router.post('/start', auth_2.authenticateUser, auth_2.requireOrganization, (0, auth_2.requirePermissions)([auth_1.PERMISSIONS.ANALYSIS_WRITE]), async (req, res) => {
     try {
-        const { documentId, options } = req.body;
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.uid;
-        const organizationId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.organizationId;
-        if (!userId) {
-            (0, utils_1.sendErrorResponse)(res, 'UNAUTHORIZED', 'Usuário não autenticado', 401, undefined, requestId);
-            return;
+        const bodyValidation = (0, utils_1.validateData)(StartAnalysisRequestSchema, req.body);
+        if (!bodyValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Dados da requisição inválidos', bodyValidation.details, req.headers['x-request-id']));
         }
+        const { documentId, options } = bodyValidation.data;
+        const organizationId = req.user?.organizationId;
+        const userId = req.user?.uid;
         if (!organizationId) {
-            (0, utils_1.sendErrorResponse)(res, 'MISSING_ORGANIZATION', 'Organização não encontrada', 400, undefined, requestId);
-            return;
+            return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'ID da organização é obrigatório', {}, req.headers['x-request-id']));
         }
         // Verificar se o documento existe e pertence à organização
-        const docRef = firestore.collection('documents').doc(documentId);
-        const docSnap = await docRef.get();
-        if (!docSnap.exists) {
-            (0, utils_1.sendErrorResponse)(res, 'DOCUMENT_NOT_FOUND', 'Documento não encontrado', 404, undefined, requestId);
-            return;
+        const docSnapshot = await firebase_1.collections.documents.doc(documentId).get();
+        if (!docSnapshot.exists) {
+            return res.status(404).json((0, utils_1.createErrorResponse)('NOT_FOUND', 'Documento não encontrado'));
         }
-        const docData = docSnap.data();
-        if ((docData === null || docData === void 0 ? void 0 : docData.organizationId) !== organizationId) {
-            (0, utils_1.sendErrorResponse)(res, 'FORBIDDEN', 'Acesso negado ao documento', 403, undefined, requestId);
-            return;
+        const document = docSnapshot.data();
+        if (document?.organizationId !== organizationId) {
+            return res.status(403).json((0, utils_1.createErrorResponse)('FORBIDDEN', 'Acesso negado ao documento', { documentId }, req.headers['x-request-id']));
         }
-        // Iniciar análise
-        const analysisRequest = {
+        // Iniciar análise via AnalysisOrchestrator
+        const analysisId = await orchestrator.startAnalysis({
             documentId,
             organizationId,
             userId,
-            options: options || {},
-            priority: 'normal'
-        };
-        const analysisId = await orchestrator.startAnalysis(analysisRequest);
-        // Salvar registro da análise no Firestore
-        await firestore.collection('analyses').doc(analysisId).set({
-            id: analysisId,
-            documentId,
-            organizationId,
-            userId,
-            status: 'pending',
-            options,
-            createdAt: new Date(),
-            updatedAt: new Date()
+            options: {
+                includeAI: true,
+                generateRecommendations: options?.includeRecommendations ?? true,
+                detailedMetrics: options?.detailedReport ?? false,
+                customRules: [],
+                ...options
+            },
+            priority: options?.priority || 'normal'
         });
-        (0, utils_1.sendSuccessResponse)(res, {
+        res.status(202).json((0, utils_1.createSuccessResponse)({
             analysisId,
-            status: 'pending',
-            message: 'Análise iniciada com sucesso'
-        }, 201, requestId);
+            status: 'queued',
+            message: 'Analysis started successfully'
+        }));
+        return;
     }
     catch (error) {
-        console.error('Erro ao criar análise:', error);
-        (0, utils_1.sendErrorResponse)(res, 'INTERNAL_ERROR', 'Erro interno do servidor', 500, undefined, requestId);
+        return (0, error_1.errorHandler)(error, req, res, () => { });
     }
 });
 /**
- * GET /analysis/:analysisId
- * Obter resultado de análise específica
+ * GET /analysis/:analysisId/progress
+ * Obtém o progresso de uma análise
  */
-router.get('/:analysisId', auth_1.authenticateUser, (0, validation_1.validatePathParams)(zod_1.z.object({ analysisId: validation_1.AnalysisIdSchema })), async (req, res) => {
-    var _a, _b;
-    const requestId = (0, utils_1.getRequestId)(req);
-    const { analysisId } = req.params;
-    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.uid;
-    const organizationId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.organizationId;
+router.get('/:analysisId/progress', auth_2.authenticateUser, auth_2.requireOrganization, (0, auth_2.requirePermissions)([auth_1.PERMISSIONS.ANALYSIS_READ]), async (req, res) => {
+    const pathValidation = (0, utils_1.validateData)(AnalysisIdSchema, req.params);
+    if (!pathValidation.success) {
+        return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Parâmetros de caminho inválidos', pathValidation.details, req.headers['x-request-id']));
+    }
     try {
-        if (!userId || !organizationId) {
-            (0, utils_1.sendErrorResponse)(res, 'UNAUTHORIZED', 'Usuário não autenticado', 401, undefined, requestId);
-            return;
-        }
-        // Buscar análise no Firestore
-        const analysisRef = firestore.collection('analyses').doc(analysisId);
-        const analysisSnap = await analysisRef.get();
-        if (!analysisSnap.exists) {
-            (0, utils_1.sendErrorResponse)(res, 'ANALYSIS_NOT_FOUND', 'Análise não encontrada', 404, undefined, requestId);
-            return;
-        }
-        const analysisData = analysisSnap.data();
-        // Verificar permissões
-        if ((analysisData === null || analysisData === void 0 ? void 0 : analysisData.organizationId) !== organizationId) {
-            (0, utils_1.sendErrorResponse)(res, 'FORBIDDEN', 'Acesso negado à análise', 403, undefined, requestId);
-            return;
-        }
-        // Obter progresso do orchestrator
+        const { analysisId } = req.params;
         const progress = await orchestrator.getAnalysisProgress(analysisId);
-        (0, utils_1.sendSuccessResponse)(res, Object.assign(Object.assign({}, analysisData), { progress }), 200, requestId);
+        if (!progress) {
+            return res.status(404).json((0, utils_1.createErrorResponse)('ANALYSIS_NOT_FOUND', 'Analysis not found'));
+        }
+        res.json((0, utils_1.createSuccessResponse)(progress));
+        return;
     }
     catch (error) {
-        console.error('Erro ao obter análise:', error);
-        (0, utils_1.sendErrorResponse)(res, 'INTERNAL_ERROR', 'Erro interno do servidor', 500, undefined, requestId);
-    }
-});
-/**
- * GET /analysis
- * Listar análises do usuário/organização
- */
-router.get('/', auth_1.authenticateUser, (0, validation_1.validateQuery)(validation_1.PaginationSchema.extend({
-    status: zod_1.z.enum(['pending', 'processing', 'completed', 'failed']).optional(),
-    documentId: validation_1.DocumentIdSchema.optional()
-})), async (req, res) => {
-    var _a, _b;
-    const requestId = (0, utils_1.getRequestId)(req);
-    const { page = 1, limit = 20, status, documentId } = req.query;
-    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.uid;
-    const organizationId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.organizationId;
-    try {
-        if (!userId || !organizationId) {
-            (0, utils_1.sendErrorResponse)(res, 'UNAUTHORIZED', 'Usuário não autenticado', 401, undefined, requestId);
-            return;
-        }
-        // Construir query
-        let query = firestore
-            .collection('analyses')
-            .where('organizationId', '==', organizationId)
-            .orderBy('createdAt', 'desc');
-        if (status) {
-            query = query.where('status', '==', status);
-        }
-        if (documentId) {
-            query = query.where('documentId', '==', documentId);
-        }
-        // Paginação
-        const offset = (page - 1) * limit;
-        const snapshot = await query.offset(offset).limit(limit).get();
-        const analyses = snapshot.docs.map(doc => (Object.assign({ id: doc.id }, doc.data())));
-        // Contar total
-        const countSnapshot = await query.get();
-        const total = countSnapshot.size;
-        (0, utils_1.sendSuccessResponse)(res, {
-            analyses,
-            pagination: {
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / limit)
-            }
-        }, 200, requestId);
-    }
-    catch (error) {
-        console.error('Erro ao listar análises:', error);
-        (0, utils_1.sendErrorResponse)(res, 'INTERNAL_ERROR', 'Erro interno do servidor', 500, undefined, requestId);
+        return (0, error_1.errorHandler)(error, req, res, () => { });
     }
 });
 /**
  * DELETE /analysis/:analysisId
- * Cancelar análise em andamento
+ * Cancela uma análise em andamento
  */
-router.delete('/:analysisId', auth_1.authenticateUser, (0, validation_1.validatePathParams)(zod_1.z.object({ analysisId: validation_1.AnalysisIdSchema })), async (req, res) => {
-    var _a, _b;
-    const requestId = (0, utils_1.getRequestId)(req);
-    const { analysisId } = req.params;
-    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.uid;
-    const organizationId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.organizationId;
+router.delete('/:analysisId', auth_2.authenticateUser, auth_2.requireOrganization, (0, auth_2.requirePermissions)([auth_1.PERMISSIONS.ANALYSIS_WRITE]), async (req, res) => {
+    const pathValidation = (0, utils_1.validateData)(AnalysisIdSchema, req.params);
+    if (!pathValidation.success) {
+        return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Parâmetros de caminho inválidos'));
+    }
     try {
-        if (!userId || !organizationId) {
-            (0, utils_1.sendErrorResponse)(res, 'UNAUTHORIZED', 'Usuário não autenticado', 401, undefined, requestId);
-            return;
+        const { analysisId } = req.params;
+        const organizationId = req.user?.organizationId;
+        const userId = req.user?.uid;
+        if (!organizationId) {
+            return res.status(400).json((0, utils_1.createErrorResponse)('ORGANIZATION_REQUIRED', 'Organization ID is required'));
         }
-        // Verificar se a análise existe e pertence à organização
-        const analysisRef = firestore.collection('analyses').doc(analysisId);
-        const analysisSnap = await analysisRef.get();
-        if (!analysisSnap.exists) {
-            (0, utils_1.sendErrorResponse)(res, 'ANALYSIS_NOT_FOUND', 'Análise não encontrada', 404, undefined, requestId);
-            return;
+        // Verificar se a análise existe
+        const activeAnalyses = orchestrator.getActiveAnalyses();
+        const analysis = activeAnalyses.find(a => a.analysisId === analysisId);
+        if (!analysis) {
+            return res.status(404).json((0, utils_1.createErrorResponse)('ANALYSIS_NOT_FOUND', 'Analysis not found or access denied'));
         }
-        const analysisData = analysisSnap.data();
-        if ((analysisData === null || analysisData === void 0 ? void 0 : analysisData.organizationId) !== organizationId) {
-            (0, utils_1.sendErrorResponse)(res, 'FORBIDDEN', 'Acesso negado à análise', 403, undefined, requestId);
-            return;
-        }
-        // Cancelar análise no orchestrator
-        await orchestrator.cancelAnalysis(analysisId);
-        // Atualizar status no Firestore
-        await analysisRef.update({
-            status: 'cancelled',
-            updatedAt: new Date()
-        });
-        (0, utils_1.sendSuccessResponse)(res, {
-            message: 'Análise cancelada com sucesso'
-        }, 200, requestId);
+        await orchestrator.cancelAnalysis(analysisId, userId);
+        res.json((0, utils_1.createSuccessResponse)({ message: 'Analysis cancelled successfully' }, req.headers['x-request-id']));
+        return;
     }
     catch (error) {
-        console.error('Erro ao cancelar análise:', error);
-        (0, utils_1.sendErrorResponse)(res, 'INTERNAL_ERROR', 'Erro interno do servidor', 500, undefined, requestId);
+        return (0, error_1.errorHandler)(error, req, res, () => { });
     }
 });
-// Middleware de tratamento de erros
-router.use(error_1.errorHandler);
+/**
+ * GET /analysis/list
+ * Lista análises da organização
+ */
+router.get('/list', auth_2.authenticateUser, auth_2.requireOrganization, (0, auth_2.requirePermissions)([auth_1.PERMISSIONS.ANALYSIS_READ]), async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 10, 100);
+        // Por enquanto, retornamos as análises ativas
+        // TODO: Implementar filtro por organização quando a propriedade estiver disponível
+        const allAnalyses = orchestrator.getActiveAnalyses();
+        const filteredAnalyses = allAnalyses;
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedAnalyses = filteredAnalyses.slice(startIndex, endIndex);
+        const analyses = {
+            data: paginatedAnalyses,
+            total: filteredAnalyses.length,
+            page,
+            limit,
+            totalPages: Math.ceil(filteredAnalyses.length / limit)
+        };
+        res.json((0, utils_1.createSuccessResponse)(analyses, req.headers['x-request-id']));
+        return;
+    }
+    catch (error) {
+        return (0, error_1.errorHandler)(error, req, res, () => { });
+    }
+});
+/**
+ * GET /analysis/result/:documentId
+ * Obtém o resultado da análise de um documento
+ */
+router.get('/result/:documentId', auth_2.authenticateUser, auth_2.requireOrganization, (0, auth_2.requirePermissions)([auth_1.PERMISSIONS.ANALYSIS_READ]), async (req, res) => {
+    const pathValidation = (0, utils_1.validateData)(DocumentIdSchema, req.params);
+    if (!pathValidation.success) {
+        return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Parâmetros de caminho inválidos'));
+    }
+    try {
+        const { documentId } = req.params;
+        const organizationId = req.user?.organizationId;
+        // Verificar se o documento pertence à organização
+        const docSnapshot = await firebase_1.collections.documents.doc(documentId).get();
+        if (!docSnapshot.exists) {
+            return res.status(404).json((0, utils_1.createErrorResponse)('DOCUMENT_NOT_FOUND', 'Document not found'));
+        }
+        const document = docSnapshot.data();
+        if (document?.organizationId !== organizationId) {
+            return res.status(403).json((0, utils_1.createErrorResponse)('ACCESS_DENIED', 'Access denied to document'));
+        }
+        // Buscar resultado da análise no Firestore
+        const resultQuery = await firebase_1.firestore
+            .collection('analysisResults')
+            .where('documentId', '==', documentId)
+            .orderBy('createdAt', 'desc')
+            .limit(1)
+            .get();
+        if (resultQuery.empty) {
+            return res.status(404).json((0, utils_1.createErrorResponse)('RESULT_NOT_FOUND', 'Analysis result not found'));
+        }
+        const result = resultQuery.docs[0].data();
+        res.json((0, utils_1.createSuccessResponse)(result, req.headers['x-request-id']));
+        return;
+    }
+    catch (error) {
+        return (0, error_1.errorHandler)(error, req, res, () => { });
+    }
+});
 exports.default = router;
 //# sourceMappingURL=analysis.js.map

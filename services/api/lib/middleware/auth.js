@@ -174,14 +174,13 @@ exports.optionalAuth = optionalAuth;
  * Service-to-service authentication using API keys
  */
 const authenticateService = (req, res, next) => {
-    var _a;
     const apiKey = req.headers["x-api-key"];
     if (!apiKey) {
         res.status(401).json((0, utils_1.createErrorResponse)("AUTH_API_KEY_REQUIRED", "API key required for service authentication", undefined, req.requestId));
         return;
     }
     // In production, validate against a secure API key store
-    const validApiKeys = ((_a = process.env.VALID_API_KEYS) === null || _a === void 0 ? void 0 : _a.split(",")) || [];
+    const validApiKeys = process.env.VALID_API_KEYS?.split(",") || [];
     if (!validApiKeys.includes(apiKey)) {
         res.status(401).json((0, utils_1.createErrorResponse)("AUTH_INVALID_API_KEY", "Invalid API key", undefined, req.requestId));
         return;

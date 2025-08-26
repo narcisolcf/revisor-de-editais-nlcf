@@ -6,7 +6,6 @@
  */
 
 import { z } from 'zod';
-import { Timestamp } from 'firebase-admin/firestore';
 
 // Analysis Schema for independent analysis records
 export const AnalysisSchema = z.object({

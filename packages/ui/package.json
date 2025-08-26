@@ -1,7 +1,7 @@
 {
-  "name": "@licitareview/ui",
+  "name": "@revisor-de-editais/ui",
   "version": "1.0.0",
-  "description": "Shared UI components and design system for LicitaReview",
+  "description": "Shared UI components and design system for Revisor de Editais",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -21,8 +21,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix"
+    "lint": "eslint src/**/*.{ts,tsx}",
+    "lint:fix": "eslint src/**/*.{ts,tsx} --fix"
   },
   "peerDependencies": {
     "react": "^18.0.0",
@@ -46,7 +46,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@licitareview/types": "*",
+    "@revisor-de-editais/types": "*",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",

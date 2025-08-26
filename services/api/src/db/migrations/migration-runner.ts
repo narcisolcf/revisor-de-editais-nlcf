@@ -68,9 +68,13 @@ export class MigrationRunner {
       description,
       version: '1.0.0',
       runAt: new Date(),
-      success,
-      error
+      success
     };
+
+    // Only add error field if it has a value
+    if (error) {
+      migrationInfo.error = error;
+    }
 
     await this.db.collection(this.migrationsCollection).doc(migrationId).set(migrationInfo);
   }

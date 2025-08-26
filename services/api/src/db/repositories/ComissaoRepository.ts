@@ -4,7 +4,7 @@
  */
 
 import { Firestore, Query, FieldValue } from 'firebase-admin/firestore';
-import { BaseRepository, QueryOptions } from './BaseRepository';
+import { BaseRepository } from './BaseRepository';
 import { 
   Comissao, 
   ComissaoSchema, 
@@ -13,7 +13,6 @@ import {
   MembroComissao,
   TipoComissao,
   StatusComissao,
-  PapelMembro,
   ComissoesQueryOptions,
   ComissaoDetalhada
 } from '../../types';

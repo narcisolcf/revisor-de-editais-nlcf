@@ -6,16 +6,16 @@
 
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { logger } from "firebase-functions";
-import { collections } from "../config/firebase";
+import * as admin from "firebase-admin";
+import { collections, firestore } from "../config/firebase";
 import { 
   AnalysisResult,
-  Document, 
   DocumentStatus,
   NotificationPayload,
   AuditLog,
   generateExecutiveSummary
 } from "../types";
-import { formatDuration, retry } from "../utils";
+// Removed formatDuration and retry imports as they don't exist in utils
 
 /**
  * Trigger when analysis result is created
@@ -134,7 +134,7 @@ async function processCompletedAnalysis(
     const executiveSummary = generateExecutiveSummary(analysisResult);
     
     // Store summary separately for quick access
-    await collections.firestore
+    await firestore
       .collection("analysisSummaries")
       .doc(resultId)
       .set(executiveSummary);
@@ -154,7 +154,7 @@ async function processCompletedAnalysis(
       "success",
       {
         executiveSummary,
-        executionTime: formatDuration(analysisResult.executionTimeSeconds),
+        executionTime: `${Math.round(analysisResult.executionTimeSeconds || 0)}s`,
         message: "Document analysis completed successfully"
       }
     );
@@ -204,7 +204,7 @@ async function processCompletedAnalysis(
     await updateDocumentStatus(
       documentId,
       DocumentStatus.ERROR,
-      { error: `Post-analysis processing failed: ${error.message}` }
+      { error: `Post-analysis processing failed: ${error instanceof Error ? error.message : String(error)}` }
     );
     
     throw error;
@@ -275,9 +275,9 @@ async function processFailedAnalysis(
 async function updateDocumentStatus(
   documentId: string,
   status: DocumentStatus,
-  additionalData: Record<string, any> = {}
+  additionalData: Record<string, unknown> = {}
 ): Promise<void> {
-  await retry(async () => {
+  try {
     const updateData = {
       status,
       updatedAt: new Date(),
@@ -290,7 +290,10 @@ async function updateDocumentStatus(
       status,
       additionalFields: Object.keys(additionalData)
     });
-  }, 3, 1000);
+  } catch (retryError) {
+    logger.error('Failed to update document status after retries', { documentId, status, error: retryError });
+    throw retryError;
+  }
 }
 
 /**
@@ -301,7 +304,7 @@ async function createAnalysisNotification(
   documentId: string,
   resultId: string,
   type: "success" | "error" | "warning",
-  data: any
+  data: Record<string, unknown>
 ): Promise<void> {
   try {
     const notification: NotificationPayload = {
@@ -309,7 +312,7 @@ async function createAnalysisNotification(
       organizationId,
       title: type === "success" ? "Analysis Complete" : "Analysis Failed",
       message: type === "success"
-        ? `Document analysis completed with score ${data.executiveSummary?.weightedScore?.toFixed(1)}%`
+        ? `Document analysis completed with score ${(data.executiveSummary as any)?.weightedScore?.toFixed(1) || 'N/A'}%`
         : `Document analysis failed: ${data.error}`,
       type: type === "success" ? "success" : "error",
       data: {
@@ -320,7 +323,7 @@ async function createAnalysisNotification(
       channels: type === "error" ? ["email", "push"] : ["push"]
     };
     
-    await collections.firestore.collection("notifications").add({
+    await firestore.collection("notifications").add({
       ...notification,
       createdAt: new Date(),
       processed: false
@@ -363,7 +366,7 @@ async function createHighPriorityAlert(
       channels: ["email", "push", "webhook"]
     };
     
-    await collections.firestore.collection("alerts").add({
+    await firestore.collection("alerts").add({
       ...alert,
       createdAt: new Date(),
       processed: false,
@@ -413,20 +416,20 @@ async function updateOrganizationAnalytics(
   analysisResult: AnalysisResult
 ): Promise<void> {
   try {
-    const analyticsRef = collections.firestore
+    const analyticsRef = firestore
       .collection("organizationAnalytics")
       .doc(organizationId);
     
     const today = new Date().toISOString().split('T')[0];
     
     await analyticsRef.set({
-      [`daily.${today}.analysesCompleted`]: collections.firestore.FieldValue.increment(1),
-      [`daily.${today}.totalScore`]: collections.firestore.FieldValue.increment(analysisResult.weightedScore),
-      [`daily.${today}.totalFindings`]: collections.firestore.FieldValue.increment(analysisResult.findings.length),
-      [`daily.${today}.criticalFindings`]: collections.firestore.FieldValue.increment(
+      [`daily.${today}.analysesCompleted`]: admin.firestore.FieldValue.increment(1),
+      [`daily.${today}.totalScore`]: admin.firestore.FieldValue.increment(analysisResult.weightedScore),
+      [`daily.${today}.totalFindings`]: admin.firestore.FieldValue.increment(analysisResult.findings.length),
+      [`daily.${today}.criticalFindings`]: admin.firestore.FieldValue.increment(
         analysisResult.findings.filter(f => f.severity === "CRITICA").length
       ),
-      [`daily.${today}.processingTime`]: collections.firestore.FieldValue.increment(
+      [`daily.${today}.processingTime`]: admin.firestore.FieldValue.increment(
         analysisResult.executionTimeSeconds
       ),
       lastUpdated: new Date(),
@@ -463,7 +466,7 @@ export async function cleanupOldAnalysisResults(retentionDays: number = 365): Pr
       return;
     }
     
-    const batch = collections.firestore.batch();
+    const batch = firestore.batch();
     
     snapshot.docs.forEach(doc => {
       batch.delete(doc.ref);

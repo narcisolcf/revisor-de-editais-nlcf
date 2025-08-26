@@ -9,7 +9,7 @@
  */
 
 import { Firestore } from 'firebase-admin/firestore';
-import { BaseRepository, QueryOptions, PaginatedResult } from './BaseRepository';
+import { BaseRepository, QueryOptions } from './BaseRepository';
 import {
   Analysis,
   AnalysisHistoryEntry,
@@ -25,7 +25,7 @@ import {
  */
 export class AnalysisRepository extends BaseRepository<Analysis> {
   constructor(db: Firestore) {
-    super(db, ANALYSIS_COLLECTIONS.ANALYSES, AnalysisSchema);
+    super(db, ANALYSIS_COLLECTIONS.ANALYSES, AnalysisSchema as any);
   }
 
   /**

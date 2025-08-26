@@ -217,7 +217,13 @@ export class AnalysisOrchestrator {
           sugestaoCorrecao: 'Verificar configurações do analisador',
           categoria: 'formal'
         }],
-        metrics: { fallbackUsed: true, error: result.reason.message },
+        metrics: { 
+          totalClauses: 0,
+          validClauses: 0,
+          missingClauses: 0,
+          inconsistencies: 1,
+          processingTime: 0
+        },
         score: 50,
         confidence: 20,
         processingTime: 0
@@ -303,7 +309,13 @@ export class AnalysisOrchestrator {
           sugestaoCorrecao: 'Verificar configurações dos analisadores',
           categoria: 'formal'
         }],
-        metrics: { allAnalysesFailed: true },
+        metrics: { 
+          totalClauses: 0,
+          validClauses: 0,
+          missingClauses: 0,
+          inconsistencies: 1,
+          processingTime: 0
+        },
         score: 0,
         confidence: 0,
         processingTime: 0

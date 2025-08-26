@@ -23,9 +23,6 @@ const comissoes_1 = require("./comissoes");
 const ComissaoIdSchema = zod_1.z.object({
     id: zod_1.z.string().uuid()
 });
-const ServidorIdSchema = zod_1.z.object({
-    servidorId: zod_1.z.string().uuid()
-});
 const ComissaoServidorSchema = zod_1.z.object({
     id: zod_1.z.string().uuid(),
     servidorId: zod_1.z.string().uuid()
@@ -65,41 +62,63 @@ comissoes_1.listComissoes);
  */
 app.get("/:id", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_READ]), async (req, res) => {
     try {
-        const { id } = (0, utils_1.validatePathParams)(ComissaoIdSchema, req.params);
+        const pathValidation = (0, utils_1.validateData)(ComissaoIdSchema, req.params);
+        if (!pathValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Parâmetros de caminho inválidos', pathValidation.details, req.headers['x-request-id']));
+        }
         await (0, comissoes_1.getComissaoById)(req, res);
+        return;
     }
     catch (error) {
         const requestId = req.headers['x-request-id'];
         if (error instanceof utils_1.ValidationError) {
-            res.status(400).json((0, utils_1.createErrorResponse)(error.message, error.details, requestId));
+            res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', error.message, error.details, requestId));
         }
         else {
-            res.status(500).json((0, utils_1.createErrorResponse)('Internal server error', undefined, requestId));
+            res.status(500).json((0, utils_1.createErrorResponse)('INTERNAL_ERROR', 'Erro interno do servidor', {}, requestId));
         }
+        return;
     }
 });
 /**
  * POST /
  * Create new comissão
  */
-app.post("/", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_WRITE]), (0, utils_1.validateRequestBody)(types_1.CreateComissaoRequestSchema), comissoes_1.createComissao);
+app.post("/", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_WRITE]), async (req, res) => {
+    const bodyValidation = (0, utils_1.validateData)(types_1.CreateComissaoRequestSchema, req.body);
+    if (!bodyValidation.success) {
+        return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Dados da requisição inválidos', bodyValidation.details, req.headers['x-request-id']));
+    }
+    await (0, comissoes_1.createComissao)(req, res);
+    return;
+});
 /**
  * PUT /:id
  * Update comissão
  */
-app.put("/:id", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_WRITE]), (0, utils_1.validateRequestBody)(types_1.UpdateComissaoRequestSchema), async (req, res) => {
+app.put("/:id", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_WRITE]), async (req, res) => {
     try {
-        const { id } = (0, utils_1.validatePathParams)(ComissaoIdSchema, req.params);
+        const pathValidation = (0, utils_1.validateData)(ComissaoIdSchema, req.params);
+        if (!pathValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Parâmetros de caminho inválidos', pathValidation.details, req.headers['x-request-id']));
+        }
+        const bodyValidation = (0, utils_1.validateData)(types_1.UpdateComissaoRequestSchema, req.body);
+        if (!bodyValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Dados da requisição inválidos', bodyValidation.details, req.headers['x-request-id']));
+        }
         await (0, comissoes_1.updateComissao)(req, res);
+        return;
     }
     catch (error) {
         const requestId = req.headers['x-request-id'];
         if (error instanceof utils_1.ValidationError) {
-            res.status(400).json((0, utils_1.createErrorResponse)(error.message, error.details, requestId));
+            res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, error.details, requestId));
         }
         else {
-            res.status(500).json((0, utils_1.createErrorResponse)('Internal server error', undefined, requestId));
+            res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Erro interno do servidor", {}, requestId));
         }
+        return;
+        return;
     }
 });
 /**
@@ -108,35 +127,48 @@ app.put("/:id", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_WRI
  */
 app.delete("/:id", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_DELETE]), async (req, res) => {
     try {
-        const { id } = (0, utils_1.validatePathParams)(ComissaoIdSchema, req.params);
+        const pathValidation = (0, utils_1.validateData)(ComissaoIdSchema, req.params);
+        if (!pathValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Parâmetros de caminho inválidos', pathValidation.details, req.headers['x-request-id']));
+        }
         await (0, comissoes_1.deleteComissao)(req, res);
+        return;
     }
     catch (error) {
         const requestId = req.headers['x-request-id'];
         if (error instanceof utils_1.ValidationError) {
-            res.status(400).json((0, utils_1.createErrorResponse)(error.message, error.details, requestId));
+            res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, error.details, requestId));
         }
         else {
-            res.status(500).json((0, utils_1.createErrorResponse)('Internal server error', undefined, requestId));
+            res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Erro interno do servidor", {}, requestId));
         }
+        return;
     }
 });
 /**
  * POST /:id/membros
  * Add member to comissão
  */
-app.post("/:id/membros", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_WRITE]), (0, utils_1.validateRequestBody)(types_1.AdicionarMembroRequestSchema), async (req, res) => {
+app.post("/:id/membros", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_WRITE]), async (req, res) => {
     try {
-        const { id } = (0, utils_1.validatePathParams)(ComissaoIdSchema, req.params);
+        const pathValidation = (0, utils_1.validateData)(ComissaoIdSchema, req.params);
+        if (!pathValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Parâmetros de caminho inválidos", pathValidation.details, req.headers['x-request-id']));
+        }
+        const bodyValidation = (0, utils_1.validateData)(types_1.AdicionarMembroRequestSchema, req.body);
+        if (!bodyValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Dados da requisição inválidos', bodyValidation.details, req.headers['x-request-id']));
+        }
         await (0, comissoes_1.adicionarMembro)(req, res);
+        return;
     }
     catch (error) {
         const requestId = req.headers['x-request-id'];
         if (error instanceof utils_1.ValidationError) {
-            res.status(400).json((0, utils_1.createErrorResponse)(error.message, error.details, requestId));
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, error.details, requestId));
         }
         else {
-            res.status(500).json((0, utils_1.createErrorResponse)('Internal server error', undefined, requestId));
+            return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", 'Erro interno do servidor', {}, requestId));
         }
     }
 });
@@ -146,16 +178,20 @@ app.post("/:id/membros", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCU
  */
 app.delete("/:id/membros/:servidorId", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_WRITE]), async (req, res) => {
     try {
-        (0, utils_1.validatePathParams)(ComissaoServidorSchema, req.params);
+        const pathValidation = (0, utils_1.validateData)(ComissaoServidorSchema, req.params);
+        if (!pathValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Parâmetros de caminho inválidos", pathValidation.details, req.headers['x-request-id']));
+        }
         await (0, comissoes_1.removerMembro)(req, res);
+        return;
     }
     catch (error) {
         const requestId = req.headers['x-request-id'];
         if (error instanceof utils_1.ValidationError) {
-            res.status(400).json((0, utils_1.createErrorResponse)(error.message, error.details, requestId));
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, error.details, requestId));
         }
         else {
-            res.status(500).json((0, utils_1.createErrorResponse)('Internal server error', undefined, requestId));
+            return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", 'Erro interno do servidor', {}, requestId));
         }
     }
 });
@@ -163,18 +199,26 @@ app.delete("/:id/membros/:servidorId", (0, auth_1.requirePermissions)([auth_1.PE
  * PATCH /:id/membros/:servidorId
  * Update member in comissão
  */
-app.patch("/:id/membros/:servidorId", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_WRITE]), (0, utils_1.validateRequestBody)(types_1.AtualizarMembroRequestSchema), async (req, res) => {
+app.patch("/:id/membros/:servidorId", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_WRITE]), async (req, res) => {
     try {
-        (0, utils_1.validatePathParams)(ComissaoServidorSchema, req.params);
+        const pathValidation = (0, utils_1.validateData)(ComissaoServidorSchema, req.params);
+        if (!pathValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Parâmetros de caminho inválidos", pathValidation.details, req.headers['x-request-id']));
+        }
+        const bodyValidation = (0, utils_1.validateData)(types_1.AtualizarMembroRequestSchema, req.body);
+        if (!bodyValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)('VALIDATION_ERROR', 'Dados da requisição inválidos', bodyValidation.details, req.headers['x-request-id']));
+        }
         await (0, comissoes_1.atualizarMembro)(req, res);
+        return;
     }
     catch (error) {
         const requestId = req.headers['x-request-id'];
         if (error instanceof utils_1.ValidationError) {
-            res.status(400).json((0, utils_1.createErrorResponse)(error.message, error.details, requestId));
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, error.details, requestId));
         }
         else {
-            res.status(500).json((0, utils_1.createErrorResponse)('Internal server error', undefined, requestId));
+            return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", 'Erro interno do servidor', {}, requestId));
         }
     }
 });
@@ -184,17 +228,22 @@ app.patch("/:id/membros/:servidorId", (0, auth_1.requirePermissions)([auth_1.PER
  */
 app.get("/:id/stats", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_READ]), async (req, res) => {
     try {
-        const { id } = (0, utils_1.validatePathParams)(ComissaoIdSchema, req.params);
+        const pathValidation = (0, utils_1.validateData)(ComissaoIdSchema, req.params);
+        if (!pathValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Parâmetros de caminho inválidos", pathValidation.details, req.headers['x-request-id']));
+        }
         await (0, comissoes_1.getComissaoStats)(req, res);
+        return;
     }
     catch (error) {
         const requestId = req.headers['x-request-id'];
         if (error instanceof utils_1.ValidationError) {
-            res.status(400).json((0, utils_1.createErrorResponse)(error.message, error.details, requestId));
+            res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, error.details, requestId));
         }
         else {
-            res.status(500).json((0, utils_1.createErrorResponse)('Internal server error', undefined, requestId));
+            res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", 'Erro interno do servidor', {}, requestId));
         }
+        return;
     }
 });
 /**
@@ -203,23 +252,27 @@ app.get("/:id/stats", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMEN
  */
 app.get("/:id/history", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCUMENTS_READ]), async (req, res) => {
     try {
-        const { id } = (0, utils_1.validatePathParams)(ComissaoIdSchema, req.params);
+        const pathValidation = (0, utils_1.validateData)(ComissaoIdSchema, req.params);
+        if (!pathValidation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Parâmetros de caminho inválidos", pathValidation.details, req.headers['x-request-id']));
+        }
         await (0, comissoes_1.getComissaoHistory)(req, res);
+        return;
     }
     catch (error) {
         const requestId = req.headers['x-request-id'];
         if (error instanceof utils_1.ValidationError) {
-            res.status(400).json((0, utils_1.createErrorResponse)(error.message, error.details, requestId));
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, error.details, requestId));
         }
         else {
-            res.status(500).json((0, utils_1.createErrorResponse)('Internal server error', undefined, requestId));
+            return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", 'Erro interno do servidor', {}, requestId));
         }
     }
 });
 // Error handling middleware
 app.use((error, req, res, next) => {
     console.error('Comissões API Error:', error);
-    const errorResponse = (0, utils_1.createErrorResponse)(error.message || 'Internal server error', error instanceof utils_1.ValidationError ? error.details : undefined, req.requestId);
+    const errorResponse = (0, utils_1.createErrorResponse)("INTERNAL_ERROR", error.message || 'Erro interno do servidor', error instanceof utils_1.ValidationError ? error.details : {}, req.headers['x-request-id']);
     res.status(error instanceof utils_1.ValidationError ? 400 : 500).json(errorResponse);
 });
 // Export the Cloud Function

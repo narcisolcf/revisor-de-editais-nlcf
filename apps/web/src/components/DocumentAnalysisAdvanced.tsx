@@ -6,7 +6,6 @@
 import React, { useState, useEffect } from 'react';
 import { DocumentUpload, DocumentAnalysis } from '@/types/document';
 import { DocumentAnalysisService } from '@/services/documentAnalysisService';
-import { ParametersService } from '@/services/parametersService';
 import { useSmartClassification } from '@/hooks/useSmartClassification';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -63,13 +62,9 @@ const DocumentAnalysisAdvanced: React.FC = () => {
     result: classificationResult, 
     error: classificationError,
     autoApplied,
-    clearClassification,
     getConfidenceText,
-    getConfidenceColor,
-    isHighConfidence
+    getConfidenceColor
   } = useSmartClassification();
-
-  const parametersService = new ParametersService();
 
   // Carregar estatísticas ao montar o componente
   useEffect(() => {

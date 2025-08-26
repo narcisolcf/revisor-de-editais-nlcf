@@ -21,25 +21,21 @@ import {
   Eye,
   Settings
 } from 'lucide-react';
-import { AdaptiveAnalysisResult, AnalysisComparison } from '@/hooks/useAdaptiveAnalysis';
+import { AdaptiveAnalysisResult } from '@/hooks/useAdaptiveAnalysis';
 import { OrganizationConfig } from '@/hooks/useAnalysisConfig';
 
 interface AdaptiveAnalysisResultsProps {
   result: AdaptiveAnalysisResult;
   baselineResult?: AdaptiveAnalysisResult;
   config?: OrganizationConfig;
-  onConfigChange?: (configId: string) => void;
-  onExport?: (format: 'pdf' | 'json' | 'csv') => void;
-  showAdvancedMetrics?: boolean;
+  onExport?: () => void;
 }
 
 export const AdaptiveAnalysisResults: React.FC<AdaptiveAnalysisResultsProps> = ({
   result,
   baselineResult,
   config,
-  onConfigChange,
-  onExport,
-  showAdvancedMetrics = false
+  onExport
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -67,7 +63,7 @@ export const AdaptiveAnalysisResults: React.FC<AdaptiveAnalysisResultsProps> = (
 
   // Agrupar problemas por categoria
   const problemsByCategory = useMemo(() => {
-    const grouped: Record<string, any[]> = {
+    const grouped: Record<string, Array<{ categoria?: string; gravidade?: string; [key: string]: unknown }>> = {
       structural: [],
       legal: [],
       clarity: [],
@@ -146,7 +142,7 @@ export const AdaptiveAnalysisResults: React.FC<AdaptiveAnalysisResultsProps> = (
     const config = severityMap[severity as keyof typeof severityMap] || severityMap.baixa;
     
     return (
-      <Badge variant={config.color as any} className="text-xs">
+      <Badge variant={config.color as 'destructive' | 'default' | 'secondary' | 'outline'} className="text-xs">
         {config.label}
       </Badge>
     );
@@ -199,11 +195,11 @@ export const AdaptiveAnalysisResults: React.FC<AdaptiveAnalysisResultsProps> = (
               )}
               
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm" onClick={() => onExport?.('pdf')}>
+                <Button variant="outline" size="sm" onClick={() => onExport?.()}>
                   <FileText className="w-4 h-4 mr-2" />
                   PDF
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => onExport?.('json')}>
+                <Button variant="outline" size="sm" onClick={() => onExport?.()}>
                   <FileText className="w-4 h-4 mr-2" />
                   JSON
                 </Button>

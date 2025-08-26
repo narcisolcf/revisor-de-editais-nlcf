@@ -8,7 +8,7 @@ export * from './validation';
 /**
  * Interface para resposta de sucesso padronizada
  */
-export interface SuccessResponse<T = any> {
+export interface SuccessResponse<T = unknown> {
     success: true;
     data: T;
     requestId: string;
@@ -22,10 +22,11 @@ export interface ErrorResponse {
     error: {
         code: string;
         message: string;
-        details?: any;
+        details?: Record<string, unknown>;
     };
     requestId: string;
     timestamp: string;
+    debug?: Record<string, unknown>;
 }
 /**
  * Gerar ID único para requisições
@@ -38,7 +39,7 @@ export declare function createSuccessResponse<T>(data: T, requestId?: string): S
 /**
  * Criar resposta de erro padronizada
  */
-export declare function createErrorResponse(code: string, message: string, details?: any, requestId?: string): ErrorResponse;
+export declare function createErrorResponse(code: string, message: string, details?: Record<string, unknown>, requestId?: string): ErrorResponse;
 /**
  * Enviar resposta de sucesso
  */
@@ -46,7 +47,7 @@ export declare function sendSuccessResponse<T>(res: Response, data: T, statusCod
 /**
  * Enviar resposta de erro
  */
-export declare function sendErrorResponse(res: Response, code: string, message: string, statusCode?: number, details?: any, requestId?: string): void;
+export declare function sendErrorResponse(res: Response, code: string, message: string, statusCode?: number, details?: Record<string, unknown>, requestId?: string): void;
 /**
  * Extrair ID da requisição do header ou gerar novo
  */
@@ -74,7 +75,7 @@ export declare function retryWithBackoff<T>(fn: () => Promise<T>, maxRetries?: n
 /**
  * Verificar se um erro é retryable
  */
-export declare function isRetryableError(error: any): boolean;
+export declare function isRetryableError(error: unknown): boolean;
 /**
  * Truncar texto mantendo palavras completas
  */
@@ -106,4 +107,8 @@ export declare const CommonSchemas: {
         limit?: number | undefined;
     }>;
 };
+/**
+ * Validar acesso à organização
+ */
+export declare function validateOrganizationAccess(userOrgId: string, targetOrgId: string): boolean;
 //# sourceMappingURL=index.d.ts.map

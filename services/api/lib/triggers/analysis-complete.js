@@ -4,14 +4,48 @@
  * Processes completed analysis results and updates document status
  * LicitaReview Cloud Functions
  */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.onAnalysisResultUpdated = exports.onAnalysisResultCreated = void 0;
 exports.cleanupOldAnalysisResults = cleanupOldAnalysisResults;
 const firestore_1 = require("firebase-functions/v2/firestore");
 const firebase_functions_1 = require("firebase-functions");
+const admin = __importStar(require("firebase-admin"));
 const firebase_1 = require("../config/firebase");
 const types_1 = require("../types");
-const utils_1 = require("../utils");
+// Removed formatDuration and retry imports as they don't exist in utils
 /**
  * Trigger when analysis result is created
  */
@@ -22,9 +56,8 @@ exports.onAnalysisResultCreated = (0, firestore_1.onDocumentCreated)({
     timeoutSeconds: 300,
     maxInstances: 20
 }, async (event) => {
-    var _a;
     const resultId = event.params.resultId;
-    const analysisResult = (_a = event.data) === null || _a === void 0 ? void 0 : _a.data();
+    const analysisResult = event.data?.data();
     if (!analysisResult) {
         firebase_functions_1.logger.error(`No analysis result data found for ${resultId}`);
         return;
@@ -59,10 +92,9 @@ exports.onAnalysisResultUpdated = (0, firestore_1.onDocumentUpdated)({
     timeoutSeconds: 300,
     maxInstances: 20
 }, async (event) => {
-    var _a, _b;
     const resultId = event.params.resultId;
-    const beforeData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.before.data();
-    const afterData = (_b = event.data) === null || _b === void 0 ? void 0 : _b.after.data();
+    const beforeData = event.data?.before.data();
+    const afterData = event.data?.after.data();
     if (!beforeData || !afterData) {
         firebase_functions_1.logger.error(`Missing analysis result data for update: ${resultId}`);
         return;
@@ -114,7 +146,7 @@ async function processCompletedAnalysis(resultId, analysisResult) {
         // Generate executive summary
         const executiveSummary = (0, types_1.generateExecutiveSummary)(analysisResult);
         // Store summary separately for quick access
-        await firebase_1.collections.firestore
+        await firebase_1.firestore
             .collection("analysisSummaries")
             .doc(resultId)
             .set(executiveSummary);
@@ -127,7 +159,7 @@ async function processCompletedAnalysis(resultId, analysisResult) {
         // Create success notification
         await createAnalysisNotification(organizationId, documentId, resultId, "success", {
             executiveSummary,
-            executionTime: (0, utils_1.formatDuration)(analysisResult.executionTimeSeconds),
+            executionTime: `${Math.round(analysisResult.executionTimeSeconds || 0)}s`,
             message: "Document analysis completed successfully"
         });
         // Log audit event
@@ -160,7 +192,7 @@ async function processCompletedAnalysis(resultId, analysisResult) {
     catch (error) {
         firebase_functions_1.logger.error(`Error in processCompletedAnalysis: ${resultId}`, error);
         // Try to update document with error status
-        await updateDocumentStatus(documentId, types_1.DocumentStatus.ERROR, { error: `Post-analysis processing failed: ${error.message}` });
+        await updateDocumentStatus(documentId, types_1.DocumentStatus.ERROR, { error: `Post-analysis processing failed: ${error instanceof Error ? error.message : String(error)}` });
         throw error;
     }
 }
@@ -208,34 +240,48 @@ async function processFailedAnalysis(resultId, analysisResult) {
  * Update document status with retry logic
  */
 async function updateDocumentStatus(documentId, status, additionalData = {}) {
-    await (0, utils_1.retry)(async () => {
-        const updateData = Object.assign({ status, updatedAt: new Date() }, additionalData);
+    try {
+        const updateData = {
+            status,
+            updatedAt: new Date(),
+            ...additionalData
+        };
         await firebase_1.collections.documents.doc(documentId).update(updateData);
         firebase_functions_1.logger.info(`Document status updated: ${documentId}`, {
             status,
             additionalFields: Object.keys(additionalData)
         });
-    }, 3, 1000);
+    }
+    catch (retryError) {
+        firebase_functions_1.logger.error('Failed to update document status after retries', { documentId, status, error: retryError });
+        throw retryError;
+    }
 }
 /**
  * Create analysis notification
  */
 async function createAnalysisNotification(organizationId, documentId, resultId, type, data) {
-    var _a, _b;
     try {
         const notification = {
             userId: "system", // Will be updated with actual user when available
             organizationId,
             title: type === "success" ? "Analysis Complete" : "Analysis Failed",
             message: type === "success"
-                ? `Document analysis completed with score ${(_b = (_a = data.executiveSummary) === null || _a === void 0 ? void 0 : _a.weightedScore) === null || _b === void 0 ? void 0 : _b.toFixed(1)}%`
+                ? `Document analysis completed with score ${data.executiveSummary?.weightedScore?.toFixed(1) || 'N/A'}%`
                 : `Document analysis failed: ${data.error}`,
             type: type === "success" ? "success" : "error",
-            data: Object.assign({ documentId,
-                resultId }, data),
+            data: {
+                documentId,
+                resultId,
+                ...data
+            },
             channels: type === "error" ? ["email", "push"] : ["push"]
         };
-        await firebase_1.collections.firestore.collection("notifications").add(Object.assign(Object.assign({}, notification), { createdAt: new Date(), processed: false }));
+        await firebase_1.firestore.collection("notifications").add({
+            ...notification,
+            createdAt: new Date(),
+            processed: false
+        });
         firebase_functions_1.logger.info(`Analysis notification created: ${resultId}`, {
             type,
             organizationId,
@@ -266,7 +312,12 @@ async function createHighPriorityAlert(organizationId, documentId, resultId, cri
             },
             channels: ["email", "push", "webhook"]
         };
-        await firebase_1.collections.firestore.collection("alerts").add(Object.assign(Object.assign({}, alert), { createdAt: new Date(), processed: false, severity: "critical" }));
+        await firebase_1.firestore.collection("alerts").add({
+            ...alert,
+            createdAt: new Date(),
+            processed: false,
+            severity: "critical"
+        });
         firebase_functions_1.logger.warn(`High priority alert created: ${resultId}`, {
             criticalCount,
             organizationId,
@@ -282,7 +333,11 @@ async function createHighPriorityAlert(organizationId, documentId, resultId, cri
  */
 async function createAuditLog(logData) {
     try {
-        const auditLog = Object.assign({ id: `audit_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`, timestamp: new Date() }, logData);
+        const auditLog = {
+            id: `audit_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            timestamp: new Date(),
+            ...logData
+        };
         await firebase_1.collections.auditLogs.add(auditLog);
         firebase_functions_1.logger.info(`Audit log created: ${logData.action}`, {
             organizationId: logData.organizationId,
@@ -299,16 +354,16 @@ async function createAuditLog(logData) {
  */
 async function updateOrganizationAnalytics(organizationId, analysisResult) {
     try {
-        const analyticsRef = firebase_1.collections.firestore
+        const analyticsRef = firebase_1.firestore
             .collection("organizationAnalytics")
             .doc(organizationId);
         const today = new Date().toISOString().split('T')[0];
         await analyticsRef.set({
-            [`daily.${today}.analysesCompleted`]: firebase_1.collections.firestore.FieldValue.increment(1),
-            [`daily.${today}.totalScore`]: firebase_1.collections.firestore.FieldValue.increment(analysisResult.weightedScore),
-            [`daily.${today}.totalFindings`]: firebase_1.collections.firestore.FieldValue.increment(analysisResult.findings.length),
-            [`daily.${today}.criticalFindings`]: firebase_1.collections.firestore.FieldValue.increment(analysisResult.findings.filter(f => f.severity === "CRITICA").length),
-            [`daily.${today}.processingTime`]: firebase_1.collections.firestore.FieldValue.increment(analysisResult.executionTimeSeconds),
+            [`daily.${today}.analysesCompleted`]: admin.firestore.FieldValue.increment(1),
+            [`daily.${today}.totalScore`]: admin.firestore.FieldValue.increment(analysisResult.weightedScore),
+            [`daily.${today}.totalFindings`]: admin.firestore.FieldValue.increment(analysisResult.findings.length),
+            [`daily.${today}.criticalFindings`]: admin.firestore.FieldValue.increment(analysisResult.findings.filter(f => f.severity === "CRITICA").length),
+            [`daily.${today}.processingTime`]: admin.firestore.FieldValue.increment(analysisResult.executionTimeSeconds),
             lastUpdated: new Date(),
             organizationId
         }, { merge: true });
@@ -337,7 +392,7 @@ async function cleanupOldAnalysisResults(retentionDays = 365) {
             firebase_functions_1.logger.info("No old analysis results to clean up");
             return;
         }
-        const batch = firebase_1.collections.firestore.batch();
+        const batch = firebase_1.firestore.batch();
         snapshot.docs.forEach(doc => {
             batch.delete(doc.ref);
         });

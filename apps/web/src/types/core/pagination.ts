@@ -163,7 +163,7 @@ export interface PaginationState {
 /** Ações de paginação */
 export interface PaginationActions {
   /** Ir para página específica */
-  goToPage: (page: number) => void;
+  goToPage: (_page: number) => void;
   /** Ir para próxima página */
   nextPage: () => void;
   /** Ir para página anterior */
@@ -173,13 +173,13 @@ export interface PaginationActions {
   /** Ir para última página */
   lastPage: () => void;
   /** Alterar limite de itens */
-  changeLimit: (limit: number) => void;
+  changeLimit: (_limit: number) => void;
   /** Aplicar filtros */
-  applyFilters: (filters: Filter[]) => void;
+  applyFilters: (_filters: Filter[]) => void;
   /** Aplicar ordenação */
-  applySort: (sort: Sort[]) => void;
+  applySort: (_sort: Sort[]) => void;
   /** Aplicar busca */
-  applySearch: (search: SearchOptions) => void;
+  applySearch: (_search: SearchOptions) => void;
   /** Limpar filtros */
   clearFilters: () => void;
   /** Recarregar dados */

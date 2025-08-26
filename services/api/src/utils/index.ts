@@ -13,7 +13,7 @@ export * from './validation';
 /**
  * Interface para resposta de sucesso padronizada
  */
-export interface SuccessResponse<T = any> {
+export interface SuccessResponse<T = unknown> {
   success: true;
   data: T;
   requestId: string;
@@ -28,11 +28,11 @@ export interface ErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: any;
+    details?: Record<string, unknown>;
   };
   requestId: string;
   timestamp: string;
-  debug?: any;
+  debug?: Record<string, unknown>;
 }
 
 /**
@@ -63,7 +63,7 @@ export function createSuccessResponse<T>(
 export function createErrorResponse(
   code: string,
   message: string,
-  details?: any,
+  details?: Record<string, unknown>,
   requestId?: string
 ): ErrorResponse {
   return {
@@ -98,7 +98,7 @@ export function sendErrorResponse(
   code: string,
   message: string,
   statusCode: number = 400,
-  details?: any,
+  details?: Record<string, unknown>,
   requestId?: string
 ): void {
   res.status(statusCode).json(createErrorResponse(code, message, details, requestId));
@@ -180,16 +180,18 @@ export async function retryWithBackoff<T>(
 /**
  * Verificar se um erro é retryable
  */
-export function isRetryableError(error: any): boolean {
+export function isRetryableError(error: unknown): boolean {
   if (!error) return false;
   
+  const err = error as any;
+  
   // Erros de rede
-  if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+  if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
     return true;
   }
   
   // Erros HTTP 5xx e 429
-  if (error.response?.status >= 500 || error.response?.status === 429) {
+  if (err.response?.status >= 500 || err.response?.status === 429) {
     return true;
   }
   
@@ -240,3 +242,10 @@ export const CommonSchemas = {
     limit: z.number().int().min(1).max(100).default(20)
   })
 };
+
+/**
+ * Validar acesso à organização
+ */
+export function validateOrganizationAccess(userOrgId: string, targetOrgId: string): boolean {
+  return userOrgId === targetOrgId;
+}

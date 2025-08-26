@@ -74,15 +74,20 @@ export interface AnalysisProgress {
     startedAt: Date;
     completedAt?: Date;
     error?: string;
+    retryCount?: number;
+    lastRetryAt?: Date;
+    maxRetries?: number;
 }
 export declare class AnalysisOrchestrator {
     private db;
     private documentRepo;
     private organizationRepo;
     private cloudRunClient;
-    private taskQueue;
     private notificationService;
     private activeAnalyses;
+    private readonly maxRetries;
+    private readonly retryDelayMs;
+    private readonly maxRetryDelayMs;
     constructor(firestore: Firestore, cloudRunServiceUrl: string, projectId: string);
     /**
      * Inicia uma nova análise
@@ -111,5 +116,33 @@ export declare class AnalysisOrchestrator {
     private loadAnalysisProgress;
     private saveAnalysisResult;
     private handleAnalysisError;
+    /**
+     * Trata erros com lógica de retry automático
+     */
+    private handleAnalysisErrorWithRetry;
+    /**
+     * Executa uma operação com retry automático
+     */
+    private retryOperation;
+    /**
+     * Verifica se um erro pode ser retentado
+     */
+    private isRetryableError;
+    /**
+     * Calcula o delay para retry com backoff exponencial
+     */
+    private calculateRetryDelay;
+    /**
+     * Utilitário para sleep
+     */
+    private sleep;
+    /**
+     * Carrega documento do banco de dados
+     */
+    private loadDocument;
+    /**
+     * Carrega configuração da organização
+     */
+    private loadOrganizationConfig;
 }
 //# sourceMappingURL=AnalysisOrchestrator.d.ts.map

@@ -1,7 +1,7 @@
 {
-  "name": "@licitareview/utils",
+  "name": "@revisor-de-editais/utils",
   "version": "1.0.0",
-  "description": "Shared utilities for LicitaReview",
+  "description": "Shared utilities for Revisor de Editais",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -20,14 +20,14 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
-    "@licitareview/types": "*",
+    "@revisor-de-editais/types": "*",
     "date-fns": "^3.6.0",
     "lodash-es": "^4.17.21",
     "zod": "^3.23.8"
@@ -45,6 +45,6 @@
     "validation",
     "formatting"
   ],
-  "author": "LicitaReview Team",
+  "author": "Revisor de Editais Team",
   "license": "MIT"
 }

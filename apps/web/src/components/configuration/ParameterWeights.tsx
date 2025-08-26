@@ -41,18 +41,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+// Tooltip imports removidos - não utilizados
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
-  Settings,
   RotateCcw,
   Save,
-  Download,
-  Upload,
   Info,
   AlertTriangle,
   CheckCircle,
@@ -231,17 +223,15 @@ const WEIGHT_PRESETS: WeightPreset[] = [
 ];
 
 interface ParameterWeightsProps {
+  organizationId: string;
   config: any;
-  onConfigChange: (config: any) => void;
-  onProgressChange: (progress: number) => void;
-  isLoading?: boolean;
+  onConfigChange: (_config: any) => void;
+  onProgressChange: (_progress: number) => void;
 }
-
 export const ParameterWeights: React.FC<ParameterWeightsProps> = ({
   config,
   onConfigChange,
-  onProgressChange,
-  isLoading = false
+  onProgressChange
 }) => {
   const { toast } = useToast();
   
@@ -249,7 +239,7 @@ export const ParameterWeights: React.FC<ParameterWeightsProps> = ({
   const [parameters, setParameters] = useState<AnalysisParameter[]>(DEFAULT_PARAMETERS);
   const [selectedPreset, setSelectedPreset] = useState<string>('');
   const [isNormalized, setIsNormalized] = useState(true);
-  const [showAdvanced, setShowAdvanced] = useState(false);
+
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   
   // Carregar configuração inicial

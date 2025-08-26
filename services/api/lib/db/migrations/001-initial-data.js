@@ -317,7 +317,10 @@ class InitialDataMigration {
         ];
         const createdRules = [];
         for (const ruleData of rules) {
-            const rule = await this.ruleRepo.createForOrganization(organizationId, Object.assign(Object.assign({}, ruleData), { createdBy: 'migration-script' }));
+            const rule = await this.ruleRepo.createForOrganization(organizationId, {
+                ...ruleData,
+                createdBy: 'migration-script'
+            });
             createdRules.push(rule);
         }
         return createdRules;
@@ -484,7 +487,10 @@ class InitialDataMigration {
         ];
         const createdTemplates = [];
         for (const templateData of templates) {
-            const template = await this.templateRepo.createForOrganization(organizationId, Object.assign(Object.assign({}, templateData), { createdBy: 'migration-script' }));
+            const template = await this.templateRepo.createForOrganization(organizationId, {
+                ...templateData,
+                createdBy: 'migration-script'
+            });
             createdTemplates.push(template);
         }
         return createdTemplates;
@@ -594,7 +600,10 @@ class InitialDataMigration {
         ];
         const createdConfigs = [];
         for (const configData of configs) {
-            const config = await this.paramsRepo.createForOrganization(organizationId, Object.assign(Object.assign({}, configData), { createdBy: 'migration-script' }));
+            const config = await this.paramsRepo.createForOrganization(organizationId, {
+                ...configData,
+                createdBy: 'migration-script'
+            });
             createdConfigs.push(config);
         }
         return createdConfigs;

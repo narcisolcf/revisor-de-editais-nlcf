@@ -30,17 +30,17 @@ export declare function closeDatabase(): Promise<void>;
  * Database health check
  */
 export declare function healthCheck(): Promise<boolean>;
-export declare function createOrganizationRepository(database?: Firestore): {
+export declare function createOrganizationRepository(database?: Firestore): Promise<{
     organizations: import("./repositories/OrganizationRepository").OrganizationRepository;
     templates: import("./repositories/OrganizationRepository").TemplateRepository;
     rules: import("./repositories/OrganizationRepository").AnalysisRuleRepository;
     parameters: import("./repositories/OrganizationRepository").CustomParametersRepository;
     users: import("./repositories/OrganizationRepository").OrganizationUserRepository;
-};
-export declare function createDocumentRepository(database?: Firestore): {
+}>;
+export declare function createDocumentRepository(database?: Firestore): Promise<{
     documents: import("./repositories/DocumentRepository").DocumentRepository;
     analyses: import("./repositories/DocumentRepository").AnalysisRepository;
     versions: import("./repositories/DocumentRepository").DocumentVersionRepository;
     comments: import("./repositories/DocumentRepository").ReviewCommentRepository;
-};
+}>;
 //# sourceMappingURL=index.d.ts.map

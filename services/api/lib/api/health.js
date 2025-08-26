@@ -28,7 +28,7 @@ app.get("/", async (req, res) => {
     }
     catch (error) {
         console.error("Health check failed:", error);
-        res.status(503).json((0, utils_1.createErrorResponse)("Health check failed", { error: error.message }));
+        res.status(503).json((0, utils_1.createErrorResponse)("HEALTH_CHECK_FAILED", "Health check failed", { error: error instanceof Error ? error.message : String(error) }, undefined));
     }
 });
 /**
@@ -45,7 +45,6 @@ app.get("/detailed", async (req, res) => {
             checkEnvironment()
         ]);
         const serviceResults = services.map((result, index) => {
-            var _a;
             const serviceNames = ["firestore", "storage", "auth", "memory", "environment"];
             if (result.status === "fulfilled") {
                 return result.value;
@@ -55,7 +54,7 @@ app.get("/detailed", async (req, res) => {
                     service: serviceNames[index],
                     status: "unhealthy",
                     timestamp: new Date(),
-                    details: { error: ((_a = result.reason) === null || _a === void 0 ? void 0 : _a.message) || "Unknown error" }
+                    details: { error: result.reason?.message || "Unknown error" }
                 };
             }
         });
@@ -73,7 +72,7 @@ app.get("/detailed", async (req, res) => {
     }
     catch (error) {
         console.error("Detailed health check failed:", error);
-        res.status(503).json((0, utils_1.createErrorResponse)("Detailed health check failed", { error: error.message }));
+        res.status(503).json((0, utils_1.createErrorResponse)("DETAILED_HEALTH_CHECK_FAILED", "Detailed health check failed", { error: error instanceof Error ? error.message : String(error) }, undefined));
     }
 });
 /**
@@ -105,21 +104,20 @@ app.get("/readiness", async (req, res) => {
     catch (error) {
         res.status(503).json({
             status: "not ready",
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
             timestamp: new Date().toISOString()
         });
     }
 });
 // Individual service health checks
 async function checkSystemHealth() {
-    const startTime = Date.now();
+    // const startTime = Date.now(); // Not used
     const services = await Promise.allSettled([
         checkFirestore(),
         checkStorage(),
         checkAuth()
     ]);
     const serviceResults = services.map((result, index) => {
-        var _a;
         const serviceNames = ["firestore", "storage", "auth"];
         if (result.status === "fulfilled") {
             return result.value;
@@ -129,11 +127,11 @@ async function checkSystemHealth() {
                 service: serviceNames[index],
                 status: "unhealthy",
                 timestamp: new Date(),
-                details: { error: ((_a = result.reason) === null || _a === void 0 ? void 0 : _a.message) || "Unknown error" }
+                details: { error: result.reason?.message || "Unknown error" }
             };
         }
     });
-    const responseTime = Date.now() - startTime;
+    // const responseTime = Date.now() - startTime; // Not used
     return {
         overall: determineOverallHealth(serviceResults),
         services: serviceResults,
@@ -160,32 +158,20 @@ async function checkFirestore() {
             status: "unhealthy",
             timestamp: new Date(),
             responseTime: Date.now() - startTime,
-            details: { error: error.message }
+            details: { error: error instanceof Error ? error.message : String(error) }
         };
     }
 }
 async function checkStorage() {
     const startTime = Date.now();
-    try {
-        // Test bucket accessibility
-        const bucket = firebase_1.storage.bucket();
-        await bucket.getMetadata();
-        return {
-            service: "storage",
-            status: "healthy",
-            timestamp: new Date(),
-            responseTime: Date.now() - startTime
-        };
-    }
-    catch (error) {
-        return {
-            service: "storage",
-            status: "unhealthy",
-            timestamp: new Date(),
-            responseTime: Date.now() - startTime,
-            details: { error: error.message }
-        };
-    }
+    // Temporarily disabled storage check
+    return {
+        service: "storage",
+        status: "degraded",
+        timestamp: new Date(),
+        responseTime: Date.now() - startTime,
+        details: { error: "Storage bucket not configured" }
+    };
 }
 async function checkAuth() {
     const startTime = Date.now();
@@ -205,7 +191,7 @@ async function checkAuth() {
             status: "unhealthy",
             timestamp: new Date(),
             responseTime: Date.now() - startTime,
-            details: { error: error.message }
+            details: { error: error instanceof Error ? error.message : String(error) }
         };
     }
 }
@@ -238,7 +224,7 @@ async function checkMemory() {
             status: "unhealthy",
             timestamp: new Date(),
             responseTime: Date.now() - startTime,
-            details: { error: error.message }
+            details: { error: error instanceof Error ? error.message : String(error) }
         };
     }
 }
@@ -272,7 +258,7 @@ async function checkEnvironment() {
             status: "unhealthy",
             timestamp: new Date(),
             responseTime: Date.now() - startTime,
-            details: { error: error.message }
+            details: { error: error instanceof Error ? error.message : String(error) }
         };
     }
 }

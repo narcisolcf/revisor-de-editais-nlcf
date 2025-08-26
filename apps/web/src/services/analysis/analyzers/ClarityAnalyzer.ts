@@ -152,7 +152,7 @@ export class ClarityAnalyzer extends BaseAnalyzer {
 
     metrics.totalAmbiguities = totalAmbiguities;
     metrics.ambiguityTypes = ambiguityTypes;
-    metrics.ambiguityScore = Math.max(0, 100 - (totalAmbiguities * 5));
+    metrics.inconsistencies = totalAmbiguities;
 
     return { problems, metrics };
   }
@@ -426,8 +426,8 @@ export class ClarityAnalyzer extends BaseAnalyzer {
     });
 
     // Ajustar score baseado nas métricas de legibilidade
-    if (metrics.ambiguityScore) {
-      score = Math.min(score, metrics.ambiguityScore);
+    if (metrics.inconsistencies !== undefined) {
+      score = Math.max(0, 100 - (metrics.inconsistencies * 5));
     }
 
     if (metrics.fleschKincaidScore && metrics.fleschKincaidScore < 60) {
@@ -480,10 +480,11 @@ export class ClarityAnalyzer extends BaseAnalyzer {
         categoria: 'formal'
       }],
       metrics: { 
-        ambiguityScore: 70, 
-        fleschKincaidScore: 60,
-        avgWordsPerSentence: 20,
-        avgSentencesPerParagraph: 2
+        totalClauses: 0,
+        validClauses: 0,
+        missingClauses: 1,
+        inconsistencies: 0,
+        processingTime: 0
       },
       score: 70,
       confidence: 30,

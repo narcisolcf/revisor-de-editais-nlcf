@@ -16,7 +16,7 @@ export * from "./config.types";
 export * from "./comissoes.types";
 
 // Common API Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -39,7 +39,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 export interface ErrorResponse extends ApiResponse {
   success: false;
   error: string;
-  details?: any;
+  details?: Record<string, unknown>;
   stack?: string; // Only in development
 }
 
@@ -58,8 +58,8 @@ export interface AuditLog {
   action: string;
   resourceType: string;
   resourceId: string;
-  changes?: Record<string, any>;
-  metadata?: Record<string, any>;
+  changes?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   ipAddress?: string;
   userAgent?: string;
   timestamp: Date;
@@ -89,7 +89,7 @@ export interface FileUploadResult {
 export interface WebhookEvent {
   id: string;
   type: string;
-  data: any;
+  data: Record<string, unknown>;
   organizationId: string;
   timestamp: Date;
   source: string;
@@ -99,7 +99,7 @@ export interface WebhookEvent {
 export interface TaskPayload {
   id: string;
   type: string;
-  data: any;
+  data: Record<string, unknown>;
   priority: "low" | "normal" | "high";
   maxRetries: number;
   currentRetries: number;
@@ -114,7 +114,7 @@ export interface NotificationPayload {
   title: string;
   message: string;
   type: "info" | "success" | "warning" | "error";
-  data?: any;
+  data?: Record<string, unknown>;
   channels: ("email" | "push" | "webhook")[];
 }
 
@@ -124,7 +124,7 @@ export interface HealthCheckResult {
   status: "healthy" | "unhealthy" | "degraded";
   timestamp: Date;
   responseTime?: number;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   dependencies?: HealthCheckResult[];
 }
 
@@ -185,7 +185,7 @@ export type WithId<T> = T & { id: string };
 export type WithTimestamp<T> = T & Timestamp;
 
 export type WithMetadata<T> = T & {
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 };
 
 // Status Types

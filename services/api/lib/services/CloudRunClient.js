@@ -3,43 +3,13 @@
  * CloudRunClient - Cliente para comunicação com serviços Cloud Run
  * LicitaReview Cloud Functions
  */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CloudRunClient = void 0;
 const google_auth_library_1 = require("google-auth-library");
-const axios_1 = __importStar(require("axios"));
+const axios_1 = __importDefault(require("axios"));
 class CloudRunClient {
     constructor(serviceUrl, circuitBreakerConfig = {
         failureThreshold: 5,
@@ -149,13 +119,12 @@ class CloudRunClient {
             const health = await this.healthCheck();
             return health.status === 'healthy';
         }
-        catch (_a) {
+        catch {
             return false;
         }
     }
     // Métodos privados
     async setupHttpClient() {
-        const client = await this.auth.getIdTokenClient(this.serviceUrl);
         this.httpClient = axios_1.default.create({
             baseURL: this.serviceUrl,
             timeout: 60000, // 1 minuto timeout padrão
@@ -166,12 +135,12 @@ class CloudRunClient {
         // Interceptor para adicionar token de autenticação
         this.httpClient.interceptors.request.use(async (config) => {
             try {
-                const token = await client.getAccessToken();
-                if (token.token) {
+                const token = await this.auth.getAccessToken();
+                if (token) {
                     if (!config.headers) {
-                        config.headers = new axios_1.AxiosHeaders();
+                        config.headers = {};
                     }
-                    config.headers.Authorization = `Bearer ${token.token}`;
+                    config.headers['Authorization'] = `Bearer ${token}`;
                 }
             }
             catch (error) {
@@ -181,15 +150,13 @@ class CloudRunClient {
         });
         // Interceptor para logging e tratamento de erros
         this.httpClient.interceptors.response.use((response) => {
-            var _a;
-            console.log(`Cloud Run request successful: ${(_a = response.config.method) === null || _a === void 0 ? void 0 : _a.toUpperCase()} ${response.config.url}`);
+            console.log(`Cloud Run request successful: ${response.config.method?.toUpperCase()} ${response.config.url}`);
             return response;
         }, (error) => {
-            var _a, _b, _c, _d, _e, _f;
-            console.error(`Cloud Run request failed: ${(_b = (_a = error.config) === null || _a === void 0 ? void 0 : _a.method) === null || _b === void 0 ? void 0 : _b.toUpperCase()} ${(_c = error.config) === null || _c === void 0 ? void 0 : _c.url}`, {
-                status: (_d = error.response) === null || _d === void 0 ? void 0 : _d.status,
-                statusText: (_e = error.response) === null || _e === void 0 ? void 0 : _e.statusText,
-                data: (_f = error.response) === null || _f === void 0 ? void 0 : _f.data
+            console.error(`Cloud Run request failed: ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                data: error.response?.data
             });
             return Promise.reject(this.handleHttpError(error));
         });
@@ -218,27 +185,25 @@ class CloudRunClient {
         throw lastError;
     }
     isRetryableError(error) {
-        var _a, _b;
         // Erros de rede ou timeouts são retryable
         if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
             return true;
         }
         // Status HTTP 5xx são retryable
-        if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) >= 500) {
+        if (error.response?.status >= 500) {
             return true;
         }
         // Status 429 (rate limit) é retryable
-        if (((_b = error.response) === null || _b === void 0 ? void 0 : _b.status) === 429) {
+        if (error.response?.status === 429) {
             return true;
         }
         return false;
     }
     handleHttpError(error) {
-        var _a;
         if (error.response) {
             // Erro HTTP com resposta
             const status = error.response.status;
-            const message = ((_a = error.response.data) === null || _a === void 0 ? void 0 : _a.error) || error.response.statusText;
+            const message = error.response.data?.error || error.response.statusText;
             switch (status) {
                 case 400:
                     return new Error(`Requisição inválida: ${message}`);

@@ -34,11 +34,10 @@ class OrganizationConfigService {
         });
         // Interceptor para logging de requests
         this.analyzerClient.interceptors.request.use((config) => {
-            var _a;
             firebase_functions_1.logger.info('Sending request to analyzer service', {
                 url: config.url,
                 method: config.method,
-                organizationId: (_a = config.data) === null || _a === void 0 ? void 0 : _a.organizationId
+                organizationId: config.data?.organizationId
             });
             return config;
         }, (error) => {
@@ -53,11 +52,10 @@ class OrganizationConfigService {
             });
             return response;
         }, (error) => {
-            var _a, _b;
             firebase_functions_1.logger.error('Analyzer service error', {
-                status: (_a = error.response) === null || _a === void 0 ? void 0 : _a.status,
+                status: error.response?.status,
                 message: error.message,
-                url: (_b = error.config) === null || _b === void 0 ? void 0 : _b.url
+                url: error.config?.url
             });
             return Promise.reject(error);
         });

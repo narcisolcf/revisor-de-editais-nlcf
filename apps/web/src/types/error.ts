@@ -40,7 +40,7 @@ export interface ErrorBoundaryState {
 
 export interface ErrorBoundaryProps {
   fallback?: ComponentType<ErrorFallbackProps>;
-  onError?: (_error: Error, _errorInfo: ErrorInfo) => void;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
   children: ReactNode;
 }
 
@@ -48,7 +48,7 @@ export interface ErrorFallbackProps {
   error?: Error;
   errorId: string;
   resetError: () => void;
-  onReport?: (_errorId: string) => void;
+  onReport?: (errorId: string) => void;
 }
 
 export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';

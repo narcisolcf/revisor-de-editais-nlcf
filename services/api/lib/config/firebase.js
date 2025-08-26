@@ -37,14 +37,13 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bucket = exports.collections = exports.messaging = exports.storage = exports.firestore = exports.auth = void 0;
+exports.collections = exports.messaging = exports.storage = exports.firestore = exports.auth = void 0;
 const admin = __importStar(require("firebase-admin"));
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.applicationDefault(),
-        projectId: process.env.GOOGLE_CLOUD_PROJECT || "analisador-de-editais",
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "analisador-de-editais.firebasestorage.app",
+        projectId: process.env.GOOGLE_CLOUD_PROJECT || "licitareview-prod",
     });
 }
 // Export Firebase services
@@ -62,7 +61,7 @@ exports.collections = {
     auditLogs: exports.firestore.collection("auditLogs"),
 };
 // Storage bucket reference
-exports.bucket = exports.storage.bucket();
+// export const bucket = storage.bucket();
 // Firestore settings for better performance
 exports.firestore.settings({
     ignoreUndefinedProperties: true,
