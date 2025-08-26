@@ -10,9 +10,6 @@ import { DocumentRepository } from '../db/repositories/DocumentRepository';
 import { AnalysisRepository } from '../db/repositories/AnalysisRepository';
 import { OrganizationRepository } from '../db/repositories/OrganizationRepository';
 import { ParameterEngine } from '../services/ParameterEngine';
-import { CloudRunClient } from '../services/CloudRunClient';
-import { TaskQueueService } from '../services/TaskQueueService';
-import { OrganizationConfigService } from '../services/OrganizationConfigService';
 import { AnalysisStatus, DocumentType, AnalysisPriority } from '../types/config.types';
 
 // Configuração do ambiente de teste
@@ -25,9 +22,6 @@ describe('Fluxo End-to-End de Análise', () => {
   let analysisRepo: AnalysisRepository;
   let organizationRepo: OrganizationRepository;
   let parameterEngine: ParameterEngine;
-  let cloudRunClient: CloudRunClient;
-  let taskQueue: TaskQueueService;
-  let configService: OrganizationConfigService;
   
   const testOrganizationId = 'test-org-e2e';
   const testUserId = 'test-user-e2e';
@@ -46,14 +40,9 @@ describe('Fluxo End-to-End de Análise', () => {
       cacheTimeout: 30 * 60 * 1000
     });
     
-    cloudRunClient = new CloudRunClient({
-      serviceUrl: 'http://localhost:8080', // Mock URL
-      timeout: 30000,
-      retryAttempts: 3
-    });
+    // CloudRunClient removido - não utilizado nos testes
     
-    taskQueue = new TaskQueueService(firestore);
-    configService = new OrganizationConfigService(firestore, cloudRunClient);
+    // TaskQueue e ConfigService removidos - não utilizados nos testes
     
     orchestrator = new AnalysisOrchestrator(
       firestore,

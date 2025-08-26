@@ -324,7 +324,8 @@ export async function generateDocumentPreview(
 /**
  * Validate document structure and content
  */
-export async function validateDocument(filePath: string, document: Document): Promise<{
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+export async function validateDocument(_filePath: string, _document: Document): Promise<{
   isValid: boolean;
   errors: string[];
   warnings: string[];

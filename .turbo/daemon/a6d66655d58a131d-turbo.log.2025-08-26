@@ -1,0 +1,280 @@
+2025-08-26T06:24:36.745862Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/.turbo-cookie"), AnchoredSystemPathBuf(".turbo/cookies/1.cookie")}
+2025-08-26T06:24:36.745871Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:24:37.151317Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/3.cookie"), AnchoredSystemPathBuf(".turbo/cookies/4.cookie"), AnchoredSystemPathBuf("services/analyzer/.turbo"), AnchoredSystemPathBuf("packages/types/.turbo"), AnchoredSystemPathBuf(".turbo/cookies/2.cookie")}
+2025-08-26T06:24:37.151412Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }, WorkspacePackage { name: Other("@licitareview/analyzer"), path: AnchoredSystemPathBuf("services/analyzer") }, WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:24:47.146645Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/5.cookie")}
+2025-08-26T06:24:47.146667Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:24:47.646782Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/7.cookie"), AnchoredSystemPathBuf(".turbo/cookies/6.cookie")}
+2025-08-26T06:24:47.646789Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:24:47.846013Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/.gitignore"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/CACHEDIR.TAG")}
+2025-08-26T06:24:47.846024Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@licitareview/analyzer"), path: AnchoredSystemPathBuf("services/analyzer") }}))
+2025-08-26T06:24:47.945547Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/2685569411066153279"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/.tmpLouHLG"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/2329306963930908046"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/18152800542168625359"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/5990912594281093638"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/.tmp9eVVbc"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/17226270591788097083"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/8917951720489350510"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/.tmp80CF9Y"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/.tmpBIEiod"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/6004497593123487984"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/.tmpa7Keb2"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/.tmpJqvInU"), AnchoredSystemPathBuf(".turbo/cookies/8.cookie"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/11571529045079018694"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/.tmp29it1w"), AnchoredSystemPathBuf("services/analyzer/.ruff_cache/0.12.9/.tmpmuSeGo")}
+2025-08-26T06:24:47.945556Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }, WorkspacePackage { name: Other("@licitareview/analyzer"), path: AnchoredSystemPathBuf("services/analyzer") }}))
+2025-08-26T06:24:55.446377Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/9.cookie")}
+2025-08-26T06:24:55.446395Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:24:56.646826Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1756189496616-9af9a2c161f94.mjs")}
+2025-08-26T06:24:56.646835Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-26T06:24:56.747030Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1756189496616-9af9a2c161f94.mjs")}
+2025-08-26T06:24:56.747046Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-26T06:25:58.771674Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/postcss.config.js")}
+2025-08-26T06:25:58.776170Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-26T06:26:04.345709Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/10.cookie")}
+2025-08-26T06:26:04.345732Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:26:04.946214Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1756189564900-ce06bcffa287d8.mjs")}
+2025-08-26T06:26:04.946224Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-26T06:26:05.046582Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/vite.config.ts.timestamp-1756189564900-ce06bcffa287d8.mjs")}
+2025-08-26T06:26:05.046590Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-26T06:32:39.708529Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".github/workflows/ci.yml")}
+2025-08-26T06:32:39.709766Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:32:39.795153Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".github/workflows/ci.yml")}
+2025-08-26T06:32:39.795165Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:33:09.595060Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/11.cookie")}
+2025-08-26T06:33:09.595078Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:33:10.094815Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/analyzer/.turbo"), AnchoredSystemPathBuf(".turbo/cookies/14.cookie"), AnchoredSystemPathBuf(".turbo/cookies/12.cookie"), AnchoredSystemPathBuf(".turbo/cookies/13.cookie")}
+2025-08-26T06:33:10.094827Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }, WorkspacePackage { name: Other("@licitareview/analyzer"), path: AnchoredSystemPathBuf("services/analyzer") }}))
+2025-08-26T06:33:34.496037Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/.eslintrc.js")}
+2025-08-26T06:33:34.496075Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:33:37.094677Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/.eslintrc.js")}
+2025-08-26T06:33:37.094699Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:33:58.727381Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/.eslintrc.js")}
+2025-08-26T06:33:58.729900Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:33:58.796032Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/.eslintrc.js")}
+2025-08-26T06:33:58.796043Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:33:58.895569Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/.eslintrc.js")}
+2025-08-26T06:33:58.895577Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:34:04.998201Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/15.cookie")}
+2025-08-26T06:34:04.998220Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:34:05.295932Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/16.cookie"), AnchoredSystemPathBuf(".turbo/cookies/17.cookie")}
+2025-08-26T06:34:05.295940Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:34:16.495093Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/organization.types.ts")}
+2025-08-26T06:34:16.495159Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:34:16.594931Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/organization.types.ts")}
+2025-08-26T06:34:16.594940Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:34:22.095426Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/user.types.ts")}
+2025-08-26T06:34:22.095462Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:34:22.196090Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/user.types.ts")}
+2025-08-26T06:34:22.196099Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:34:48.996720Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/analysis.types.ts")}
+2025-08-26T06:34:48.996752Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:34:59.396061Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/document.types.ts")}
+2025-08-26T06:34:59.402679Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:34:59.403676Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/document.types.ts")}
+2025-08-26T06:34:59.403679Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:34:59.495993Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/document.types.ts")}
+2025-08-26T06:34:59.496001Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:35:06.395940Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/18.cookie")}
+2025-08-26T06:35:06.395982Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:35:06.795792Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/19.cookie"), AnchoredSystemPathBuf(".turbo/cookies/20.cookie")}
+2025-08-26T06:35:06.795801Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:35:34.797132Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/error.types.ts")}
+2025-08-26T06:35:34.797352Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:35:34.896466Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/error.types.ts")}
+2025-08-26T06:35:34.896475Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:35:40.695955Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/21.cookie")}
+2025-08-26T06:35:40.695973Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:35:41.097167Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/23.cookie"), AnchoredSystemPathBuf(".turbo/cookies/22.cookie")}
+2025-08-26T06:35:41.097177Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:35:58.219959Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/api.types.ts")}
+2025-08-26T06:35:58.221170Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:35:58.296353Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/api.types.ts")}
+2025-08-26T06:35:58.296364Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:36:02.399639Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/error.types.ts")}
+2025-08-26T06:36:02.399870Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:36:02.597849Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("packages/types/src/error.types.ts")}
+2025-08-26T06:36:02.597860Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }}))
+2025-08-26T06:36:09.598406Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/24.cookie")}
+2025-08-26T06:36:09.598786Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:36:11.796630Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/25.cookie"), AnchoredSystemPathBuf(".turbo/cookies/26.cookie")}
+2025-08-26T06:36:11.796711Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:36:14.896404Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/27.cookie")}
+2025-08-26T06:36:14.896798Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:36:15.000874Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/28.cookie"), AnchoredSystemPathBuf(".turbo/cookies/30.cookie"), AnchoredSystemPathBuf("packages/utils/.turbo"), AnchoredSystemPathBuf("packages/ui/.turbo"), AnchoredSystemPathBuf(".turbo/cookies/29.cookie"), AnchoredSystemPathBuf("services/api/.turbo")}
+2025-08-26T06:36:15.000897Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/utils"), path: AnchoredSystemPathBuf("packages/utils") }, WorkspacePackage { name: Other("@revisor-de-editais/ui"), path: AnchoredSystemPathBuf("packages/ui") }, WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }, WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:36:22.135562Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/31.cookie"), AnchoredSystemPathBuf(".turbo/cookies/32.cookie")}
+2025-08-26T06:36:22.139977Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:37:28.078937Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package-lock.json")}
+2025-08-26T06:37:28.087163Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:37:57.120703Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/package.json")}
+2025-08-26T06:37:57.122577Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-26T06:37:57.197609Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package.json"), AnchoredSystemPathBuf("packages/utils/package.json")}
+2025-08-26T06:37:57.197617Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-26T06:37:57.597538Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package-lock.json")}
+2025-08-26T06:37:57.597548Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:38:07.909295Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("")}
+2025-08-26T06:38:07.910342Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({}))
+2025-08-26T06:38:08.000638Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(""), AnchoredSystemPathBuf("package.json")}
+2025-08-26T06:38:08.000646Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-26T06:38:08.399268Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package-lock.json")}
+2025-08-26T06:38:08.399279Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:38:20.512433Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("")}
+2025-08-26T06:38:20.513926Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({}))
+2025-08-26T06:38:20.898510Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package.json")}
+2025-08-26T06:38:20.898519Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-26T06:38:21.198519Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package-lock.json")}
+2025-08-26T06:38:21.198527Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:38:30.299899Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("")}
+2025-08-26T06:38:30.299925Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({}))
+2025-08-26T06:38:30.399516Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(""), AnchoredSystemPathBuf("package.json")}
+2025-08-26T06:38:30.399525Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(All)
+2025-08-26T06:38:30.698009Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("package-lock.json")}
+2025-08-26T06:38:30.698017Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:38:35.797950Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/33.cookie")}
+2025-08-26T06:38:35.797963Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:38:36.197915Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/35.cookie"), AnchoredSystemPathBuf(".turbo/cookies/34.cookie")}
+2025-08-26T06:38:36.197924Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:38:36.397703Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/36.cookie")}
+2025-08-26T06:38:36.397711Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:38:37.297156Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/37.cookie")}
+2025-08-26T06:38:37.297166Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:38:37.398048Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/39.cookie"), AnchoredSystemPathBuf(".turbo/cookies/40.cookie"), AnchoredSystemPathBuf(".turbo/cookies/38.cookie")}
+2025-08-26T06:38:37.398059Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:38:38.499069Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/43.cookie"), AnchoredSystemPathBuf(".turbo/cookies/42.cookie"), AnchoredSystemPathBuf(".turbo/cookies/41.cookie"), AnchoredSystemPathBuf("apps/web/.turbo")}
+2025-08-26T06:38:38.499082Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }, WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
+2025-08-26T06:39:17.422252Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/utils/index.ts")}
+2025-08-26T06:39:17.443792Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:39:17.598410Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/utils/index.ts")}
+2025-08-26T06:39:17.598420Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:39:23.498448Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/utils/validation.ts")}
+2025-08-26T06:39:23.498481Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:39:23.598739Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/utils/validation.ts")}
+2025-08-26T06:39:23.598749Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:39:32.901657Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/44.cookie")}
+2025-08-26T06:39:32.901673Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:39:33.398328Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/analyzer/.turbo"), AnchoredSystemPathBuf(".turbo/cookies/49.cookie"), AnchoredSystemPathBuf(".turbo/cookies/51.cookie"), AnchoredSystemPathBuf(".turbo/cookies/47.cookie"), AnchoredSystemPathBuf(".turbo/cookies/46.cookie"), AnchoredSystemPathBuf(".turbo/cookies/48.cookie"), AnchoredSystemPathBuf(".turbo/cookies/45.cookie"), AnchoredSystemPathBuf(".turbo/cookies/50.cookie"), AnchoredSystemPathBuf("packages/types/.turbo")}
+2025-08-26T06:39:33.398337Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/types"), path: AnchoredSystemPathBuf("packages/types") }, WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }, WorkspacePackage { name: Other("@licitareview/analyzer"), path: AnchoredSystemPathBuf("services/analyzer") }}))
+2025-08-26T06:39:33.498218Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/54.cookie"), AnchoredSystemPathBuf(".turbo/cookies/52.cookie"), AnchoredSystemPathBuf("packages/utils/.turbo"), AnchoredSystemPathBuf(".turbo/cookies/53.cookie"), AnchoredSystemPathBuf("packages/ui/.turbo")}
+2025-08-26T06:39:33.498227Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }, WorkspacePackage { name: Other("@revisor-de-editais/ui"), path: AnchoredSystemPathBuf("packages/ui") }, WorkspacePackage { name: Other("@revisor-de-editais/utils"), path: AnchoredSystemPathBuf("packages/utils") }}))
+2025-08-26T06:39:54.557807Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/.eslintrc.js")}
+2025-08-26T06:39:54.666926Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:39:54.676254Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/.eslintrc.js")}
+2025-08-26T06:39:54.676262Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:39:54.913507Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/.eslintrc.js")}
+2025-08-26T06:39:54.913546Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:40:02.034844Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/55.cookie")}
+2025-08-26T06:40:02.034943Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:40:03.398343Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/57.cookie"), AnchoredSystemPathBuf(".turbo/cookies/56.cookie")}
+2025-08-26T06:40:03.398380Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:40:03.558067Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/60.cookie"), AnchoredSystemPathBuf(".turbo/cookies/58.cookie"), AnchoredSystemPathBuf(".turbo/cookies/61.cookie"), AnchoredSystemPathBuf(".turbo/cookies/59.cookie")}
+2025-08-26T06:40:03.558142Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:48:59.417629Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/documents.test.ts")}
+2025-08-26T06:48:59.419823Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:48:59.597129Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/documents.test.ts")}
+2025-08-26T06:48:59.597138Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:48:59.696527Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/documents.test.ts")}
+2025-08-26T06:48:59.696576Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:49:06.494180Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/e2e-analysis-flow.test.ts")}
+2025-08-26T06:49:06.494236Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:49:06.597241Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/e2e-analysis-flow.test.ts")}
+2025-08-26T06:49:06.597341Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:49:12.594331Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:49:12.594369Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:49:12.698867Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:49:12.698881Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:49:17.903079Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/e2e-simple.js")}
+2025-08-26T06:49:17.903117Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:49:18.098126Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/e2e-simple.js")}
+2025-08-26T06:49:18.098142Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:16.794632Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/analysis-config.test.ts")}
+2025-08-26T06:50:16.794668Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:16.894014Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/analysis-config.test.ts")}
+2025-08-26T06:50:16.894049Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:22.194330Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/firestore-integration.test.ts")}
+2025-08-26T06:50:22.194374Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:22.295239Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/firestore-integration.test.ts")}
+2025-08-26T06:50:22.295252Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:30.894378Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/firestore-integration.test.ts")}
+2025-08-26T06:50:30.894418Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:40.994533Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:50:40.994569Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:41.093580Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:50:41.093590Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:48.098310Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:50:48.098350Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:53.394147Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:50:53.394177Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:59.796535Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:50:59.796681Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:50:59.895294Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:50:59.895306Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:51:06.998281Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/setup.ts")}
+2025-08-26T06:51:06.999082Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:51:19.595032Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:51:19.595070Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:51:19.694869Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:51:19.694882Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:51:36.295587Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/62.cookie")}
+2025-08-26T06:51:36.295693Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:51:36.795601Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/66.cookie"), AnchoredSystemPathBuf(".turbo/cookies/64.cookie"), AnchoredSystemPathBuf(".turbo/cookies/67.cookie"), AnchoredSystemPathBuf(".turbo/cookies/63.cookie"), AnchoredSystemPathBuf(".turbo/cookies/65.cookie")}
+2025-08-26T06:51:36.795938Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:51:36.894896Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo/cookies/68.cookie")}
+2025-08-26T06:51:36.894909Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-08-26T06:52:40.215822Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/e2e-analysis-flow.test.ts")}
+2025-08-26T06:52:40.218153Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:52:40.295267Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/e2e-analysis-flow.test.ts")}
+2025-08-26T06:52:40.295279Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:52:47.314663Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/firestore-integration.test.ts")}
+2025-08-26T06:52:47.314712Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:52:47.397697Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/firestore-integration.test.ts")}
+2025-08-26T06:52:47.397709Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:52:57.895183Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:52:57.895219Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:52:57.996173Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:52:57.996185Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:53:14.127532Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:53:14.129750Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:53:14.195810Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:53:14.195822Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:53:34.094568Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:53:34.094629Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:53:34.196818Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:53:34.196831Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:54:07.297810Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/e2e-analysis-flow.test.ts")}
+2025-08-26T06:54:07.298035Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:54:18.496942Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:54:18.497062Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:54:29.097894Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:54:29.097932Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:54:29.296458Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:54:29.296471Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:54:54.197299Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/e2e-analysis-flow.test.ts")}
+2025-08-26T06:54:54.197349Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:54:54.296112Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/e2e-analysis-flow.test.ts")}
+2025-08-26T06:54:54.296149Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:55:08.002704Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:55:08.002786Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:55:08.102405Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:55:08.102416Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:55:30.497788Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/e2e-analysis-flow.test.ts")}
+2025-08-26T06:55:30.497862Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:56:33.102408Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:56:33.102456Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:56:44.797603Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:56:44.797641Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:56:44.898619Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:56:44.898630Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:56:58.801059Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:56:58.801100Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:56:58.896818Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T06:56:58.896828Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:57:03.199351Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:57:03.199391Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:57:03.299306Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:57:03.299317Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:57:19.597979Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:57:19.598012Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T06:57:19.697202Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/unit/AnalysisOrchestrator.test.ts")}
+2025-08-26T06:57:19.697217Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T07:00:27.101300Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/firestore-integration.test.ts")}
+2025-08-26T07:00:27.101570Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T07:00:27.199654Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/firestore-integration.test.ts")}
+2025-08-26T07:00:27.199715Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T07:00:42.800790Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/tests/parameter-engine.test.ts")}
+2025-08-26T07:00:42.800866Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T07:02:04.900649Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/triggers/document-upload.ts")}
+2025-08-26T07:02:04.900683Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T07:02:16.402871Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/types/comissoes.types.ts")}
+2025-08-26T07:02:16.402902Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T07:02:16.498450Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/types/comissoes.types.ts")}
+2025-08-26T07:02:16.498462Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))
+2025-08-26T07:02:48.700240Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("services/api/src/triggers/document-upload.ts")}
+2025-08-26T07:02:48.700274Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@revisor-de-editais/api"), path: AnchoredSystemPathBuf("services/api") }}))

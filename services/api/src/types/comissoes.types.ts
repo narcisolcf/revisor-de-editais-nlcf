@@ -69,7 +69,7 @@ export const ConfiguracoesComissaoSchema = z.object({
 });
 
 // Comissão Interface
-export interface Comissao extends WithId<{}>, WithTimestamp<{}> {
+export interface Comissao extends WithId<Record<string, never>>, WithTimestamp<Record<string, never>> {
   nomeDaComissao: string;
   tipo: TipoComissao;
   dataDeCriacao: Date;

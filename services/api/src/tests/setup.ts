@@ -50,9 +50,16 @@ jest.mock('express', () => {
     delete: jest.fn(),
     listen: jest.fn()
   };
-  const mockExpress = jest.fn(() => mockApp) as any;
-mockExpress.json = jest.fn();
-mockExpress.Router = jest.fn(() => mockApp);
+  
+  interface MockExpress {
+    (): typeof mockApp;
+    json: jest.Mock;
+    Router: jest.Mock;
+  }
+  
+  const mockExpress = jest.fn(() => mockApp) as MockExpress;
+  mockExpress.json = jest.fn();
+  mockExpress.Router = jest.fn(() => mockApp);
   return mockExpress;
 });
 

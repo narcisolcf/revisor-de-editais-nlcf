@@ -5,7 +5,6 @@
 
 import { describe, it, expect, beforeEach, afterEach, jest } from "@jest/globals";
 import request from "supertest";
-import express from "express";
 import { DocumentType, DocumentStatus, LicitationModality } from "../types";
 
 // Mock Firebase modules

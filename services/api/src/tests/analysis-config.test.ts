@@ -387,8 +387,18 @@ describe("Analysis Configuration API", () => {
       expect(response.body.data).toBeInstanceOf(Array);
       expect(response.body.data.length).toBeGreaterThan(0);
       
+      interface PresetData {
+        preset: string;
+        weights: {
+          structural: number;
+          legal: number;
+          clarity: number;
+          abnt: number;
+        };
+      }
+      
       const standardPreset = response.body.data.find(
-        (p: any) => p.preset === AnalysisPreset.STANDARD
+        (p: PresetData) => p.preset === AnalysisPreset.STANDARD
       );
       expect(standardPreset).toBeDefined();
       expect(standardPreset.weights).toEqual({

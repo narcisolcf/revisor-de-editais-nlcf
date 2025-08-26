@@ -12,10 +12,11 @@ process.env.NODE_ENV = 'integration-test';
 process.env.GCLOUD_PROJECT = 'analisador-de-editais';
 
 // Limpar require cache para evitar conflitos com mocks
-delete require.cache[require.resolve('firebase-admin')];
+// Cache clearing is handled by Jest configuration
 
 // Importar Firebase Admin diretamente
-const admin = require('firebase-admin');
+import * as admin from 'firebase-admin';
+import { type FirebaseFirestore } from 'firebase-admin/firestore';
 
 // Inicializar Firebase Admin para testes de integração
 if (admin.apps.length === 0) {
@@ -46,7 +47,7 @@ describe('Firestore Integration Tests', () => {
       const snapshot = await firestore.collection(testCollection).get();
       const batch = firestore.batch();
       
-      snapshot.docs.forEach((doc: any) => {
+      snapshot.docs.forEach((doc: FirebaseFirestore.QueryDocumentSnapshot) => {
         batch.delete(doc.ref);
       });
       

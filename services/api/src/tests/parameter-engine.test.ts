@@ -6,23 +6,33 @@
 import request from 'supertest';
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { ParameterEngine } from '../services/ParameterEngine';
-import { firestore } from '../config/firebase';
 
 // Mock do Firebase
 jest.mock('../config/firebase', () => ({
-  firestore: {
-    collection: jest.fn(),
-    doc: jest.fn(),
-    batch: jest.fn()
-  }
+  // Firebase mocks are handled by Jest configuration
 }));
 
 // Mock do ParameterEngine
 jest.mock('../services/ParameterEngine');
 
+interface MockRequest {
+  user?: {
+    uid: string;
+    organizationId: string;
+    role: string;
+  };
+}
+
+interface MockResponse {
+  status?: () => MockResponse;
+  json?: () => MockResponse;
+}
+
+type MockNext = () => void;
+
 // Mock da autenticação
 jest.mock('../middleware/auth', () => ({
-  authenticateUser: (req: any, res: any, next: any) => {
+  authenticateUser: (req: MockRequest, res: MockResponse, next: MockNext) => {
     req.user = {
       uid: 'test-user-id',
       organizationId: 'test-org-id',
@@ -30,8 +40,12 @@ jest.mock('../middleware/auth', () => ({
     };
     next();
   },
-  requireOrganization: (req: any, res: any, next: any) => next(),
-  requirePermissions: (permissions: string[]) => (req: any, res: any, next: any) => next(),
+  requireOrganization: (req: MockRequest, res: MockResponse, next: MockNext) => next(),
+  requirePermissions: jest.fn(() => {
+    return (req: MockRequest, res: MockResponse, next: MockNext) => {
+      next();
+    };
+  }),
   PERMISSIONS: {
     CONFIG_READ: 'config:read',
     CONFIG_WRITE: 'config:write'
@@ -40,21 +54,21 @@ jest.mock('../middleware/auth', () => ({
     ADMIN: 'ADMIN',
     USER: 'USER'
   }
-}));
+}))
 
 // Mock do rate limiting
 jest.mock('express-rate-limit', () => {
-  return jest.fn(() => (req: any, res: any, next: any) => next());
+  return jest.fn(() => (req: MockRequest, res: MockResponse, next: MockNext) => next());
 });
 
 // Mock do helmet
 jest.mock('helmet', () => {
-  return jest.fn(() => (req: any, res: any, next: any) => next());
+  return jest.fn(() => (req: MockRequest, res: MockResponse, next: MockNext) => next());
 });
 
 // Mock do cors
 jest.mock('cors', () => {
-  return jest.fn(() => (req: any, res: any, next: any) => next());
+  return jest.fn(() => (req: MockRequest, res: MockResponse, next: MockNext) => next());
 });
 
 // Mock da configuração
@@ -77,8 +91,16 @@ jest.mock('firebase-functions', () => ({
   }
 }));
 
+interface MockApp {
+  get: jest.Mock;
+  post: jest.Mock;
+  put: jest.Mock;
+  delete: jest.Mock;
+  use: jest.Mock;
+}
+
 describe('ParameterEngine API', () => {
-  let app: any;
+  let app: MockApp;
   let mockParameterEngine: jest.Mocked<ParameterEngine>;
 
   beforeEach(async () => {
@@ -92,7 +114,7 @@ describe('ParameterEngine API', () => {
       clearCache: jest.fn(),
       getEngineStats: jest.fn(),
       updateConfig: jest.fn()
-    } as any;
+    } as jest.Mocked<ParameterEngine>;
 
     (ParameterEngine as jest.MockedClass<typeof ParameterEngine>).mockImplementation(() => mockParameterEngine);
 

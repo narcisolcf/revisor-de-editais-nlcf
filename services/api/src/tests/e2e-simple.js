@@ -234,7 +234,7 @@ async function testProcessAnalysis() {
   const progressSteps = [
     { structural: 25, legal: 0, clarity: 0, abnt: 0, overall: 6.25 },
     { structural: 100, legal: 50, clarity: 0, abnt: 0, overall: 37.5 },
-    { structural: 100, legal: 100, clarity: 75, clarity: 0, overall: 68.75 },
+    { structural: 100, legal: 100, clarity: 75, abnt: 0, overall: 68.75 },
     { structural: 100, legal: 100, clarity: 100, abnt: 50, overall: 87.5 }
   ];
   
