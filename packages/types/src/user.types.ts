@@ -6,6 +6,7 @@
 import { z } from 'zod';
 
 // Enums
+/* eslint-disable no-unused-vars */
 export enum UserRole {
   ADMIN = 'admin',
   MANAGER = 'manager',
@@ -19,6 +20,7 @@ export enum UserStatus {
   PENDING = 'pending',
   SUSPENDED = 'suspended'
 }
+/* eslint-enable no-unused-vars */
 
 // Schemas
 export const UserProfileSchema = z.object({

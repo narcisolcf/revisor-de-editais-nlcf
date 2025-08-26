@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { ProblemSeverity } from './config.types';
 
 // Enums
+/* eslint-disable no-unused-vars */
 export enum AnalysisStatus {
   PENDING = 'pending',
   IN_PROGRESS = 'in_progress',
@@ -14,6 +15,7 @@ export enum AnalysisStatus {
   FAILED = 'failed',
   CANCELLED = 'cancelled'
 }
+/* eslint-enable no-unused-vars */
 
 // ProblemSeverity is imported from config.types to avoid duplication
 

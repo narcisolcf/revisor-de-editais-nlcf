@@ -3,8 +3,6 @@
  * Tipos relacionados às APIs e comunicação
  */
 
-import { z } from 'zod';
-
 // Common API Response
 export interface ApiResponse<T = unknown> {
   success: boolean;

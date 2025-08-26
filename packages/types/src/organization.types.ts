@@ -6,6 +6,7 @@
 import { z } from 'zod';
 
 // Enums
+/* eslint-disable no-unused-vars */
 export enum OrganizationType {
   FEDERAL = 'federal',
   STATE = 'state',
@@ -19,6 +20,7 @@ export enum OrganizationStatus {
   SUSPENDED = 'suspended',
   TRIAL = 'trial'
 }
+/* eslint-enable no-unused-vars */
 
 // Schemas
 export const OrganizationSettingsSchema = z.object({

@@ -183,7 +183,7 @@ export async function retryWithBackoff<T>(
 export function isRetryableError(error: unknown): boolean {
   if (!error) return false;
   
-  const err = error as any;
+  const err = error as Error & { code?: string; response?: { status?: number } };
   
   // Erros de rede
   if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {

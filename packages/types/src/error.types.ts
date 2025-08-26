@@ -3,9 +3,8 @@
  * Tipos relacionados ao tratamento de erros
  */
 
-import { z } from 'zod';
-
 // Error Categories
+/* eslint-disable no-unused-vars */
 export enum ErrorCategory {
   VALIDATION = 'validation',
   AUTHENTICATION = 'authentication',
@@ -26,6 +25,7 @@ export enum ErrorSeverity {
   HIGH = 'high',
   CRITICAL = 'critical'
 }
+/* eslint-enable no-unused-vars */
 
 // Base Error Interface
 export interface BaseError {

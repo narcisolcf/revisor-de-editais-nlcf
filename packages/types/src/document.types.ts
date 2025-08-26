@@ -6,6 +6,7 @@
 import { z } from 'zod';
 
 // Enums
+/* eslint-disable no-unused-vars */
 export enum DocumentType {
   EDITAL = 'edital',
   TERMO_REFERENCIA = 'termo_referencia',
@@ -36,6 +37,7 @@ export enum LicitationModality {
   RDC = 'rdc',
   DIALOGO_COMPETITIVO = 'dialogo_competitivo'
 }
+/* eslint-enable no-unused-vars */
 
 // Schemas
 export const DocumentMetadataSchema = z.object({

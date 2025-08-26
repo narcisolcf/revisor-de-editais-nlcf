@@ -25,8 +25,19 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Node.js dependencies
         run: npm ci
+
+      - name: Install Python dependencies for analyzer
+        working-directory: ./services/analyzer
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Lint
         run: npm run lint
