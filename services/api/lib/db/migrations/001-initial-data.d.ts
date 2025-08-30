@@ -40,4 +40,3 @@ export declare class InitialDataMigration {
      */
     rollback(): Promise<void>;
 }
-//# sourceMappingURL=001-initial-data.d.ts.map

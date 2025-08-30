@@ -5,7 +5,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationService = void 0;
 class NotificationService {
-    constructor(projectId) {
+    // eslint-disable-next-line no-unused-vars
+    constructor(_projectId) {
         // projectId stored for future use
     }
     /**
@@ -142,7 +143,8 @@ class NotificationService {
     /**
      * Simula envio de notificação (para desenvolvimento/teste)
      */
-    async simulateNotificationSend(payload) {
+    // eslint-disable-next-line no-unused-vars
+    async simulateNotificationSend(_payload) {
         // Simular delay de rede
         await new Promise(resolve => setTimeout(resolve, 100));
         // Simular falha ocasional (5% de chance)
@@ -153,7 +155,8 @@ class NotificationService {
     /**
      * Simula envio de email (para desenvolvimento/teste)
      */
-    async simulateEmailSend(notification) {
+    // eslint-disable-next-line no-unused-vars
+    async simulateEmailSend(_notification) {
         // Simular delay de rede
         await new Promise(resolve => setTimeout(resolve, 200));
         // Simular falha ocasional (3% de chance)
@@ -164,7 +167,8 @@ class NotificationService {
     /**
      * Simula envio de push notification (para desenvolvimento/teste)
      */
-    async simulatePushSend(notification) {
+    // eslint-disable-next-line no-unused-vars
+    async simulatePushSend(_notification) {
         // Simular delay de rede
         await new Promise(resolve => setTimeout(resolve, 150));
         // Simular falha ocasional (2% de chance)
@@ -175,6 +179,7 @@ class NotificationService {
     /**
      * Obtém preferências de notificação do usuário
      */
+    // eslint-disable-next-line no-unused-vars
     async getUserNotificationPreferences(userId) {
         // Aqui seria implementada a busca das preferências no banco de dados
         // Por enquanto, retorna preferências padrão
@@ -188,8 +193,9 @@ class NotificationService {
     /**
      * Atualiza preferências de notificação do usuário
      */
-    async updateUserNotificationPreferences(userId, preferences) {
-        console.log(`Atualizando preferências de notificação para usuário ${userId}:`, preferences);
+    // eslint-disable-next-line no-unused-vars
+    async updateUserNotificationPreferences(_userId, preferences) {
+        console.log(`Atualizando preferências de notificação para usuário ${_userId}:`, preferences);
         // Aqui seria implementada a atualização no banco de dados
         // Por enquanto, apenas log
     }

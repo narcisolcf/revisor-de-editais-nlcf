@@ -1,16 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AnimatedContainer, StaggeredContainer, LoadingAnimation, PulseAnimation } from '@/components/ui/animated-container';
+import DashboardErrorBoundary, { DashboardErrorFallback } from '@/components/ui/dashboard-error-boundary';
+import {
+  MetricCardSkeleton,
+  ChartSkeleton,
+  DocumentsTableSkeleton,
+  IssuesBreakdownSkeleton,
+  PerformanceMetricsSkeleton,
+  QuickActionsSkeleton
+} from '@/components/ui/dashboard-skeletons';
 import {
   BarChart3,
   TrendingUp,
   FileText,
   AlertTriangle,
   Activity,
-  RefreshCw
+  RefreshCw,
+  Clock,
+  CheckCircle,
+  Settings,
+  Bell,
+  User
 } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 // Importar componentes do dashboard
 import { MetricsCards } from '@/components/dashboard/MetricsCards';
@@ -78,9 +96,9 @@ interface SystemHealth {
 }
 
 const DashboardPage: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [lastUpdate, setLastUpdate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('overview');
 
   // Dados mock - em produção, estes viriam de APIs
@@ -285,13 +303,13 @@ const DashboardPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    // Simular atualização de dados
+    // Simular carregamento
     await new Promise(resolve => setTimeout(resolve, 2000));
-    setLastUpdated(new Date());
+    setLastUpdate(new Date());
     setIsRefreshing(false);
-  };
+  }, []);
 
   const handleUploadDocument = () => {
     console.log('Upload documento');
@@ -315,37 +333,88 @@ const DashboardPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Carregando Dashboard</h2>
-          <p className="text-gray-600">Preparando suas métricas e análises...</p>
-        </div>
-      </div>
+      <DashboardErrorBoundary>
+        <AnimatedContainer animation="fadeIn" className="min-h-screen bg-gray-50">
+          {/* Header Skeleton */}
+          <div className="bg-white border-b border-gray-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-16">
+                <div className="flex items-center space-x-4">
+                  <Skeleton className="w-8 h-8" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Skeleton */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="space-y-6">
+              {/* Tabs Skeleton */}
+              <div className="flex space-x-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-24" />
+                ))}
+              </div>
+
+              {/* Metrics Cards Skeleton */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <MetricCardSkeleton key={i} />
+                  ))}
+                </div>
+                <div className="lg:col-span-1">
+                  <QuickActionsSkeleton />
+                </div>
+              </div>
+
+              {/* Charts Skeleton */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ChartSkeleton height={300} />
+                <ChartSkeleton height={300} />
+              </div>
+
+              {/* Table Skeleton */}
+              <DocumentsTableSkeleton rows={5} />
+            </div>
+          </div>
+        </AnimatedContainer>
+      </DashboardErrorBoundary>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DashboardErrorBoundary>
+      <AnimatedContainer animation="fadeIn" className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <AnimatedContainer animation="slideDown" className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
+            <AnimatedContainer animation="slideRight" className="flex items-center space-x-4">
               <BarChart3 className="w-8 h-8 text-blue-600" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Dashboard Analytics</h1>
                 <p className="text-sm text-gray-600">
-                  Última atualização: {lastUpdated.toLocaleString('pt-BR')}
+                  Última atualização: {lastUpdate.toLocaleString('pt-BR')}
                 </p>
               </div>
-            </div>
+            </AnimatedContainer>
             
-            <div className="flex items-center space-x-3">
-              <Badge variant="outline" className="text-green-600 border-green-600">
-                <div className="w-2 h-2 bg-green-600 rounded-full mr-2"></div>
-                Sistema Online
-              </Badge>
+            <AnimatedContainer animation="slideLeft" delay={0.2} className="flex items-center space-x-3">
+              <PulseAnimation>
+                <Badge variant="outline" className="text-green-600 border-green-600">
+                  <div className="w-2 h-2 bg-green-600 rounded-full mr-2"></div>
+                  Sistema Online
+                </Badge>
+              </PulseAnimation>
               
               <Button 
                 variant="outline" 
@@ -356,64 +425,128 @@ const DashboardPage: React.FC = () => {
                 <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                 {isRefreshing ? 'Atualizando...' : 'Atualizar'}
               </Button>
-            </div>
+            </AnimatedContainer>
           </div>
         </div>
-      </div>
+      </AnimatedContainer>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <AnimatedContainer animation="slideUp" delay={0.3} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="documents">Documentos</TabsTrigger>
-            <TabsTrigger value="issues">Problemas</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-          </TabsList>
+          <AnimatedContainer animation="scale" delay={0.4}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+              <TabsTrigger value="documents">Documentos</TabsTrigger>
+              <TabsTrigger value="issues">Problemas</TabsTrigger>
+              <TabsTrigger value="performance">Performance</TabsTrigger>
+            </TabsList>
+          </AnimatedContainer>
 
           {/* Visão Geral */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <StaggeredContainer animation="slideUp" stagger={0.1} className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Métricas Principais */}
               <div className="lg:col-span-3">
-                <MetricsCards metrics={metrics} />
+                <DashboardErrorBoundary 
+                  fallback={
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <DashboardErrorFallback 
+                          key={i}
+                          title="Erro nas Métricas"
+                          description="Não foi possível carregar as métricas."
+                        />
+                      ))}
+                    </div>
+                  }
+                >
+                  <MetricsCards 
+                    metrics={metrics} 
+                    isLoading={isLoading}
+                    isRefreshing={isRefreshing}
+                  />
+                </DashboardErrorBoundary>
               </div>
               
               {/* Ações Rápidas */}
               <div className="lg:col-span-1">
-                <QuickActions
-                  onUploadDocument={handleUploadDocument}
-                  onViewReports={handleViewReports}
-                  onRefreshData={handleRefresh}
-                  isRefreshing={isRefreshing}
-                  pendingNotifications={3}
-                />
+                <DashboardErrorBoundary 
+                  fallback={
+                    <DashboardErrorFallback 
+                      title="Erro nas Ações"
+                      description="Não foi possível carregar as ações rápidas."
+                    />
+                  }
+                >
+                  <QuickActions
+                    onUploadDocument={handleUploadDocument}
+                    onViewReports={handleViewReports}
+                    onRefreshData={handleRefresh}
+                    isRefreshing={isRefreshing}
+                    pendingNotifications={3}
+                  />
+                </DashboardErrorBoundary>
               </div>
-            </div>
+            </StaggeredContainer>
             
             {/* Gráficos de Tendência */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <TrendsChart
-                data={trendsData.documents}
-                type="documents"
-                title="Documentos Processados"
-                description="Evolução mensal do processamento de documentos"
-              />
+            <StaggeredContainer animation="slideUp" stagger={0.2} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <DashboardErrorBoundary 
+                fallback={
+                  <DashboardErrorFallback 
+                    title="Erro no Gráfico"
+                    description="Não foi possível carregar o gráfico de documentos."
+                  />
+                }
+              >
+                <TrendsChart
+                  data={trendsData.documents}
+                  type="documents"
+                  title="Documentos Processados"
+                  description="Evolução mensal do processamento de documentos"
+                  isLoading={isLoading}
+                  height={300}
+                />
+              </DashboardErrorBoundary>
               
-              <TrendsChart
-                data={trendsData.scores}
-                type="scores"
-                title="Scores de Qualidade"
-                description="Evolução da qualidade dos documentos analisados"
-              />
-            </div>
+              <DashboardErrorBoundary 
+                fallback={
+                  <DashboardErrorFallback 
+                    title="Erro no Gráfico"
+                    description="Não foi possível carregar o gráfico de scores."
+                  />
+                }
+              >
+                <TrendsChart
+                  data={trendsData.scores}
+                  type="scores"
+                  title="Scores de Qualidade"
+                  description="Evolução da qualidade dos documentos analisados"
+                  isLoading={isLoading}
+                  height={300}
+                />
+              </DashboardErrorBoundary>
+            </StaggeredContainer>
             
             {/* Documentos Recentes */}
-            <DocumentsTable
-              documents={documents}
-              onViewDocument={handleViewDocument}
-              onDownloadDocument={handleDownloadDocument}
-            />
+            <AnimatedContainer animation="slideUp" delay={0.6}>
+              <DashboardErrorBoundary 
+                fallback={
+                  <DashboardErrorFallback 
+                    title="Erro na Tabela"
+                    description="Não foi possível carregar a tabela de documentos."
+                  />
+                }
+              >
+                <DocumentsTable
+                  documents={documents}
+                  onViewDocument={handleViewDocument}
+                  onDownloadDocument={handleDownloadDocument}
+                  isLoading={isLoading}
+                  pageSize={15}
+                />
+              </DashboardErrorBoundary>
+            </AnimatedContainer>
           </TabsContent>
 
           {/* Documentos */}
@@ -423,6 +556,8 @@ const DashboardPage: React.FC = () => {
               showAll={true}
               onViewDocument={handleViewDocument}
               onDownloadDocument={handleDownloadDocument}
+              isLoading={isLoading}
+              pageSize={15}
             />
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -465,9 +600,9 @@ const DashboardPage: React.FC = () => {
             />
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
-  );
-};
+        </AnimatedContainer>
+      </DashboardErrorBoundary>
+    );
+  };
 
 export default DashboardPage;

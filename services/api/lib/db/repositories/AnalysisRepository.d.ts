@@ -128,4 +128,3 @@ export declare class AnalysisStatisticsRepository extends BaseRepository<Analysi
      */
     getStatistics(organizationId: string, period: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY', date: Date): Promise<AnalysisStatistics | null>;
 }
-//# sourceMappingURL=AnalysisRepository.d.ts.map

@@ -3,7 +3,7 @@
  * LicitaReview Cloud Functions
  */
 import { z } from "zod";
-import { WithId, WithTimestamp, ApiResponse, PaginatedResponse } from "./index";
+import { ApiResponse, PaginatedResponse } from "./index";
 export declare enum TipoComissao {
     PERMANENTE = "Permanente",
     TEMPORARIA = "Temporaria"
@@ -76,7 +76,8 @@ export declare const ConfiguracoesComissaoSchema: z.ZodObject<{
     notificarMembros: boolean;
     quorumMinimo?: number | undefined;
 }>;
-export interface Comissao extends WithId<{}>, WithTimestamp<{}> {
+export interface Comissao {
+    id: string;
     nomeDaComissao: string;
     tipo: TipoComissao;
     dataDeCriacao: Date;
@@ -89,6 +90,8 @@ export interface Comissao extends WithId<{}>, WithTimestamp<{}> {
     createdBy: string;
     lastModifiedBy?: string;
     configuracoes?: ConfiguracoesComissao;
+    createdAt: Date;
+    updatedAt: Date;
 }
 export declare const ComissaoSchema: z.ZodEffects<z.ZodObject<{
     id: z.ZodString;
@@ -143,8 +146,8 @@ export declare const ComissaoSchema: z.ZodEffects<z.ZodObject<{
         quorumMinimo?: number | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    status: StatusComissao;
     organizationId: string;
+    status: StatusComissao;
     id: string;
     createdBy: string;
     createdAt: Date;
@@ -171,8 +174,8 @@ export declare const ComissaoSchema: z.ZodEffects<z.ZodObject<{
         quorumMinimo?: number | undefined;
     } | undefined;
 }, {
-    status: StatusComissao;
     organizationId: string;
+    status: StatusComissao;
     id: string;
     createdBy: string;
     createdAt: Date;
@@ -199,8 +202,8 @@ export declare const ComissaoSchema: z.ZodEffects<z.ZodObject<{
         quorumMinimo?: number | undefined;
     } | undefined;
 }>, {
-    status: StatusComissao;
     organizationId: string;
+    status: StatusComissao;
     id: string;
     createdBy: string;
     createdAt: Date;
@@ -227,8 +230,8 @@ export declare const ComissaoSchema: z.ZodEffects<z.ZodObject<{
         quorumMinimo?: number | undefined;
     } | undefined;
 }, {
-    status: StatusComissao;
     organizationId: string;
+    status: StatusComissao;
     id: string;
     createdBy: string;
     createdAt: Date;
@@ -539,11 +542,10 @@ export declare const ComissoesQueryOptionsSchema: z.ZodObject<{
     search?: string | undefined;
 }, {
     status?: StatusComissao | undefined;
+    tipo?: TipoComissao | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    tipo?: TipoComissao | undefined;
     search?: string | undefined;
     sortBy?: "status" | "nomeDaComissao" | "tipo" | "dataDeCriacao" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
 }>;
-//# sourceMappingURL=comissoes.types.d.ts.map

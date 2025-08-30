@@ -120,4 +120,3 @@ export declare class OrganizationConfigService {
  * Factory function para criar instância do serviço
  */
 export declare function createOrganizationConfigService(db: Firestore, analyzerConfig: AnalyzerServiceConfig): OrganizationConfigService;
-//# sourceMappingURL=OrganizationConfigService.d.ts.map

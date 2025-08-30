@@ -34,7 +34,11 @@ async function testAnalysisOrchestrator() {
     const orchestrator = new AnalysisOrchestrator(
       firestore,
       process.env.CLOUD_RUN_SERVICE_URL || 'https://document-analyzer-123456789-uc.a.run.app',
-      process.env.GOOGLE_CLOUD_PROJECT || 'analisador-de-editais'
+      process.env.GOOGLE_CLOUD_PROJECT || 'analisador-de-editais',
+      {
+        projectId: process.env.GOOGLE_CLOUD_PROJECT || 'analisador-de-editais',
+        scopes: ['https://www.googleapis.com/auth/cloud-platform']
+      }
     );
     
     console.log('✅ AnalysisOrchestrator criado com sucesso');

@@ -49,6 +49,7 @@ globals_1.jest.mock('express', () => {
     const mockExpress = globals_1.jest.fn(() => mockApp);
     mockExpress.json = globals_1.jest.fn();
     mockExpress.Router = globals_1.jest.fn(() => mockApp);
+    mockExpress.static = globals_1.jest.fn();
     return mockExpress;
 });
 // Mock de middlewares
@@ -64,7 +65,7 @@ globals_1.jest.mock('axios', () => ({
     post: globals_1.jest.fn()
 }));
 // Limpeza após cada teste
-afterEach(() => {
+(0, globals_1.afterEach)(() => {
     globals_1.jest.clearAllMocks();
 });
 //# sourceMappingURL=setup.js.map

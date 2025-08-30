@@ -268,8 +268,8 @@ async function testCompleteAnalysis() {
     weightedScore: 86.1,
     findings: [
       {
-        category: 'structural',
-        severity: 'medium',
+        category: 'ESTRUTURAL',
+        severity: 'MEDIA',
         description: 'Estrutura do documento adequada com pequenos ajustes necessários',
         location: 'Seção 2.1'
       },

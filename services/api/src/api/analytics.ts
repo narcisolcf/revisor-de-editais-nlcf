@@ -21,6 +21,27 @@ import {
 import { UsageMetrics, PerformanceMetrics } from "../types";
 import { z } from "zod";
 
+
+// Analytics-specific interfaces
+interface FunctionMetrics {
+  totalCalls: number;
+  totalExecutionTime: number;
+  totalMemoryUsed: number;
+  successCount: number;
+  errorCount: number;
+  averageExecutionTime: number;
+  averageMemoryUsed: number;
+  successRate: number;
+  errors: string[];
+}
+
+interface DailyMetrics {
+  documentsProcessed?: number;
+  analysesCompleted?: number;
+  storageUsed?: number;
+  apiCalls?: number;
+}
+
 const app = express();
 app.use(express.json());
 
@@ -63,11 +84,11 @@ app.get("/usage",
       
       const query = queryValidation.data!;
       
-      const organizationId = req.user!.organizationId;
+      const organizationId = (req as any).user!.organizationId;
       
       // Calculate date range
       const endDate = query.endDate || new Date();
-      const startDate = query.startDate || getStartDateForPeriod(query?.period || 'daily', endDate);
+      const startDate = query.startDate || getStartDateForPeriod(query.period || 'month', endDate);
       
       // Query analytics data
       const analyticsSnapshot = await firestore
@@ -90,8 +111,7 @@ app.get("/usage",
       const metrics = aggregateMetricsForPeriod(
         analyticsData?.daily || {},
         startDate,
-        endDate,
-        query?.period || 'daily'
+        endDate
       );
       
       res.json(createSuccessResponse({
@@ -142,9 +162,9 @@ app.get("/documents",
       
       const query = queryValidation.data!;
       
-      const organizationId = req.user!.organizationId;
+      const organizationId = (req as any).user!.organizationId;
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - (query?.days || 7));
+      startDate.setDate(startDate.getDate() - (query.days || 30));
       
       // Get document statistics
       const documentsQuery = collections.documents
@@ -173,7 +193,7 @@ app.get("/documents",
       
       res.json(createSuccessResponse({
         organizationId,
-        period: `${query?.days || 7} days`,
+        period: `${query.days || 30} days`,
         documentStats
       }));
       return;
@@ -217,7 +237,7 @@ app.get("/analysis",
       
       const query = queryValidation.data!;
       
-      const organizationId = req.user!.organizationId;
+      const organizationId = (req as any).user!.organizationId;
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - (query?.days || 30));
       
@@ -275,7 +295,7 @@ app.get("/analysis",
           
           // Findings breakdown
           if (data.findings) {
-            data.findings.forEach((finding: any) => {
+            data.findings.forEach((finding: { severity?: string }) => {
               const severity = finding.severity?.toLowerCase() || "unknown";
               if (severity === "critica") {
                 analysisStats.findingsBreakdown.critical++;
@@ -308,6 +328,177 @@ app.get("/analysis",
       return res.status(500).json(createErrorResponse(
         "INTERNAL_ERROR",
         "Failed to get analysis analytics",
+        undefined,
+        req.requestId
+      ));
+    }
+  }
+);
+
+/**
+ * GET /analytics/dashboard
+ * Get comprehensive dashboard metrics
+ */
+app.get("/dashboard",
+  requirePermissions([PERMISSIONS.AUDIT_READ]),
+  async (req, res) => {
+    try {
+      const organizationId = (req as any).user!.organizationId;
+      const now = new Date();
+      const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      // Get documents metrics
+      const documentsSnapshot = await collections.documents
+        .where("organizationId", "==", organizationId)
+        .where("createdAt", ">=", last30Days)
+        .get();
+      
+      const documents = documentsSnapshot.docs.map(doc => doc.data());
+      const recentDocuments = documents.filter(doc => 
+        doc.createdAt.toDate() >= last7Days
+      );
+      
+      // Get analysis results
+      const analysisSnapshot = await collections.analysisResults
+        .where("organizationId", "==", organizationId)
+        .where("createdAt", ">=", last30Days)
+        .get();
+      
+      const analyses = analysisSnapshot.docs.map(doc => doc.data());
+      const recentAnalyses = analyses.filter(analysis => 
+        analysis.createdAt.toDate() >= last7Days
+      );
+      
+      // Calculate metrics
+      const completedAnalyses = analyses.filter(a => a.status === "completed");
+      const avgScore = completedAnalyses.length > 0 
+        ? completedAnalyses.reduce((sum, a) => sum + (a.weightedScore || 0), 0) / completedAnalyses.length
+        : 0;
+      
+      const avgProcessingTime = completedAnalyses.length > 0
+        ? completedAnalyses.reduce((sum, a) => sum + (a.executionTimeSeconds || 0), 0) / completedAnalyses.length
+        : 0;
+      
+      const successRate = analyses.length > 0
+        ? (completedAnalyses.length / analyses.length) * 100
+        : 0;
+      
+      // Calculate trends (comparing last 7 days vs previous 7 days)
+      const prev7Days = new Date(last7Days.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const prevDocuments = documents.filter(doc => {
+        const date = doc.createdAt.toDate();
+        return date >= prev7Days && date < last7Days;
+      });
+      
+      const prevAnalyses = analyses.filter(analysis => {
+        const date = analysis.createdAt.toDate();
+        return date >= prev7Days && date < last7Days;
+      });
+      
+      const documentsTrend = prevDocuments.length > 0 
+        ? ((recentDocuments.length - prevDocuments.length) / prevDocuments.length) * 100
+        : recentDocuments.length > 0 ? 100 : 0;
+      
+      const analysesTrend = prevAnalyses.length > 0
+        ? ((recentAnalyses.length - prevAnalyses.length) / prevAnalyses.length) * 100
+        : recentAnalyses.length > 0 ? 100 : 0;
+      
+      res.json(createSuccessResponse({
+        organizationId,
+        period: "30 days",
+        metrics: {
+          totalDocuments: documents.length,
+          totalAnalyses: analyses.length,
+          averageScore: Math.round(avgScore * 100) / 100,
+          averageProcessingTime: Math.round(avgProcessingTime * 100) / 100,
+          successRate: Math.round(successRate * 100) / 100,
+          trends: {
+            documents: Math.round(documentsTrend * 100) / 100,
+            analyses: Math.round(analysesTrend * 100) / 100
+          }
+        },
+        recentActivity: {
+          documentsLast7Days: recentDocuments.length,
+          analysesLast7Days: recentAnalyses.length
+        }
+      }, req.requestId));
+      
+    } catch (error) {
+      console.error("Error getting dashboard metrics:", error);
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
+        "Failed to get dashboard metrics",
+        undefined,
+        req.requestId
+      ));
+    }
+  }
+);
+
+/**
+ * GET /analytics/trends
+ * Get trend analysis over time
+ */
+app.get("/trends",
+  requirePermissions([PERMISSIONS.AUDIT_READ]),
+  async (req, res) => {
+    try {
+      const queryValidation = validateData(
+        z.object({
+          days: z.coerce.number().min(7).max(365).default(30),
+          granularity: z.enum(["daily", "weekly", "monthly"]).default("daily")
+        }),
+        req.query
+      );
+      
+      if (!queryValidation.success) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid query parameters",
+          queryValidation.details as Record<string, unknown>,
+          req.requestId
+        ));
+        return;
+      }
+      
+      const query = queryValidation.data!;
+      const organizationId = (req as any).user!.organizationId;
+      const endDate = new Date();
+      const days = query.days || 30;
+      const startDate = new Date(endDate.getTime() - (days * 24 * 60 * 60 * 1000));
+      
+      // Get documents and analyses for the period
+      const [documentsSnapshot, analysisSnapshot] = await Promise.all([
+        collections.documents
+          .where("organizationId", "==", organizationId)
+          .where("createdAt", ">=", startDate)
+          .get(),
+        collections.analysisResults
+          .where("organizationId", "==", organizationId)
+          .where("createdAt", ">=", startDate)
+          .get()
+      ]);
+      
+      const documents = documentsSnapshot.docs.map(doc => doc.data());
+      const analyses = analysisSnapshot.docs.map(doc => doc.data());
+      
+      // Group data by time period
+      const granularity = query.granularity || 'daily';
+      const trends = groupDataByPeriod(documents, analyses, granularity, startDate, endDate);
+      
+      res.json(createSuccessResponse({
+        organizationId,
+        period: `${query.days} days`,
+        granularity: query.granularity,
+        trends
+      }, req.requestId));
+      
+    } catch (error) {
+      console.error("Error getting trends:", error);
+      return res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
+        "Failed to get trends",
         undefined,
         req.requestId
       ));
@@ -389,10 +580,10 @@ app.get("/performance",
         }
         
         return acc;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, FunctionMetrics>);
       
       // Calculate averages and rates
-      Object.values(functionMetrics).forEach((funcMetric: any) => {
+      Object.values(functionMetrics).forEach((funcMetric: FunctionMetrics) => {
         funcMetric.averageExecutionTime = funcMetric.totalExecutionTime / funcMetric.totalCalls;
         funcMetric.averageMemoryUsed = funcMetric.totalMemoryUsed / funcMetric.totalCalls;
         funcMetric.successRate = (funcMetric.successCount / funcMetric.totalCalls) * 100;
@@ -454,10 +645,9 @@ function getEmptyMetrics(): UsageMetrics {
 }
 
 function aggregateMetricsForPeriod(
-  dailyData: Record<string, any>,
+  dailyData: Record<string, DailyMetrics>,
   startDate: Date,
-  endDate: Date,
-  period: string
+  endDate: Date
 ): UsageMetrics {
   const metrics = getEmptyMetrics();
   
@@ -478,6 +668,95 @@ function aggregateMetricsForPeriod(
   }
   
   return metrics;
+}
+
+function groupDataByPeriod(
+  documents: any[],
+  analyses: any[],
+  granularity: string,
+  startDate: Date,
+  endDate: Date
+): Record<string, any> {
+  const trends: Record<string, any> = {};
+  
+  const getDateKey = (date: Date): string => {
+    switch (granularity) {
+      case "daily":
+        return date.toISOString().split('T')[0];
+      case "weekly":
+        const weekStart = new Date(date);
+        weekStart.setDate(date.getDate() - date.getDay());
+        return weekStart.toISOString().split('T')[0];
+      case "monthly":
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      default:
+        return date.toISOString().split('T')[0];
+    }
+  };
+  
+  // Initialize all periods with zero values
+  const currentDate = new Date(startDate);
+  while (currentDate <= endDate) {
+    const key = getDateKey(currentDate);
+    if (!trends[key]) {
+      trends[key] = {
+        documents: 0,
+        analyses: 0,
+        completedAnalyses: 0,
+        averageScore: 0,
+        averageProcessingTime: 0
+      };
+    }
+    
+    // Increment by appropriate amount based on granularity
+    switch (granularity) {
+      case "daily":
+        currentDate.setDate(currentDate.getDate() + 1);
+        break;
+      case "weekly":
+        currentDate.setDate(currentDate.getDate() + 7);
+        break;
+      case "monthly":
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        break;
+    }
+  }
+  
+  // Group documents
+  documents.forEach(doc => {
+    const key = getDateKey(doc.createdAt.toDate());
+    if (trends[key]) {
+      trends[key].documents++;
+    }
+  });
+  
+  // Group analyses
+  analyses.forEach(analysis => {
+    const key = getDateKey(analysis.createdAt.toDate());
+    if (trends[key]) {
+      trends[key].analyses++;
+      if (analysis.status === "completed") {
+        trends[key].completedAnalyses++;
+        if (analysis.weightedScore !== undefined) {
+          trends[key].totalScore = (trends[key].totalScore || 0) + analysis.weightedScore;
+          trends[key].totalProcessingTime = (trends[key].totalProcessingTime || 0) + (analysis.executionTimeSeconds || 0);
+        }
+      }
+    }
+  });
+  
+  // Calculate averages
+  Object.values(trends).forEach((trend: any) => {
+    if (trend.completedAnalyses > 0) {
+      trend.averageScore = (trend.totalScore || 0) / trend.completedAnalyses;
+      trend.averageProcessingTime = (trend.totalProcessingTime || 0) / trend.completedAnalyses;
+    }
+    // Clean up temporary fields
+    delete trend.totalScore;
+    delete trend.totalProcessingTime;
+  });
+  
+  return trends;
 }
 
 // Export Cloud Function

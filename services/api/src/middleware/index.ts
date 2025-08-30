@@ -9,6 +9,8 @@ export * from "./error";
 import { Request, Response, NextFunction } from "express";
 import { logger } from "firebase-functions";
 import { generateRequestId } from "../utils";
+import * as crypto from "crypto";
+
 
 /**
  * Request logging middleware
@@ -162,7 +164,7 @@ export const etag = (req: Request, res: Response, next: NextFunction): void => {
   
   res.send = function(body: any) {
     if (req.method === "GET" && res.statusCode === 200) {
-      const hash = require("crypto")
+      const hash = crypto
         .createHash("md5")
         .update(body)
         .digest("hex");
@@ -282,13 +284,4 @@ function formatBytes(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
-// Extend Express Request type
-declare global {
-  namespace Express {
-    interface Request {
-      requestId?: string;
-      correlationId?: string;
-      apiVersion?: string;
-    }
-  }
-}
+// Express Request type extensions are defined in ../types/express.d.ts

@@ -10,7 +10,24 @@ import { firestore, collections } from '../config/firebase';
 import { z } from 'zod';
 import { errorHandler } from '../middleware/error';
 import { authenticateUser, requirePermissions, requireOrganization } from '../middleware/auth';
-import { validateData, createSuccessResponse, createErrorResponse } from '../utils';
+import { validateData, createSuccessResponse, createErrorResponse, generateRequestId } from '../utils';
+import { UserContext } from '../types';
+import { 
+  initializeSecurity, 
+  securityHeaders, 
+  rateLimit, 
+  auditAccess, 
+  attackProtection 
+} from '../middleware/security';
+import { LoggingService } from '../services/LoggingService';
+import { MetricsService } from '../services/MetricsService';
+import { getFirestore } from 'firebase-admin/firestore';
+
+
+// Authenticated Request type
+interface AuthenticatedRequest extends express.Request {
+  user: UserContext;
+}
 
 // Schemas de validação
 const StartAnalysisRequestSchema = z.object({
@@ -31,11 +48,18 @@ const DocumentIdSchema = z.object({
   documentId: z.string().min(1, 'Document ID is required')
 });
 
-// Inicializar o orquestrador de análises
+// Inicializar o orquestrador de análises com configuração de autenticação
 const orchestrator = new AnalysisOrchestrator(
   firestore,
   process.env.CLOUD_RUN_SERVICE_URL || 'https://analysis-service-url',
-  process.env.GOOGLE_CLOUD_PROJECT || 'default-project'
+  process.env.GOOGLE_CLOUD_PROJECT || 'default-project',
+  {
+    projectId: process.env.GOOGLE_CLOUD_PROJECT,
+    serviceAccountEmail: process.env.CLOUD_RUN_SERVICE_ACCOUNT_EMAIL,
+    serviceAccountKeyFile: process.env.CLOUD_RUN_SERVICE_ACCOUNT_KEY_FILE,
+    audience: process.env.CLOUD_RUN_IAP_AUDIENCE,
+    scopes: ['https://www.googleapis.com/auth/cloud-platform']
+  }
 );
 
 // Helper functions - using imported utilities
@@ -44,9 +68,33 @@ const orchestrator = new AnalysisOrchestrator(
 
 const router = express.Router();
 
+// Inicializar serviços de segurança
+const db = getFirestore();
+const loggingService = new LoggingService('analysis-api');
+const metricsService = new MetricsService('analysis-api');
+
+// Inicializar middleware de segurança
+const securityManager = initializeSecurity(db, loggingService, metricsService, {
+  rateLimit: {
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    maxRequests: 100 // máximo 100 requests por IP por janela
+  },
+  audit: {
+    enabled: true,
+    sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
+    excludePaths: []
+  }
+});
+
+// Aplicar middlewares de segurança
+router.use(securityHeaders);
+router.use(rateLimit);
+router.use(auditAccess);
+router.use(attackProtection);
+
 /**
  * POST /analysis/start
- * Inicia uma nova análise de documento
+ * Inicia uma nova análise com parâmetros aprimorados
  */
 router.post('/start',
   authenticateUser,
@@ -60,19 +108,19 @@ router.post('/start',
           'VALIDATION_ERROR',
           'Dados da requisição inválidos',
           bodyValidation.details as Record<string, unknown>,
-          req.headers['x-request-id'] as string
+          req.requestId || generateRequestId()
         ));
       }
       const { documentId, options } = bodyValidation.data!;
-      const organizationId = (req as any).user?.organizationId;
-      const userId = (req as any).user?.uid;
+      const organizationId = (req as AuthenticatedRequest).user?.organizationId;
+      const userId = (req as AuthenticatedRequest).user?.uid;
 
       if (!organizationId) {
         return res.status(400).json(createErrorResponse(
           'VALIDATION_ERROR',
           'ID da organização é obrigatório',
           {},
-          req.headers['x-request-id'] as string
+          req.requestId || generateRequestId()
         ));
       }
 
@@ -91,11 +139,18 @@ router.post('/start',
           'FORBIDDEN',
           'Acesso negado ao documento',
           { documentId },
-          req.headers['x-request-id'] as string
+          req.requestId || generateRequestId()
         ));
       }
 
-      // Iniciar análise via AnalysisOrchestrator
+      // Obter parâmetros de análise aprimorados
+      const enhancedParamsResult = await orchestrator.getEnhancedAnalysisParameters(
+        organizationId
+      );
+      
+      const enhancedParams = enhancedParamsResult.success ? enhancedParamsResult.parameters : {};
+
+      // Iniciar análise via AnalysisOrchestrator com parâmetros aprimorados
       const analysisId = await orchestrator.startAnalysis({
         documentId,
         organizationId,
@@ -105,21 +160,24 @@ router.post('/start',
           generateRecommendations: options?.includeRecommendations ?? true,
           detailedMetrics: options?.detailedReport ?? false,
           customRules: [],
-          ...options
+          ...enhancedParams
         },
-        priority: options?.priority || 'normal'
+        priority: options?.priority || enhancedParams.priority || 'normal'
       });
 
       res.status(202).json(createSuccessResponse(
         {
           analysisId,
           status: 'queued',
-          message: 'Analysis started successfully'
-        }
+          message: 'Analysis started successfully',
+          enhancedParameters: enhancedParams,
+          cloudRunAvailable: await orchestrator.isCloudRunAvailable()
+        },
+        req.requestId || generateRequestId()
       ));
       return;
     } catch (error) {
-       return errorHandler(error as Error, req, res, () => {});
+       return errorHandler(error as Error, req, res);
      }
   }
 );
@@ -139,7 +197,7 @@ router.get('/:analysisId/progress',
           'VALIDATION_ERROR',
           'Parâmetros de caminho inválidos',
           pathValidation.details as Record<string, unknown>,
-          req.headers['x-request-id'] as string
+          req.requestId || generateRequestId()
         ));
     }
     try {
@@ -150,16 +208,19 @@ router.get('/:analysisId/progress',
       if (!progress) {
         return res.status(404).json(createErrorResponse(
           'ANALYSIS_NOT_FOUND',
-          'Analysis not found'
+          'Analysis not found',
+          undefined,
+          req.requestId || generateRequestId()
         ));
       }
 
       res.json(createSuccessResponse(
-        progress
+        progress,
+        req.requestId || generateRequestId()
       ));
       return;
     } catch (error) {
-       return errorHandler(error as Error, req, res, () => {});
+       return errorHandler(error as Error, req, res);
      }
   }
 );
@@ -177,18 +238,22 @@ router.delete('/:analysisId',
     if (!pathValidation.success) {
       return res.status(400).json(createErrorResponse(
         'VALIDATION_ERROR',
-        'Parâmetros de caminho inválidos'
+        'Parâmetros de caminho inválidos',
+        pathValidation.details as Record<string, unknown>,
+        req.requestId || generateRequestId()
       ));
     }
     try {
       const { analysisId } = req.params;
-      const organizationId = (req as any).user?.organizationId;
-      const userId = (req as any).user?.uid;
+      const organizationId = (req as AuthenticatedRequest).user?.organizationId;
+      const userId = (req as AuthenticatedRequest).user?.uid;
 
       if (!organizationId) {
         return res.status(400).json(createErrorResponse(
           'ORGANIZATION_REQUIRED',
-          'Organization ID is required'
+          'Organization ID is required',
+          undefined,
+          req.requestId || generateRequestId()
         ));
       }
 
@@ -199,7 +264,9 @@ router.delete('/:analysisId',
       if (!analysis) {
         return res.status(404).json(createErrorResponse(
           'ANALYSIS_NOT_FOUND',
-          'Analysis not found or access denied'
+          'Analysis not found or access denied',
+          undefined,
+          req.requestId || generateRequestId()
         ));
       }
 
@@ -207,11 +274,11 @@ router.delete('/:analysisId',
 
       res.json(createSuccessResponse(
         { message: 'Analysis cancelled successfully' },
-        req.headers['x-request-id'] as string
+        req.requestId || generateRequestId()
       ));
       return;
     } catch (error) {
-       return errorHandler(error as Error, req, res, () => {});
+       return errorHandler(error as Error, req, res);
      }
   }
 );
@@ -248,11 +315,11 @@ router.get('/list',
 
       res.json(createSuccessResponse(
         analyses,
-        req.headers['x-request-id'] as string
+        req.requestId || generateRequestId()
       ));
       return;
     } catch (error) {
-       return errorHandler(error as Error, req, res, () => {});
+       return errorHandler(error as Error, req, res);
      }
   }
 );
@@ -270,19 +337,23 @@ router.get('/result/:documentId',
     if (!pathValidation.success) {
       return res.status(400).json(createErrorResponse(
         'VALIDATION_ERROR',
-          'Parâmetros de caminho inválidos'
+        'Parâmetros de caminho inválidos',
+        pathValidation.details as Record<string, unknown>,
+        req.requestId || generateRequestId()
       ));
     }
     try {
       const { documentId } = req.params;
-      const organizationId = (req as any).user?.organizationId;
+      const organizationId = (req as AuthenticatedRequest).user?.organizationId;
 
       // Verificar se o documento pertence à organização
       const docSnapshot = await collections.documents.doc(documentId).get();
       if (!docSnapshot.exists) {
         return res.status(404).json(createErrorResponse(
           'DOCUMENT_NOT_FOUND',
-          'Document not found'
+          'Document not found',
+          undefined,
+          req.requestId || generateRequestId()
         ));
       }
 
@@ -290,7 +361,9 @@ router.get('/result/:documentId',
       if (document?.organizationId !== organizationId) {
         return res.status(403).json(createErrorResponse(
           'ACCESS_DENIED',
-          'Access denied to document'
+          'Access denied to document',
+          undefined,
+          req.requestId || generateRequestId()
         ));
       }
 
@@ -305,7 +378,9 @@ router.get('/result/:documentId',
       if (resultQuery.empty) {
         return res.status(404).json(createErrorResponse(
           'RESULT_NOT_FOUND',
-          'Analysis result not found'
+          'Analysis result not found',
+          undefined,
+          req.requestId || generateRequestId()
         ));
       }
 
@@ -313,11 +388,11 @@ router.get('/result/:documentId',
 
       res.json(createSuccessResponse(
         result,
-        req.headers['x-request-id'] as string
+        req.requestId || generateRequestId()
       ));
       return;
     } catch (error) {
-       return errorHandler(error as Error, req, res, () => {});
+       return errorHandler(error as Error, req, res);
      }
   }
 );

@@ -23,7 +23,7 @@ export declare class TaskQueueService {
     /**
      * Adiciona uma tarefa à fila
      */
-    enqueueTask(payload: TaskPayload, options?: TaskOptions): Promise<string>;
+    enqueueTask(payload: TaskPayload, _options?: TaskOptions): Promise<string>;
     /**
      * Cancela uma tarefa específica
      */
@@ -53,4 +53,3 @@ export declare class TaskQueueService {
      */
     enqueueAnalysisTask(analysisId: string, documentId: string, organizationId: string, priority?: 'low' | 'normal' | 'high', metadata?: Record<string, any>): Promise<string>;
 }
-//# sourceMappingURL=TaskQueueService.d.ts.map

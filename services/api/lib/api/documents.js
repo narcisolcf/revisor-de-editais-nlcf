@@ -383,7 +383,7 @@ app.patch("/:id/status", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.DOCU
     }
 });
 // Error handling middleware
-app.use((error, req, res, next) => {
+app.use((error, req, res) => {
     console.error("Unhandled error in documents API:", error);
     res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Internal server error", process.env.NODE_ENV === "development" ? { stack: error.stack } : undefined, req.requestId));
 });

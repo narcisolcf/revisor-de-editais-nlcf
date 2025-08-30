@@ -49,7 +49,24 @@ export abstract class BaseRepository<T, CreateT = Partial<T>, UpdateT = Partial<
    * Get collection reference
    */
   protected getCollection(): CollectionReference {
-    return this.db.collection(this.collectionPath);
+    console.log('BaseRepository.getCollection() called');
+    console.log('this.db:', this.db);
+    console.log('this.db.collection:', this.db.collection);
+    console.log('this.collectionPath:', this.collectionPath);
+    
+    if (!this.db) {
+      throw new Error('Firestore database instance is not initialized');
+    }
+    
+    if (!this.db.collection) {
+      throw new Error('Firestore database collection method is not available');
+    }
+    
+    const collection = this.db.collection(this.collectionPath);
+    console.log('Collection returned by this.db.collection():', collection);
+    console.log('Collection.doc method:', collection?.doc);
+    
+    return collection;
   }
 
   /**
@@ -75,8 +92,14 @@ export abstract class BaseRepository<T, CreateT = Partial<T>, UpdateT = Partial<
     const converted = { ...data };
     
     Object.keys(converted).forEach(key => {
-      if (converted[key] instanceof Timestamp) {
+      // Check for Timestamp-like objects (works with mocks)
+      if (converted[key] && 
+          typeof converted[key] === 'object' && 
+          typeof converted[key].toDate === 'function') {
         converted[key] = converted[key].toDate();
+      } else if (Array.isArray(converted[key])) {
+        // Preserve arrays as-is, don't recursively process them
+        // Arrays should be handled by Firestore natively
       } else if (typeof converted[key] === 'object' && converted[key] !== null) {
         converted[key] = this.convertTimestamps(converted[key]);
       }
@@ -96,6 +119,9 @@ export abstract class BaseRepository<T, CreateT = Partial<T>, UpdateT = Partial<
     Object.keys(prepared).forEach(key => {
       if (prepared[key] instanceof Date) {
         prepared[key] = Timestamp.fromDate(prepared[key]);
+      } else if (Array.isArray(prepared[key])) {
+        // Preserve arrays as-is (don't recursively process them)
+        // Arrays should be handled by Firestore natively
       } else if (typeof prepared[key] === 'object' && prepared[key] !== null) {
         prepared[key] = this.prepareForStorage(prepared[key]);
       }
@@ -108,7 +134,8 @@ export abstract class BaseRepository<T, CreateT = Partial<T>, UpdateT = Partial<
    * Create a new document
    */
   async create(data: CreateT, id?: string): Promise<T> {
-    const docRef = id ? this.getDocRef(id) : this.getCollection().doc();
+    const collection = this.getCollection();
+    const docRef = id ? this.getDocRef(id) : collection.doc();
     
     const createData = {
       ...data,
@@ -118,9 +145,15 @@ export abstract class BaseRepository<T, CreateT = Partial<T>, UpdateT = Partial<
     };
 
     const prepared = this.prepareForStorage(createData);
+    console.log('BaseRepository.create - setting document with id:', docRef.id);
+    console.log('BaseRepository.create - prepared data:', JSON.stringify(prepared, null, 2));
+    
     await docRef.set(prepared);
     
-    return this.validate({ ...createData, id: docRef.id });
+    const validated = this.validate({ ...createData, id: docRef.id });
+    console.log('BaseRepository.create - validated result:', JSON.stringify(validated, null, 2));
+    
+    return validated;
   }
 
   /**
@@ -134,7 +167,8 @@ export abstract class BaseRepository<T, CreateT = Partial<T>, UpdateT = Partial<
     }
     
     const data = this.convertTimestamps(doc.data());
-    return this.validate({ ...data, id: doc.id });
+    const validated = this.validate({ ...data, id: doc.id });
+    return validated;
   }
 
   /**

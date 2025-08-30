@@ -1,4 +1,4 @@
-#!/Users/narcisofilho/revisor-de-editais/services/analyzer/venv/bin/python3.11
+#!/Users/narcisofilho/revisor-de-editais-nlcf/services/analyzer/venv/bin/python3.12
 # -*- coding: utf-8 -*-
 # Copyright 2023 Google LLC
 #

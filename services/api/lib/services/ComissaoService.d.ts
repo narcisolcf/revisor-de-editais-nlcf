@@ -71,4 +71,3 @@ export declare class ComissaoService {
     private validateServidorExists;
     private logHistory;
 }
-//# sourceMappingURL=ComissaoService.d.ts.map

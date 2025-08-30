@@ -8,6 +8,7 @@ import { logger } from "firebase-functions";
 import { ValidationError, createErrorResponse, generateRequestId } from "../utils";
 import { config } from "../config";
 
+
 // Custom error classes
 export class AppError extends Error {
   public statusCode: number;
@@ -70,8 +71,7 @@ export class ServiceUnavailableError extends AppError {
 export const errorHandler = (
   error: Error,
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): void => {
   // Ensure request ID exists
   if (!req.requestId) {
@@ -176,6 +176,7 @@ export const notFoundHandler = (req: Request, res: Response): void => {
  * Async error wrapper for route handlers
  */
 export const asyncHandler = (
+  // eslint-disable-next-line no-unused-vars
   fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
 ) => {
   return (req: Request, res: Response, next: NextFunction): void => {

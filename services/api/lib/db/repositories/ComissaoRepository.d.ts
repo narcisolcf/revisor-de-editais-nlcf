@@ -58,4 +58,3 @@ export declare class ComissaoRepository extends BaseRepository<Comissao, CreateC
         membrosTotal: number;
     }>;
 }
-//# sourceMappingURL=ComissaoRepository.d.ts.map

@@ -12,6 +12,7 @@ const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-functions/v2/firestore");
 const express_1 = __importDefault(require("express"));
 const firebase_functions_1 = require("firebase-functions");
+const crypto_1 = __importDefault(require("crypto"));
 const firebase_1 = require("../config/firebase");
 const auth_1 = require("../middleware/auth");
 const utils_1 = require("../utils");
@@ -85,9 +86,6 @@ exports.onNotificationCreated = (0, firestore_1.onDocumentCreated)({
         });
     }
 });
-/**
- * Process notification through various channels
- */
 async function processNotification(notification) {
     const results = {};
     // Process each channel
@@ -308,9 +306,8 @@ async function sendWebhookNotification(notification) {
 function generateWebhookSignature(payload, secret) {
     if (!secret)
         return "";
-    const crypto = require("crypto");
     const payloadString = JSON.stringify(payload);
-    return crypto
+    return crypto_1.default
         .createHmac("sha256", secret)
         .update(payloadString)
         .digest("hex");

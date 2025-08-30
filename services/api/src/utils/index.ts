@@ -10,6 +10,10 @@ import { z } from 'zod';
 // Re-exportar validação
 export * from './validation';
 
+// Re-exportar logger
+import { LoggingService } from '../services/LoggingService';
+export const logger = new LoggingService('utils');
+
 /**
  * Interface para resposta de sucesso padronizada
  */
@@ -191,7 +195,7 @@ export function isRetryableError(error: unknown): boolean {
   }
   
   // Erros HTTP 5xx e 429
-  if (err.response?.status >= 500 || err.response?.status === 429) {
+  if (err.response?.status && (err.response.status >= 500 || err.response.status === 429)) {
     return true;
   }
   

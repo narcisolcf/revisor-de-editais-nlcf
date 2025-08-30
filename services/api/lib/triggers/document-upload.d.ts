@@ -7,7 +7,7 @@ import { Document } from "../types";
 /**
  * Trigger when document is uploaded to Storage
  */
-export declare const onDocumentUpload: import("firebase-functions/v2/core").CloudFunction<import("firebase-functions/v2/storage").StorageEvent>;
+export declare const onDocumentUpload: import("firebase-functions").CloudFunction<import("firebase-functions/v2/storage").StorageEvent>;
 /**
  * Extract document content from uploaded file
  */
@@ -19,9 +19,8 @@ export declare function generateDocumentPreview(filePath: string, maxLength?: nu
 /**
  * Validate document structure and content
  */
-export declare function validateDocument(filePath: string, document: Document): Promise<{
+export declare function validateDocument(_filePath: string, _document: Document): Promise<{
     isValid: boolean;
     errors: string[];
     warnings: string[];
 }>;
-//# sourceMappingURL=document-upload.d.ts.map

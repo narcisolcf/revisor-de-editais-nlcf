@@ -18,6 +18,9 @@ process.env.GCLOUD_PROJECT = 'analisador-de-editais';
 import * as admin from 'firebase-admin';
 import { type FirebaseFirestore } from 'firebase-admin/firestore';
 
+// Importar Jest globals
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
+
 // Inicializar Firebase Admin para testes de integração
 if (admin.apps.length === 0) {
   admin.initializeApp({
@@ -66,7 +69,7 @@ describe('Firestore Integration Tests', () => {
     const testDoc = {
       name: 'Teste de Conexão',
       timestamp: new Date(),
-      status: 'active'
+      status: 'ANALYZED'
     };
     
     // Criar documento

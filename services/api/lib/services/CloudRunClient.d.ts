@@ -90,4 +90,3 @@ export declare class CloudRunClient {
     private handleHttpError;
     private sleep;
 }
-//# sourceMappingURL=CloudRunClient.d.ts.map

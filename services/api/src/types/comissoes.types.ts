@@ -4,7 +4,7 @@
  */
 
 import { z } from "zod";
-import { WithId, WithTimestamp, ApiResponse, PaginatedResponse } from "./index";
+import { ApiResponse, PaginatedResponse } from "./index";
 
 // Enums
 /* eslint-disable no-unused-vars */
@@ -69,7 +69,8 @@ export const ConfiguracoesComissaoSchema = z.object({
 });
 
 // Comissão Interface
-export interface Comissao extends WithId<Record<string, never>>, WithTimestamp<Record<string, never>> {
+export interface Comissao {
+  id: string;
   nomeDaComissao: string;
   tipo: TipoComissao;
   dataDeCriacao: Date;
@@ -82,6 +83,8 @@ export interface Comissao extends WithId<Record<string, never>>, WithTimestamp<R
   createdBy: string;
   lastModifiedBy?: string;
   configuracoes?: ConfiguracoesComissao;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const ComissaoSchema = z.object({

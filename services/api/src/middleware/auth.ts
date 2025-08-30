@@ -5,18 +5,8 @@
 
 import { Request, Response, NextFunction } from "express";
 import { auth } from "../config/firebase";
-import { UserContext } from "../types";
 import { createErrorResponse } from "../utils";
 
-// Extend Request type to include user context
-declare global {
-  namespace Express {
-    interface Request {
-      user?: UserContext;
-      requestId?: string;
-    }
-  }
-}
 
 /**
  * Verify Firebase ID Token and extract user context

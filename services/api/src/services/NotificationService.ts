@@ -5,7 +5,7 @@
 export interface NotificationPayload {
   userId: string;
   organizationId: string;
-  type: 'analysis_complete' | 'analysis_failed' | 'document_uploaded' | 'system_alert';
+  type: 'analysis_complete' | 'analysis_failed' | 'document_uploaded' | 'system_alert' | 'low_satisfaction_alert';
   title: string;
   message: string;
   data?: Record<string, any>;
@@ -36,7 +36,8 @@ export interface PushNotification {
 }
 
 export class NotificationService {
-  constructor(projectId: string) {
+  // eslint-disable-next-line no-unused-vars
+  constructor(_projectId: string) {
     // projectId stored for future use
   }
 
@@ -161,6 +162,32 @@ export class NotificationService {
   }
 
   /**
+   * Notifica sobre progresso da análise
+   */
+  async notifyAnalysisProgress(
+    organizationId: string,
+    analysisId: string,
+    percentage: number,
+    currentStep: string
+  ): Promise<void> {
+    const payload: NotificationPayload = {
+      userId: organizationId, // usando organizationId como userId temporariamente
+      organizationId,
+      type: 'system_alert',
+      title: 'Progresso da Análise',
+      message: `Análise em progresso: ${percentage}% - ${currentStep}`,
+      data: {
+        analysisId,
+        percentage,
+        currentStep
+      },
+      priority: 'low'
+    };
+
+    await this.sendNotification(payload);
+  }
+
+  /**
    * Notifica sobre upload de documento
    */
   async notifyDocumentUploaded(
@@ -214,7 +241,8 @@ export class NotificationService {
   /**
    * Simula envio de notificação (para desenvolvimento/teste)
    */
-  private async simulateNotificationSend(payload: NotificationPayload): Promise<void> {
+  // eslint-disable-next-line no-unused-vars
+  private async simulateNotificationSend(_payload: NotificationPayload): Promise<void> {
     // Simular delay de rede
     await new Promise(resolve => setTimeout(resolve, 100));
     
@@ -227,7 +255,8 @@ export class NotificationService {
   /**
    * Simula envio de email (para desenvolvimento/teste)
    */
-  private async simulateEmailSend(notification: EmailNotification): Promise<void> {
+  // eslint-disable-next-line no-unused-vars
+  private async simulateEmailSend(_notification: EmailNotification): Promise<void> {
     // Simular delay de rede
     await new Promise(resolve => setTimeout(resolve, 200));
     
@@ -240,7 +269,8 @@ export class NotificationService {
   /**
    * Simula envio de push notification (para desenvolvimento/teste)
    */
-  private async simulatePushSend(notification: PushNotification): Promise<void> {
+  // eslint-disable-next-line no-unused-vars
+  private async simulatePushSend(_notification: PushNotification): Promise<void> {
     // Simular delay de rede
     await new Promise(resolve => setTimeout(resolve, 150));
     
@@ -253,6 +283,7 @@ export class NotificationService {
   /**
    * Obtém preferências de notificação do usuário
    */
+  // eslint-disable-next-line no-unused-vars
   async getUserNotificationPreferences(userId: string): Promise<{
     email: boolean;
     push: boolean;
@@ -272,8 +303,9 @@ export class NotificationService {
   /**
    * Atualiza preferências de notificação do usuário
    */
+  // eslint-disable-next-line no-unused-vars
   async updateUserNotificationPreferences(
-    userId: string,
+    _userId: string,
     preferences: {
       email?: boolean;
       push?: boolean;
@@ -281,7 +313,7 @@ export class NotificationService {
       types?: string[];
     }
   ): Promise<void> {
-    console.log(`Atualizando preferências de notificação para usuário ${userId}:`, preferences);
+    console.log(`Atualizando preferências de notificação para usuário ${_userId}:`, preferences);
     
     // Aqui seria implementada a atualização no banco de dados
     // Por enquanto, apenas log

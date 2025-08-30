@@ -32,7 +32,7 @@ export interface PushNotification {
     sound?: string;
 }
 export declare class NotificationService {
-    constructor(projectId: string);
+    constructor(_projectId: string);
     /**
      * Envia notificação para um usuário específico
      */
@@ -85,11 +85,10 @@ export declare class NotificationService {
     /**
      * Atualiza preferências de notificação do usuário
      */
-    updateUserNotificationPreferences(userId: string, preferences: {
+    updateUserNotificationPreferences(_userId: string, preferences: {
         email?: boolean;
         push?: boolean;
         sms?: boolean;
         types?: string[];
     }): Promise<void>;
 }
-//# sourceMappingURL=NotificationService.d.ts.map

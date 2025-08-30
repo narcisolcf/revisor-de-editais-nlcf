@@ -221,7 +221,7 @@ app.get("/health", async (req, res) => {
     }
 });
 // Error handling middleware
-app.use((error, req, res, next) => {
+app.use((error, req, res) => {
     firebase_functions_1.logger.error("Unhandled error in parameter-engine API", {
         error: error.message,
         stack: error.stack,

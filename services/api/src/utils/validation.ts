@@ -78,7 +78,8 @@ export function validateQuery<T>(schema: z.ZodSchema<T>) {
       throw new ValidationError(validation.error!, validation.details);
     }
     
-    req.query = validation.data as Record<string, unknown>;
+    // Store validated data in a custom property instead of overwriting req.query
+    (req as any).validatedQuery = validation.data;
     return next();
   };
 }
@@ -154,7 +155,8 @@ export function validateQueryParams<T>(schema: z.ZodSchema<T>) {
         details: result.details
       });
     }
-    req.query = result.data as Record<string, unknown>;
+    // Store validated data in a custom property instead of overwriting req.query
+    (req as any).validatedQuery = result.data;
     return next();
   };
 }

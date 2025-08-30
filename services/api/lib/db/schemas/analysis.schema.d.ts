@@ -21,38 +21,38 @@ export declare const AnalysisSchema: z.ZodObject<{
             detailedMetrics: z.ZodBoolean;
             customRules: z.ZodArray<z.ZodString, "many">;
         }, "strip", z.ZodTypeAny, {
-            includeAI: boolean;
             generateRecommendations: boolean;
-            detailedMetrics: boolean;
             customRules: string[];
+            includeAI: boolean;
+            detailedMetrics: boolean;
         }, {
-            includeAI: boolean;
             generateRecommendations: boolean;
-            detailedMetrics: boolean;
             customRules: string[];
+            includeAI: boolean;
+            detailedMetrics: boolean;
         }>;
         webhook: z.ZodOptional<z.ZodString>;
         timeout: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
         options: {
-            includeAI: boolean;
             generateRecommendations: boolean;
-            detailedMetrics: boolean;
             customRules: string[];
+            includeAI: boolean;
+            detailedMetrics: boolean;
         };
         priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
         timeout: number;
         webhook?: string | undefined;
     }, {
         options: {
-            includeAI: boolean;
             generateRecommendations: boolean;
-            detailedMetrics: boolean;
             customRules: string[];
+            includeAI: boolean;
+            detailedMetrics: boolean;
         };
         priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;
-        timeout?: number | undefined;
         webhook?: string | undefined;
+        timeout?: number | undefined;
     }>;
     processing: z.ZodObject<{
         status: z.ZodEnum<["PENDING", "INITIALIZING", "PROCESSING", "COMPLETED", "FAILED", "CANCELLED", "TIMEOUT"]>;
@@ -105,13 +105,13 @@ export declare const AnalysisSchema: z.ZodObject<{
             code: string;
             message: string;
             retryCount: number;
-            stack?: string | undefined;
             details?: Record<string, any> | undefined;
+            stack?: string | undefined;
         }, {
             code: string;
             message: string;
-            stack?: string | undefined;
             details?: Record<string, any> | undefined;
+            stack?: string | undefined;
             retryCount?: number | undefined;
         }>>;
     }, "strip", z.ZodTypeAny, {
@@ -121,8 +121,8 @@ export declare const AnalysisSchema: z.ZodObject<{
             code: string;
             message: string;
             retryCount: number;
-            stack?: string | undefined;
             details?: Record<string, any> | undefined;
+            stack?: string | undefined;
         } | undefined;
         completedAt?: Date | undefined;
         currentStep?: string | undefined;
@@ -146,8 +146,8 @@ export declare const AnalysisSchema: z.ZodObject<{
         error?: {
             code: string;
             message: string;
-            stack?: string | undefined;
             details?: Record<string, any> | undefined;
+            stack?: string | undefined;
             retryCount?: number | undefined;
         } | undefined;
         completedAt?: Date | undefined;
@@ -300,21 +300,21 @@ export declare const AnalysisSchema: z.ZodObject<{
             expectedImprovement: z.ZodOptional<z.ZodNumber>;
             complianceImprovement: z.ZodDefault<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             complianceImprovement: boolean;
             estimatedEffort?: string | undefined;
             expectedImprovement?: number | undefined;
         }, {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             estimatedEffort?: string | undefined;
             expectedImprovement?: number | undefined;
@@ -419,11 +419,11 @@ export declare const AnalysisSchema: z.ZodObject<{
         }>>;
     }, "strip", z.ZodTypeAny, {
         recommendations: {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             complianceImprovement: boolean;
             estimatedEffort?: string | undefined;
@@ -499,11 +499,11 @@ export declare const AnalysisSchema: z.ZodObject<{
         } | undefined;
     }, {
         recommendations: {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             estimatedEffort?: string | undefined;
             expectedImprovement?: number | undefined;
@@ -585,14 +585,14 @@ export declare const AnalysisSchema: z.ZodObject<{
         fallbackUsed: z.ZodDefault<z.ZodBoolean>;
         cacheHit: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         version: string;
+        name: string;
         fallbackUsed: boolean;
         cacheHit: boolean;
         cloudRunEndpoint?: string | undefined;
     }, {
-        name?: string | undefined;
         version?: string | undefined;
+        name?: string | undefined;
         cloudRunEndpoint?: string | undefined;
         fallbackUsed?: boolean | undefined;
         cacheHit?: boolean | undefined;
@@ -603,14 +603,13 @@ export declare const AnalysisSchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    documentId: string;
-    analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
     organizationId: string;
     id: string;
     createdBy: string;
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
+    documentId: string;
     processing: {
         status: "PROCESSING" | "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "INITIALIZING" | "TIMEOUT";
         progress: number;
@@ -618,8 +617,8 @@ export declare const AnalysisSchema: z.ZodObject<{
             code: string;
             message: string;
             retryCount: number;
-            stack?: string | undefined;
             details?: Record<string, any> | undefined;
+            stack?: string | undefined;
         } | undefined;
         completedAt?: Date | undefined;
         currentStep?: string | undefined;
@@ -638,21 +637,22 @@ export declare const AnalysisSchema: z.ZodObject<{
         } | undefined;
         estimatedTimeRemaining?: number | undefined;
     };
+    analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
     userId: string;
     configurationId: string;
     engine: {
-        name: string;
         version: string;
+        name: string;
         fallbackUsed: boolean;
         cacheHit: boolean;
         cloudRunEndpoint?: string | undefined;
     };
     request: {
         options: {
-            includeAI: boolean;
             generateRecommendations: boolean;
-            detailedMetrics: boolean;
             customRules: string[];
+            includeAI: boolean;
+            detailedMetrics: boolean;
         };
         priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
         timeout: number;
@@ -662,11 +662,11 @@ export declare const AnalysisSchema: z.ZodObject<{
     templateId?: string | undefined;
     results?: {
         recommendations: {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             complianceImprovement: boolean;
             estimatedEffort?: string | undefined;
@@ -742,19 +742,18 @@ export declare const AnalysisSchema: z.ZodObject<{
         } | undefined;
     } | undefined;
 }, {
-    documentId: string;
-    analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
     organizationId: string;
     id: string;
     createdBy: string;
+    documentId: string;
     processing: {
         status: "PROCESSING" | "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "INITIALIZING" | "TIMEOUT";
         progress: number;
         error?: {
             code: string;
             message: string;
-            stack?: string | undefined;
             details?: Record<string, any> | undefined;
+            stack?: string | undefined;
             retryCount?: number | undefined;
         } | undefined;
         completedAt?: Date | undefined;
@@ -774,25 +773,26 @@ export declare const AnalysisSchema: z.ZodObject<{
         } | undefined;
         estimatedTimeRemaining?: number | undefined;
     };
+    analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
     userId: string;
     configurationId: string;
     engine: {
-        name?: string | undefined;
         version?: string | undefined;
+        name?: string | undefined;
         cloudRunEndpoint?: string | undefined;
         fallbackUsed?: boolean | undefined;
         cacheHit?: boolean | undefined;
     };
     request: {
         options: {
-            includeAI: boolean;
             generateRecommendations: boolean;
-            detailedMetrics: boolean;
             customRules: string[];
+            includeAI: boolean;
+            detailedMetrics: boolean;
         };
         priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;
-        timeout?: number | undefined;
         webhook?: string | undefined;
+        timeout?: number | undefined;
     };
     metadata?: Record<string, any> | undefined;
     tags?: string[] | undefined;
@@ -801,11 +801,11 @@ export declare const AnalysisSchema: z.ZodObject<{
     templateId?: string | undefined;
     results?: {
         recommendations: {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             estimatedEffort?: string | undefined;
             expectedImprovement?: number | undefined;
@@ -894,24 +894,24 @@ export declare const AnalysisHistoryEntrySchema: z.ZodObject<{
     timestamp: z.ZodDate;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    documentId: string;
-    analysisId: string;
-    timestamp: Date;
     organizationId: string;
     id: string;
     description: string;
+    documentId: string;
+    analysisId: string;
+    timestamp: Date;
     changeType: "CANCELLED" | "STATUS_CHANGE" | "PROGRESS_UPDATE" | "ERROR_OCCURRED" | "RESULT_UPDATED";
     triggeredBy: string;
     metadata?: Record<string, any> | undefined;
     previousValue?: any;
     newValue?: any;
 }, {
-    documentId: string;
-    analysisId: string;
-    timestamp: Date;
     organizationId: string;
     id: string;
     description: string;
+    documentId: string;
+    analysisId: string;
+    timestamp: Date;
     changeType: "CANCELLED" | "STATUS_CHANGE" | "PROGRESS_UPDATE" | "ERROR_OCCURRED" | "RESULT_UPDATED";
     triggeredBy: string;
     metadata?: Record<string, any> | undefined;
@@ -1036,4 +1036,3 @@ export declare const ANALYSIS_COLLECTIONS: {
     readonly HISTORY: "analysis_history";
     readonly STATISTICS: "analysis_statistics";
 };
-//# sourceMappingURL=analysis.schema.d.ts.map

@@ -31,7 +31,7 @@ export declare class ServiceUnavailableError extends AppError {
 /**
  * Error handling middleware - should be the last middleware
  */
-export declare const errorHandler: (error: Error, req: Request, res: Response, next: NextFunction) => void;
+export declare const errorHandler: (error: Error, req: Request, res: Response) => void;
 /**
  * Not found handler - for unmatched routes
  */
@@ -95,4 +95,3 @@ export interface ExternalServiceError {
     message: string;
     response?: any;
 }
-//# sourceMappingURL=error.d.ts.map

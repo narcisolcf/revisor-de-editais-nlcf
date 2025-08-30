@@ -180,4 +180,3 @@ export declare class ReviewCommentRepository extends BaseRepository<ReviewCommen
      */
     getStatistics(documentId: string): Promise<any>;
 }
-//# sourceMappingURL=DocumentRepository.d.ts.map

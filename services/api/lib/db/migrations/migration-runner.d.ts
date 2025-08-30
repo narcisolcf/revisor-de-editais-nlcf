@@ -56,4 +56,3 @@ export declare class MigrationRunner {
      */
     seedDevelopmentData(): Promise<void>;
 }
-//# sourceMappingURL=migration-runner.d.ts.map

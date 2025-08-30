@@ -135,7 +135,8 @@ class AnalysisOrchestrator {
     /**
      * Cancela uma análise
      */
-    async cancelAnalysis(analysisId, userId) {
+    // eslint-disable-next-line no-unused-vars
+    async cancelAnalysis(analysisId, _userId) {
         const progress = await this.getAnalysisProgress(analysisId);
         if (!progress) {
             return false;

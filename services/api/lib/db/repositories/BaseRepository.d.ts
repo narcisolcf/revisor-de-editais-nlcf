@@ -112,4 +112,3 @@ export declare abstract class BaseRepository<T, CreateT = Partial<T>, UpdateT = 
      */
     onDocumentSnapshot(id: string, callback: (data: T | null) => void, errorCallback?: (error: Error) => void): () => void;
 }
-//# sourceMappingURL=BaseRepository.d.ts.map

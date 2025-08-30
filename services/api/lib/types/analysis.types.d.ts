@@ -170,11 +170,11 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     completedAt: z.ZodOptional<z.ZodDate>;
     error: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    documentId: string;
-    status: "error" | "pending" | "processing" | "completed";
     organizationId: string;
+    status: "pending" | "processing" | "completed" | "error";
     id: string;
     createdAt: Date;
+    documentId: string;
     conformityScores: {
         structural: number;
         legal: number;
@@ -208,9 +208,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     analysisMetadata?: Record<string, any> | undefined;
     completedAt?: Date | undefined;
 }, {
-    documentId: string;
     organizationId: string;
     id: string;
+    documentId: string;
     conformityScores: {
         structural: number;
         legal: number;
@@ -240,9 +240,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     appliedConfigId: string;
     appliedConfigHash: string;
     executionTimeSeconds: number;
-    status?: "error" | "pending" | "processing" | "completed" | undefined;
-    error?: string | undefined;
+    status?: "pending" | "processing" | "completed" | "error" | undefined;
     createdAt?: Date | undefined;
+    error?: string | undefined;
     analysisMetadata?: Record<string, any> | undefined;
     completedAt?: Date | undefined;
 }>;
@@ -258,45 +258,45 @@ export declare const AnalysisRequestSchema: z.ZodObject<{
         generateRecommendations: z.ZodDefault<z.ZodBoolean>;
         extractKeyMetrics: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        generateRecommendations: boolean;
         includeAIAnalysis: boolean;
         runCustomRules: boolean;
+        generateRecommendations: boolean;
         extractKeyMetrics: boolean;
     }, {
-        generateRecommendations?: boolean | undefined;
         includeAIAnalysis?: boolean | undefined;
         runCustomRules?: boolean | undefined;
+        generateRecommendations?: boolean | undefined;
         extractKeyMetrics?: boolean | undefined;
     }>>;
     requestedBy: z.ZodString;
     requestedAt: z.ZodDefault<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
+    organizationId: string;
     documentId: string;
     priority: "low" | "normal" | "high";
     analysisType: "quick" | "standard" | "deep";
-    organizationId: string;
     requestedBy: string;
     requestedAt: Date;
     options?: {
-        generateRecommendations: boolean;
         includeAIAnalysis: boolean;
         runCustomRules: boolean;
+        generateRecommendations: boolean;
         extractKeyMetrics: boolean;
     } | undefined;
     configId?: string | undefined;
 }, {
-    documentId: string;
     organizationId: string;
+    documentId: string;
     requestedBy: string;
     options?: {
-        generateRecommendations?: boolean | undefined;
         includeAIAnalysis?: boolean | undefined;
         runCustomRules?: boolean | undefined;
+        generateRecommendations?: boolean | undefined;
         extractKeyMetrics?: boolean | undefined;
     } | undefined;
+    configId?: string | undefined;
     priority?: "low" | "normal" | "high" | undefined;
     analysisType?: "quick" | "standard" | "deep" | undefined;
-    configId?: string | undefined;
     requestedAt?: Date | undefined;
 }>;
 export type ConformityScore = z.infer<typeof ConformityScoreSchema>;
@@ -393,4 +393,3 @@ export declare const groupFindingsByCategory: (findings: AnalysisFinding[]) => R
     resolvedBy?: string | undefined;
 }[]>;
 export declare const generateExecutiveSummary: (result: AnalysisResult) => AnalysisExecutiveSummary;
-//# sourceMappingURL=analysis.types.d.ts.map

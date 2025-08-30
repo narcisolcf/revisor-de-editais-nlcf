@@ -33,7 +33,7 @@ async function testFirestoreConnection() {
     const testData = {
       name: 'Teste de Conectividade',
       timestamp: new Date(),
-      status: 'active'
+      status: 'ANALYZED'
     };
     
     const docRef = await firestore.collection('connectivity-test').add(testData);

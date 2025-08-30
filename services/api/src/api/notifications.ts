@@ -7,10 +7,13 @@ import { onRequest } from "firebase-functions/v2/https";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import express from "express";
 import { logger } from "firebase-functions";
+import crypto from "crypto";
 import { collections, messaging, firestore } from "../config/firebase";
 import { NotificationPayload } from "../types";
-import { authenticateService } from "../middleware/auth";
+import { authenticateService, authenticateUser } from "../middleware/auth";
 import { createSuccessResponse, createErrorResponse, generateRequestId } from "../utils";
+import { z } from "zod";
+
 
 const app = express();
 app.use(express.json());
@@ -21,6 +24,214 @@ app.use((req, res, next) => {
   res.setHeader("X-Request-ID", req.requestId);
   next();
 });
+
+// Validation schemas
+const listNotificationsSchema = z.object({
+  page: z.string().optional().transform(val => val ? parseInt(val) : 1),
+  limit: z.string().optional().transform(val => val ? parseInt(val) : 20),
+  unreadOnly: z.string().optional().transform(val => val === 'true'),
+  type: z.string().optional()
+});
+
+const markAsReadSchema = z.object({
+  notificationIds: z.array(z.string()).min(1)
+});
+
+/**
+ * GET /notifications
+ * List user notifications with pagination and filters
+ */
+app.get("/",
+  authenticateUser,
+  async (req, res) => {
+    try {
+      const validation = listNotificationsSchema.safeParse(req.query);
+      
+      if (!validation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid query parameters",
+          { errors: validation.error.errors },
+          req.requestId
+        ));
+      }
+      
+      const { page, limit, unreadOnly, type } = validation.data;
+      const userId = req.user!.uid;
+      
+      // Build query
+      let query = firestore
+        .collection("notifications")
+        .where("userId", "==", userId)
+        .orderBy("createdAt", "desc");
+      
+      if (unreadOnly) {
+        query = query.where("readAt", "==", null);
+      }
+      
+      if (type) {
+        query = query.where("type", "==", type);
+      }
+      
+      // Apply pagination
+      const offset = (page - 1) * limit;
+      query = query.offset(offset).limit(limit);
+      
+      const snapshot = await query.get();
+      
+      const notifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || doc.data().createdAt,
+        readAt: doc.data().readAt?.toDate?.()?.toISOString() || doc.data().readAt
+      }));
+      
+      // Get total count for pagination
+      let countQuery = firestore
+        .collection("notifications")
+        .where("userId", "==", userId);
+      
+      if (unreadOnly) {
+        countQuery = countQuery.where("readAt", "==", null);
+      }
+      
+      if (type) {
+        countQuery = countQuery.where("type", "==", type);
+      }
+      
+      const countSnapshot = await countQuery.count().get();
+      const total = countSnapshot.data().count;
+      
+      res.json(createSuccessResponse({
+        notifications,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          hasNext: page * limit < total,
+          hasPrev: page > 1
+        }
+      }, req.requestId));
+      
+    } catch (error) {
+      logger.error("Error listing notifications:", error);
+      res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
+        "Failed to list notifications",
+        { error: error instanceof Error ? error.message : String(error) },
+        req.requestId
+      ));
+    }
+  }
+);
+
+/**
+ * PATCH /notifications/mark-read
+ * Mark notifications as read
+ */
+app.patch("/mark-read",
+  authenticateUser,
+  async (req, res) => {
+    try {
+      const validation = markAsReadSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Invalid request body",
+          { errors: validation.error.errors },
+          req.requestId
+        ));
+      }
+      
+      const { notificationIds } = validation.data;
+      const userId = req.user!.uid;
+      const now = new Date();
+      
+      // Verify all notifications belong to the user
+      const notificationsSnapshot = await firestore
+        .collection("notifications")
+        .where("userId", "==", userId)
+        .where("__name__", "in", notificationIds)
+        .get();
+      
+      if (notificationsSnapshot.size !== notificationIds.length) {
+        return res.status(404).json(createErrorResponse(
+          "NOT_FOUND",
+          "Some notifications not found or don't belong to user",
+          {},
+          req.requestId
+        ));
+      }
+      
+      // Update notifications in batch
+      const batch = firestore.batch();
+      
+      notificationsSnapshot.docs.forEach(doc => {
+        if (!doc.data().readAt) {
+          batch.update(doc.ref, { readAt: now });
+        }
+      });
+      
+      await batch.commit();
+      
+      logger.info(`Marked ${notificationIds.length} notifications as read`, {
+        userId,
+        notificationIds
+      });
+      
+      res.json(createSuccessResponse({
+        markedAsRead: notificationIds.length,
+        readAt: now.toISOString()
+      }, req.requestId));
+      
+    } catch (error) {
+      logger.error("Error marking notifications as read:", error);
+      res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
+        "Failed to mark notifications as read",
+        { error: error instanceof Error ? error.message : String(error) },
+        req.requestId
+      ));
+    }
+  }
+);
+
+/**
+ * GET /notifications/unread-count
+ * Get count of unread notifications for user
+ */
+app.get("/unread-count",
+  authenticateUser,
+  async (req, res) => {
+    try {
+      const userId = req.user!.uid;
+      
+      const countSnapshot = await firestore
+        .collection("notifications")
+        .where("userId", "==", userId)
+        .where("readAt", "==", null)
+        .count()
+        .get();
+      
+      const unreadCount = countSnapshot.data().count;
+      
+      res.json(createSuccessResponse({
+        unreadCount
+      }, req.requestId));
+      
+    } catch (error) {
+      logger.error("Error getting unread count:", error);
+      res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
+        "Failed to get unread count",
+        { error: error instanceof Error ? error.message : String(error) },
+        req.requestId
+      ));
+    }
+  }
+);
 
 /**
  * POST /notifications/send
@@ -106,10 +317,15 @@ export const onNotificationCreated = onDocumentCreated({
 /**
  * Process notification through various channels
  */
+interface NotificationResult {
+  success: boolean;
+  details?: Record<string, unknown>;
+}
+
 async function processNotification(notification: NotificationPayload): Promise<{
-  channels: Record<string, { success: boolean; details?: any }>
+  channels: Record<string, NotificationResult>
 }> {
-  const results: Record<string, { success: boolean; details?: any }> = {};
+  const results: Record<string, NotificationResult> = {};
   
   // Process each channel
   for (const channel of notification.channels) {
@@ -145,10 +361,7 @@ async function processNotification(notification: NotificationPayload): Promise<{
 /**
  * Send push notification via Firebase Messaging
  */
-async function sendPushNotification(notification: NotificationPayload): Promise<{
-  success: boolean;
-  details?: any;
-}> {
+async function sendPushNotification(notification: NotificationPayload): Promise<NotificationResult> {
   try {
     // Get user's FCM tokens
     const userTokensSnapshot = await firestore
@@ -234,10 +447,7 @@ async function sendPushNotification(notification: NotificationPayload): Promise<
 /**
  * Send email notification
  */
-async function sendEmailNotification(notification: NotificationPayload): Promise<{
-  success: boolean;
-  details?: any;
-}> {
+async function sendEmailNotification(notification: NotificationPayload): Promise<NotificationResult> {
   try {
     // In a real implementation, you would integrate with an email service
     // like SendGrid, AWS SES, or similar
@@ -273,10 +483,7 @@ async function sendEmailNotification(notification: NotificationPayload): Promise
 /**
  * Send webhook notification
  */
-async function sendWebhookNotification(notification: NotificationPayload): Promise<{
-  success: boolean;
-  details?: any;
-}> {
+async function sendWebhookNotification(notification: NotificationPayload): Promise<NotificationResult> {
   try {
     // Get organization webhook configuration
     const orgConfigSnapshot = await collections.configs
@@ -360,10 +567,9 @@ async function sendWebhookNotification(notification: NotificationPayload): Promi
 /**
  * Generate webhook signature for security
  */
-function generateWebhookSignature(payload: any, secret?: string): string {
+function generateWebhookSignature(payload: Record<string, unknown>, secret?: string): string {
   if (!secret) return "";
   
-  const crypto = require("crypto");
   const payloadString = JSON.stringify(payload);
   
   return crypto

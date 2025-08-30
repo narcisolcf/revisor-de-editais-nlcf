@@ -111,4 +111,3 @@ export declare const CommonSchemas: {
  * Validar acesso à organização
  */
 export declare function validateOrganizationAccess(userOrgId: string, targetOrgId: string): boolean;
-//# sourceMappingURL=index.d.ts.map

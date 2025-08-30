@@ -285,7 +285,15 @@ async function testNonRetryableError() {
 // Utilitários
 function createOrchestrator(mockCloudRun) {
   // Substituir CloudRunClient por mock no constructor
-  const orchestrator = new AnalysisOrchestrator(db, 'http://mock-url', 'test-project');
+  const orchestrator = new AnalysisOrchestrator(
+    db, 
+    'http://mock-url', 
+    'test-project',
+    {
+      projectId: 'test-project',
+      scopes: ['https://www.googleapis.com/auth/cloud-platform']
+    }
+  );
   orchestrator.cloudRunClient = mockCloudRun;
   orchestrator.taskQueue = new MockTaskQueueService();
   orchestrator.notificationService = new MockNotificationService();

@@ -173,4 +173,3 @@ export declare class OrganizationUserRepository extends BaseRepository<Organizat
      */
     updatePermissions(organizationId: string, userId: string, permissions: string[]): Promise<void>;
 }
-//# sourceMappingURL=OrganizationRepository.d.ts.map

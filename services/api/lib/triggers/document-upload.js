@@ -276,7 +276,8 @@ async function generateDocumentPreview(filePath, maxLength = 500) {
 /**
  * Validate document structure and content
  */
-async function validateDocument(filePath, document) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+async function validateDocument(_filePath, _document) {
     const errors = [];
     const warnings = [];
     try {

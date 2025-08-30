@@ -40,8 +40,8 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.onAnalysisResultUpdated = exports.onAnalysisResultCreated = void 0;
 exports.cleanupOldAnalysisResults = cleanupOldAnalysisResults;
-const firestore_1 = require("firebase-functions/v2/firestore");
-const firebase_functions_1 = require("firebase-functions");
+const functions = __importStar(require("firebase-functions/v1"));
+const logger = functions.logger;
 const admin = __importStar(require("firebase-admin"));
 const firebase_1 = require("../config/firebase");
 const types_1 = require("../types");
@@ -49,20 +49,21 @@ const types_1 = require("../types");
 /**
  * Trigger when analysis result is created
  */
-exports.onAnalysisResultCreated = (0, firestore_1.onDocumentCreated)({
-    document: "analysisResults/{resultId}",
-    region: "us-central1",
-    memory: "512MiB",
-    timeoutSeconds: 300,
-    maxInstances: 20
-}, async (event) => {
-    const resultId = event.params.resultId;
-    const analysisResult = event.data?.data();
+exports.onAnalysisResultCreated = functions
+    .region("us-central1")
+    .runWith({
+    memory: "512MB",
+    timeoutSeconds: 300
+})
+    .firestore.document("analysisResults/{resultId}")
+    .onCreate(async (snapshot, context) => {
+    const resultId = context.params.resultId;
+    const analysisResult = snapshot.data();
     if (!analysisResult) {
-        firebase_functions_1.logger.error(`No analysis result data found for ${resultId}`);
+        logger.error(`No analysis result data found for ${resultId}`);
         return;
     }
-    firebase_functions_1.logger.info(`Analysis result created: ${resultId}`, {
+    logger.info(`Analysis result created: ${resultId}`, {
         documentId: analysisResult.documentId,
         organizationId: analysisResult.organizationId,
         status: analysisResult.status,
@@ -78,30 +79,31 @@ exports.onAnalysisResultCreated = (0, firestore_1.onDocumentCreated)({
         }
     }
     catch (error) {
-        firebase_functions_1.logger.error(`Error processing analysis result creation: ${resultId}`, error);
+        logger.error(`Error processing analysis result creation: ${resultId}`, error);
         throw error;
     }
 });
 /**
  * Trigger when analysis result is updated
  */
-exports.onAnalysisResultUpdated = (0, firestore_1.onDocumentUpdated)({
-    document: "analysisResults/{resultId}",
-    region: "us-central1",
-    memory: "512MiB",
-    timeoutSeconds: 300,
-    maxInstances: 20
-}, async (event) => {
-    const resultId = event.params.resultId;
-    const beforeData = event.data?.before.data();
-    const afterData = event.data?.after.data();
+exports.onAnalysisResultUpdated = functions
+    .region("us-central1")
+    .runWith({
+    memory: "512MB",
+    timeoutSeconds: 300
+})
+    .firestore.document("analysisResults/{resultId}")
+    .onUpdate(async (change, context) => {
+    const resultId = context.params.resultId;
+    const beforeData = change.before.data();
+    const afterData = change.after.data();
     if (!beforeData || !afterData) {
-        firebase_functions_1.logger.error(`Missing analysis result data for update: ${resultId}`);
+        logger.error(`Missing analysis result data for update: ${resultId}`);
         return;
     }
     // Check if status changed to completed
     if (beforeData.status !== "completed" && afterData.status === "completed") {
-        firebase_functions_1.logger.info(`Analysis completed: ${resultId}`, {
+        logger.info(`Analysis completed: ${resultId}`, {
             documentId: afterData.documentId,
             organizationId: afterData.organizationId,
             executionTime: afterData.executionTimeSeconds,
@@ -111,13 +113,13 @@ exports.onAnalysisResultUpdated = (0, firestore_1.onDocumentUpdated)({
             await processCompletedAnalysis(resultId, afterData);
         }
         catch (error) {
-            firebase_functions_1.logger.error(`Error processing completed analysis: ${resultId}`, error);
+            logger.error(`Error processing completed analysis: ${resultId}`, error);
             throw error;
         }
     }
     // Check if status changed to error
     if (beforeData.status !== "error" && afterData.status === "error") {
-        firebase_functions_1.logger.error(`Analysis failed: ${resultId}`, {
+        logger.error(`Analysis failed: ${resultId}`, {
             documentId: afterData.documentId,
             error: afterData.error
         });
@@ -125,7 +127,7 @@ exports.onAnalysisResultUpdated = (0, firestore_1.onDocumentUpdated)({
             await processFailedAnalysis(resultId, afterData);
         }
         catch (error) {
-            firebase_functions_1.logger.error(`Error processing failed analysis: ${resultId}`, error);
+            logger.error(`Error processing failed analysis: ${resultId}`, error);
             throw error;
         }
     }
@@ -150,7 +152,7 @@ async function processCompletedAnalysis(resultId, analysisResult) {
             .collection("analysisSummaries")
             .doc(resultId)
             .set(executiveSummary);
-        firebase_functions_1.logger.info(`Executive summary generated for ${resultId}`, {
+        logger.info(`Executive summary generated for ${resultId}`, {
             overallScore: executiveSummary.overallScore,
             weightedScore: executiveSummary.weightedScore,
             totalFindings: executiveSummary.totalFindings,
@@ -187,10 +189,10 @@ async function processCompletedAnalysis(resultId, analysisResult) {
         }
         // Update organization analytics
         await updateOrganizationAnalytics(organizationId, analysisResult);
-        firebase_functions_1.logger.info(`Analysis processing completed: ${resultId}`);
+        logger.info(`Analysis processing completed: ${resultId}`);
     }
     catch (error) {
-        firebase_functions_1.logger.error(`Error in processCompletedAnalysis: ${resultId}`, error);
+        logger.error(`Error in processCompletedAnalysis: ${resultId}`, error);
         // Try to update document with error status
         await updateDocumentStatus(documentId, types_1.DocumentStatus.ERROR, { error: `Post-analysis processing failed: ${error instanceof Error ? error.message : String(error)}` });
         throw error;
@@ -229,10 +231,10 @@ async function processFailedAnalysis(resultId, analysisResult) {
                 configId: analysisResult.appliedConfigId
             }
         });
-        firebase_functions_1.logger.error(`Analysis failed processing completed: ${resultId}`);
+        logger.error(`Analysis failed processing completed: ${resultId}`);
     }
     catch (error) {
-        firebase_functions_1.logger.error(`Error in processFailedAnalysis: ${resultId}`, error);
+        logger.error(`Error in processFailedAnalysis: ${resultId}`, error);
         throw error;
     }
 }
@@ -247,13 +249,13 @@ async function updateDocumentStatus(documentId, status, additionalData = {}) {
             ...additionalData
         };
         await firebase_1.collections.documents.doc(documentId).update(updateData);
-        firebase_functions_1.logger.info(`Document status updated: ${documentId}`, {
+        logger.info(`Document status updated: ${documentId}`, {
             status,
             additionalFields: Object.keys(additionalData)
         });
     }
     catch (retryError) {
-        firebase_functions_1.logger.error('Failed to update document status after retries', { documentId, status, error: retryError });
+        logger.error('Failed to update document status after retries', { documentId, status, error: retryError });
         throw retryError;
     }
 }
@@ -282,14 +284,14 @@ async function createAnalysisNotification(organizationId, documentId, resultId, 
             createdAt: new Date(),
             processed: false
         });
-        firebase_functions_1.logger.info(`Analysis notification created: ${resultId}`, {
+        logger.info(`Analysis notification created: ${resultId}`, {
             type,
             organizationId,
             documentId
         });
     }
     catch (error) {
-        firebase_functions_1.logger.error(`Failed to create analysis notification: ${resultId}`, error);
+        logger.error(`Failed to create analysis notification: ${resultId}`, error);
     }
 }
 /**
@@ -318,14 +320,14 @@ async function createHighPriorityAlert(organizationId, documentId, resultId, cri
             processed: false,
             severity: "critical"
         });
-        firebase_functions_1.logger.warn(`High priority alert created: ${resultId}`, {
+        logger.warn(`High priority alert created: ${resultId}`, {
             criticalCount,
             organizationId,
             documentId
         });
     }
     catch (error) {
-        firebase_functions_1.logger.error(`Failed to create high priority alert: ${resultId}`, error);
+        logger.error(`Failed to create high priority alert: ${resultId}`, error);
     }
 }
 /**
@@ -339,14 +341,14 @@ async function createAuditLog(logData) {
             ...logData
         };
         await firebase_1.collections.auditLogs.add(auditLog);
-        firebase_functions_1.logger.info(`Audit log created: ${logData.action}`, {
+        logger.info(`Audit log created: ${logData.action}`, {
             organizationId: logData.organizationId,
             resourceType: logData.resourceType,
             resourceId: logData.resourceId
         });
     }
     catch (error) {
-        firebase_functions_1.logger.error(`Failed to create audit log:`, error);
+        logger.error(`Failed to create audit log:`, error);
     }
 }
 /**
@@ -367,14 +369,14 @@ async function updateOrganizationAnalytics(organizationId, analysisResult) {
             lastUpdated: new Date(),
             organizationId
         }, { merge: true });
-        firebase_functions_1.logger.info(`Organization analytics updated: ${organizationId}`, {
+        logger.info(`Organization analytics updated: ${organizationId}`, {
             date: today,
             score: analysisResult.weightedScore,
             findings: analysisResult.findings.length
         });
     }
     catch (error) {
-        firebase_functions_1.logger.error(`Failed to update organization analytics: ${organizationId}`, error);
+        logger.error(`Failed to update organization analytics: ${organizationId}`, error);
     }
 }
 /**
@@ -389,7 +391,7 @@ async function cleanupOldAnalysisResults(retentionDays = 365) {
             .limit(100); // Process in batches
         const snapshot = await oldResultsQuery.get();
         if (snapshot.empty) {
-            firebase_functions_1.logger.info("No old analysis results to clean up");
+            logger.info("No old analysis results to clean up");
             return;
         }
         const batch = firebase_1.firestore.batch();
@@ -397,13 +399,13 @@ async function cleanupOldAnalysisResults(retentionDays = 365) {
             batch.delete(doc.ref);
         });
         await batch.commit();
-        firebase_functions_1.logger.info(`Cleaned up ${snapshot.docs.length} old analysis results`, {
+        logger.info(`Cleaned up ${snapshot.docs.length} old analysis results`, {
             cutoffDate: cutoffDate.toISOString(),
             retentionDays
         });
     }
     catch (error) {
-        firebase_functions_1.logger.error("Error cleaning up old analysis results:", error);
+        logger.error("Error cleaning up old analysis results:", error);
         throw error;
     }
 }

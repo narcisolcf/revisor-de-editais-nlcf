@@ -43,4 +43,3 @@ export declare function createDocumentRepository(database?: Firestore): Promise<
     versions: import("./repositories/DocumentRepository").DocumentVersionRepository;
     comments: import("./repositories/DocumentRepository").ReviewCommentRepository;
 }>;
-//# sourceMappingURL=index.d.ts.map

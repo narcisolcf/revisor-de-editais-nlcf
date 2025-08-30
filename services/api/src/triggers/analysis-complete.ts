@@ -4,8 +4,8 @@
  * LicitaReview Cloud Functions
  */
 
-import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
-import { logger } from "firebase-functions";
+import * as functions from "firebase-functions/v1";
+const logger = functions.logger;
 import * as admin from "firebase-admin";
 import { collections, firestore } from "../config/firebase";
 import { 
@@ -20,15 +20,16 @@ import {
 /**
  * Trigger when analysis result is created
  */
-export const onAnalysisResultCreated = onDocumentCreated({
-  document: "analysisResults/{resultId}",
-  region: "us-central1",
-  memory: "512MiB",
-  timeoutSeconds: 300,
-  maxInstances: 20
-}, async (event) => {
-  const resultId = event.params.resultId;
-  const analysisResult = event.data?.data() as AnalysisResult;
+export const onAnalysisResultCreated = functions
+  .region("us-central1")
+  .runWith({
+    memory: "512MB",
+    timeoutSeconds: 300
+  })
+  .firestore.document("analysisResults/{resultId}")
+  .onCreate(async (snapshot: functions.firestore.QueryDocumentSnapshot, context: functions.EventContext) => {
+    const resultId = context.params.resultId;
+  const analysisResult = snapshot.data() as AnalysisResult;
   
   if (!analysisResult) {
     logger.error(`No analysis result data found for ${resultId}`);
@@ -59,16 +60,17 @@ export const onAnalysisResultCreated = onDocumentCreated({
 /**
  * Trigger when analysis result is updated
  */
-export const onAnalysisResultUpdated = onDocumentUpdated({
-  document: "analysisResults/{resultId}",
-  region: "us-central1", 
-  memory: "512MiB",
-  timeoutSeconds: 300,
-  maxInstances: 20
-}, async (event) => {
-  const resultId = event.params.resultId;
-  const beforeData = event.data?.before.data() as AnalysisResult;
-  const afterData = event.data?.after.data() as AnalysisResult;
+export const onAnalysisResultUpdated = functions
+  .region("us-central1")
+  .runWith({
+    memory: "512MB",
+    timeoutSeconds: 300
+  })
+  .firestore.document("analysisResults/{resultId}")
+  .onUpdate(async (change: functions.Change<functions.firestore.QueryDocumentSnapshot>, context: functions.EventContext) => {
+    const resultId = context.params.resultId;
+  const beforeData = change.before.data() as AnalysisResult;
+  const afterData = change.after.data() as AnalysisResult;
   
   if (!beforeData || !afterData) {
     logger.error(`Missing analysis result data for update: ${resultId}`);
@@ -291,7 +293,7 @@ async function updateDocumentStatus(
       additionalFields: Object.keys(additionalData)
     });
   } catch (retryError) {
-    logger.error('Failed to update document status after retries', { documentId, status, error: retryError });
+    logger.error('Failed to update document status after retries', retryError instanceof Error ? retryError : new Error(String(retryError)), { documentId, status });
     throw retryError;
   }
 }

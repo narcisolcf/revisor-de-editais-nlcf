@@ -10,9 +10,17 @@
 import { onRequest } from "firebase-functions/v2/https";
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import { z } from "zod";
+import { getFirestore } from 'firebase-admin/firestore';
+import { 
+  initializeSecurity, 
+  securityHeaders, 
+  rateLimit, 
+  attackProtection, 
+  auditAccess 
+} from '../middleware/security';
+import { LoggingService } from '../services/LoggingService';
+import { MetricsService } from '../services/MetricsService';
 
 import { firestore } from "../config/firebase";
 import { ParameterEngine } from "../services/ParameterEngine";
@@ -32,25 +40,47 @@ import {
 import { config } from "../config";
 import { logger } from "firebase-functions";
 
+
+// Inicializar serviços de segurança
+const db = getFirestore();
+const loggingService = new LoggingService('parameter-engine-api');
+const metricsService = new MetricsService('parameter-engine-api');
+
+// Inicializar middleware de segurança
+const securityManager = initializeSecurity(db, loggingService, metricsService, {
+  rateLimit: {
+    windowMs: config.rateLimitWindowMs || 15 * 60 * 1000, // 15 minutos
+    maxRequests: config.rateLimitMax || 100 // máximo 100 requests por IP por janela
+  },
+  audit: {
+    enabled: true,
+    sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
+    excludePaths: []
+  }
+});
+
 const app = express();
 
-// Middleware
-app.use(helmet());
+// Middleware básico
 app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json({ limit: config.maxRequestSize }));
-app.use(generateRequestId);
+
+// Aplicar middlewares de segurança
+app.use(securityHeaders);
+app.use(rateLimit);
+app.use(attackProtection);
+app.use(auditAccess);
+
+// Request ID middleware
+app.use((req, res, next) => {
+  req.requestId = generateRequestId();
+  res.setHeader("X-Request-ID", req.requestId);
+  next();
+});
+
+// Authentication middleware
 app.use(authenticateUser);
 app.use(requireOrganization);
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: config.rateLimitWindowMs,
-  max: config.rateLimitMax,
-  message: { error: "Too many requests, please try again later" },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use(limiter);
 
 // Initialize ParameterEngine
 const parameterEngine = new ParameterEngine(firestore, {
@@ -290,7 +320,7 @@ app.get("/health", async (req, res) => {
 });
 
 // Error handling middleware
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error, req: express.Request, res: express.Response) => {
   logger.error("Unhandled error in parameter-engine API", {
     error: error.message,
     stack: error.stack,

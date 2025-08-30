@@ -57,7 +57,7 @@ describe('Teste Básico de Integração', () => {
     const testData = {
       name: 'Teste de Integração',
       timestamp: new Date(),
-      status: 'active',
+      status: 'ANALYZED',
       metadata: {
         version: '1.0.0',
         environment: 'test'

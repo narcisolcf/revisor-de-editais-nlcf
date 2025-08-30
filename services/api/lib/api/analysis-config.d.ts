@@ -3,5 +3,5 @@
  * Manage organization-specific analysis configurations
  * LicitaReview Cloud Functions
  */
-export declare const analysisConfigApi: import("firebase-functions/v2/https").HttpsFunction;
-//# sourceMappingURL=analysis-config.d.ts.map
+import * as functions from 'firebase-functions/v1';
+export declare const analysisConfigApi: functions.HttpsFunction;

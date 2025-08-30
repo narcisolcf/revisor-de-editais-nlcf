@@ -178,8 +178,8 @@ export declare const DocumentSchema: z.ZodObject<{
     updatedAt: z.ZodDefault<z.ZodDate>;
     expiresAt: z.ZodOptional<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
-    status: DocumentStatus;
     organizationId: string;
+    status: DocumentStatus;
     id: string;
     title: string;
     content: string;
@@ -332,8 +332,8 @@ export declare const CreateDocumentRequestSchema: z.ZodObject<Omit<{
     updatedAt: z.ZodDefault<z.ZodDate>;
     expiresAt: z.ZodOptional<z.ZodDate>;
 }, "id" | "createdAt" | "updatedAt">, "strip", z.ZodTypeAny, {
-    status: DocumentStatus;
     organizationId: string;
+    status: DocumentStatus;
     title: string;
     content: string;
     classification: {
@@ -477,8 +477,8 @@ export declare const UpdateDocumentRequestSchema: z.ZodObject<Omit<{
     updatedAt: z.ZodOptional<z.ZodDefault<z.ZodDate>>;
     expiresAt: z.ZodOptional<z.ZodOptional<z.ZodDate>>;
 }, "id" | "createdAt">, "strip", z.ZodTypeAny, {
-    status?: DocumentStatus | undefined;
     organizationId?: string | undefined;
+    status?: DocumentStatus | undefined;
     title?: string | undefined;
     content?: string | undefined;
     classification?: {
@@ -511,8 +511,8 @@ export declare const UpdateDocumentRequestSchema: z.ZodObject<Omit<{
     updatedAt?: Date | undefined;
     expiresAt?: Date | undefined;
 }, {
-    status?: DocumentStatus | undefined;
     organizationId?: string | undefined;
+    status?: DocumentStatus | undefined;
     title?: string | undefined;
     content?: string | undefined;
     classification?: {
@@ -567,8 +567,8 @@ export declare const DocumentSummarySchema: z.ZodObject<{
         size: number;
     }>;
 }, "strip", z.ZodTypeAny, {
-    status: DocumentStatus;
     organizationId: string;
+    status: DocumentStatus;
     documentType: DocumentType;
     id: string;
     title: string;
@@ -580,8 +580,8 @@ export declare const DocumentSummarySchema: z.ZodObject<{
         size: number;
     };
 }, {
-    status: DocumentStatus;
     organizationId: string;
+    status: DocumentStatus;
     documentType: DocumentType;
     id: string;
     title: string;
@@ -599,4 +599,3 @@ export type DocumentSummary = z.infer<typeof DocumentSummarySchema>;
 export declare const createDocumentSummary: (doc: Document) => DocumentSummary;
 export declare const validateDocumentType: (type: string) => DocumentType | null;
 export declare const getDocumentTypeDisplayName: (type: DocumentType) => string;
-//# sourceMappingURL=document.types.d.ts.map

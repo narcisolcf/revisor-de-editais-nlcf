@@ -22,6 +22,7 @@ export enum AnalysisStatus {
 // Schemas
 export const AnalysisResultSchema = z.object({
   id: z.string(),
+  analysisId: z.string().optional(),
   documentId: z.string(),
   organizationId: z.string(),
   status: z.nativeEnum(AnalysisStatus),

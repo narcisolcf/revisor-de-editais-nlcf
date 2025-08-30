@@ -22,4 +22,3 @@ export declare const config: {
     readonly isDevelopment: boolean;
 };
 export default config;
-//# sourceMappingURL=index.d.ts.map

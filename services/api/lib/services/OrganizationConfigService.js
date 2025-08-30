@@ -376,24 +376,16 @@ class OrganizationConfigService {
     /**
      * Obtém estatísticas de uso de configurações
      */
+    // eslint-disable-next-line no-unused-vars
     async getConfigUsageStats(organizationId) {
-        try {
-            // Implementar busca de estatísticas no AnalysisRepository
-            // Por enquanto, retornar dados mock
-            return {
-                totalAnalyses: 0,
-                avgScore: 0,
-                lastUsed: null,
-                configVersion: 1
-            };
-        }
-        catch (error) {
-            firebase_functions_1.logger.error('Error getting config usage stats', {
-                organizationId,
-                error: error instanceof Error ? error.message : 'Unknown error'
-            });
-            throw error;
-        }
+        // Implementar busca de estatísticas no AnalysisRepository
+        // Por enquanto, retornar dados mock
+        return {
+            totalAnalyses: 0,
+            avgScore: 0,
+            lastUsed: null,
+            configVersion: 1
+        };
     }
 }
 exports.OrganizationConfigService = OrganizationConfigService;

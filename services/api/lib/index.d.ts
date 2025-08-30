@@ -1,16 +1,11 @@
 /**
  * LicitaReview Cloud Functions - Main Entry Point
  * Exports all Cloud Functions for deployment
+ * TEMPORARY: Simplified version for testing deployment
  */
-export { documentsApi } from "./api/documents";
-export { analysisConfigApi } from "./api/analysis-config";
 export { comissoesApi } from "./api/comissoes-api";
-export { organizationConfig } from "./api/organization-config";
-export declare const analysisApi: import("firebase-functions/v2/https").HttpsFunction;
-export { processAnalysis } from "./api/process-analysis";
 export { healthCheck } from "./api/health";
-export { analyticsReporter } from "./api/analytics";
-export { notificationProcessor } from "./api/notifications";
-export { auditLogger } from "./api/audit";
-export { cleanupOldAnalysisResults } from "./triggers/analysis-complete";
-//# sourceMappingURL=index.d.ts.map
+export { processAnalysis } from "./api/process-analysis";
+export { organizationConfig } from "./api/organization-config";
+export { analysisConfigApi } from "./api/analysis-config";
+export { onAnalysisResultCreated, onAnalysisResultUpdated } from "./triggers/analysis-complete";

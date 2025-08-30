@@ -65,12 +65,12 @@ export declare const AnalysisRequestSchema: z.ZodObject<{
         generateRecommendations: z.ZodDefault<z.ZodBoolean>;
         detailedMetrics: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        includeAI: boolean;
         generateRecommendations: boolean;
+        includeAI: boolean;
         detailedMetrics: boolean;
     }, {
-        includeAI?: boolean | undefined;
         generateRecommendations?: boolean | undefined;
+        includeAI?: boolean | undefined;
         detailedMetrics?: boolean | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
@@ -78,15 +78,15 @@ export declare const AnalysisRequestSchema: z.ZodObject<{
     priority: "low" | "normal" | "high";
     analysisType: "basic" | "detailed" | "comprehensive";
     options?: {
-        includeAI: boolean;
         generateRecommendations: boolean;
+        includeAI: boolean;
         detailedMetrics: boolean;
     } | undefined;
 }, {
     documentId: string;
     options?: {
-        includeAI?: boolean | undefined;
         generateRecommendations?: boolean | undefined;
+        includeAI?: boolean | undefined;
         detailedMetrics?: boolean | undefined;
     } | undefined;
     priority?: "low" | "normal" | "high" | undefined;
@@ -95,4 +95,3 @@ export declare const AnalysisRequestSchema: z.ZodObject<{
 export declare const UUIDSchema: z.ZodString;
 export declare function validateRequestBody<T>(schema: z.ZodSchema<T>): (req: Request, res: Response, next: NextFunction) => void | Response<any, Record<string, any>>;
 export declare function validateQueryParams<T>(schema: z.ZodSchema<T>): (req: Request, res: Response, next: NextFunction) => void | Response<any, Record<string, any>>;
-//# sourceMappingURL=validation.d.ts.map

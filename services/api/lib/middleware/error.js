@@ -58,7 +58,7 @@ exports.ServiceUnavailableError = ServiceUnavailableError;
 /**
  * Error handling middleware - should be the last middleware
  */
-const errorHandler = (error, req, res, next) => {
+const errorHandler = (error, req, res) => {
     // Ensure request ID exists
     if (!req.requestId) {
         req.requestId = (0, utils_1.generateRequestId)();
@@ -151,7 +151,9 @@ exports.notFoundHandler = notFoundHandler;
 /**
  * Async error wrapper for route handlers
  */
-const asyncHandler = (fn) => {
+const asyncHandler = (
+// eslint-disable-next-line no-unused-vars
+fn) => {
     return (req, res, next) => {
         Promise.resolve(fn(req, res, next)).catch(next);
     };

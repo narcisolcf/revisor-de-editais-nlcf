@@ -16,4 +16,3 @@ export declare const collections: {
     readonly auditLogs: admin.firestore.CollectionReference<admin.firestore.DocumentData, admin.firestore.DocumentData>;
 };
 export default admin;
-//# sourceMappingURL=firebase.d.ts.map

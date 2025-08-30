@@ -160,4 +160,3 @@ export interface Environment {
     version: string;
     logLevel: "debug" | "info" | "warn" | "error";
 }
-//# sourceMappingURL=index.d.ts.map

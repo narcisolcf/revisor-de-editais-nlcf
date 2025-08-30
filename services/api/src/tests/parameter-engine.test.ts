@@ -6,6 +6,10 @@
 import request from 'supertest';
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { ParameterEngine } from '../services/ParameterEngine';
+import { OrganizationRepository, CustomParametersRepository } from '../db/repositories/OrganizationRepository';
+import { AnalysisRepository } from '../db/repositories/AnalysisRepository';
+import { ProblemCategory, ProblemSeverity } from '../types/analysis.types';
+import { AnalysisPreset } from '../types/config.types';
 
 // Mock do Firebase
 jest.mock('../config/firebase', () => ({
@@ -14,6 +18,16 @@ jest.mock('../config/firebase', () => ({
 
 // Mock do ParameterEngine
 jest.mock('../services/ParameterEngine');
+
+// Interface para Problem
+interface Problem {
+  id: string;
+  type: string;
+  severity: string;
+  description: string;
+  location: string;
+  suggestion: string;
+}
 
 interface MockRequest {
   user?: {
@@ -91,16 +105,10 @@ jest.mock('firebase-functions', () => ({
   }
 }));
 
-interface MockApp {
-  get: jest.Mock;
-  post: jest.Mock;
-  put: jest.Mock;
-  delete: jest.Mock;
-  use: jest.Mock;
-}
+import { Application } from 'express';
 
 describe('ParameterEngine API', () => {
-  let app: MockApp;
+  let app: Application;
   let mockParameterEngine: jest.Mocked<ParameterEngine>;
 
   beforeEach(async () => {
@@ -112,15 +120,15 @@ describe('ParameterEngine API', () => {
       generateParameters: jest.fn(),
       optimizeParameters: jest.fn(),
       clearCache: jest.fn(),
-      getEngineStats: jest.fn(),
-      updateConfig: jest.fn()
-    } as jest.Mocked<ParameterEngine>;
+      getEngineStats: jest.fn()
+    } as any;
 
     (ParameterEngine as jest.MockedClass<typeof ParameterEngine>).mockImplementation(() => mockParameterEngine);
 
     // Import app after mocks are set up
     const { parameterEngineApi } = await import('../api/parameter-engine');
-    app = parameterEngineApi;
+    // Extract the Express app from the Cloud Function
+    app = (parameterEngineApi as any).__express;
   });
 
   afterEach(() => {
@@ -130,19 +138,22 @@ describe('ParameterEngine API', () => {
   describe('GET /parameters', () => {
     it('deve gerar parâmetros com sucesso', async () => {
       const mockParameters = {
-        weights: {
-          technical: 40,
-          legal: 30,
-          financial: 30
-        },
-        rules: [
-          {
-            id: 'rule-1',
-            name: 'Verificação de documentos',
-            weight: 10
-          }
-        ]
-      };
+      organizationId: 'test-org-id',
+      weights: {
+        structural: 40,
+        legal: 30,
+        clarity: 20,
+        abnt: 10
+      },
+      customRules: [],
+      preset: AnalysisPreset.STANDARD,
+      metadata: {
+        configVersion: 1,
+        engineVersion: '1.0.0',
+        generatedAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000)
+      }
+    };
 
       mockParameterEngine.generateParameters.mockResolvedValue(mockParameters);
 
@@ -175,19 +186,23 @@ describe('ParameterEngine API', () => {
       };
 
       const mockOptimizationResult = {
-        optimizedWeights: {
-          technical: 45,
+        suggestedWeights: {
+          structural: 45,
           legal: 25,
-          financial: 30
+          clarity: 20,
+          abnt: 10
         },
+        reasoning: 'Otimização baseada em análises recentes',
+        confidence: 0.85,
+        basedOnAnalyses: 50,
         improvements: [
           {
-            category: 'technical',
-            change: '+5%',
-            reason: 'Melhor performance em análises técnicas'
+            category: ProblemCategory.ESTRUTURAL,
+            currentWeight: 40,
+            suggestedWeight: 45,
+            expectedImprovement: 5
           }
-        ],
-        confidence: 0.85
+        ]
       };
 
       mockParameterEngine.optimizeParameters.mockResolvedValue(mockOptimizationResult);

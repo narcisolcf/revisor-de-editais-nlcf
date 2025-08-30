@@ -24,6 +24,7 @@ export const collections = {
   documents: firestore.collection("documents"),
   organizations: firestore.collection("organizations"),
   analysisResults: firestore.collection("analysisResults"),
+  analysis: firestore.collection("analysis"),
   configs: firestore.collection("organizationConfigs"),
   users: firestore.collection("users"),
   auditLogs: firestore.collection("auditLogs"),

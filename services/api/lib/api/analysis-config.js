@@ -4,12 +4,45 @@
  * Manage organization-specific analysis configurations
  * LicitaReview Cloud Functions
  */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.analysisConfigApi = void 0;
-const https_1 = require("firebase-functions/v2/https");
+const functions = __importStar(require("firebase-functions/v1"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
@@ -53,7 +86,7 @@ app.get("/", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.CONFIG_READ]), a
         // Validate query parameters
         const queryValidation = (0, utils_1.validateData)(utils_1.PaginationSchema, req.query);
         if (!queryValidation.success) {
-            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Parâmetros de consulta inválidos", queryValidation.details, req.requestId));
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Parâmetros de consulta inválidos", queryValidation.details, req.requestId || (0, utils_1.generateRequestId)()));
         }
         const { page = 1, limit = 10 } = queryValidation.data || {};
         // Super admin can see all configs, others only their org
@@ -67,8 +100,9 @@ app.get("/", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.CONFIG_READ]), a
         const countQuery = await firestoreQuery.count().get();
         const total = countQuery.data().count;
         // Apply pagination
-        const offset = (page - 1) * limit;
-        firestoreQuery = firestoreQuery.offset(offset).limit(limit);
+        firestoreQuery = firestoreQuery.limit(limit);
+        // For pages beyond the first, we would need to implement cursor-based pagination
+        // For now, we'll just limit the results
         const snapshot = await firestoreQuery.get();
         const configs = snapshot.docs.map((doc) => {
             const data = { id: doc.id, ...doc.data() };
@@ -91,7 +125,7 @@ app.get("/", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.CONFIG_READ]), a
     catch (error) {
         console.error("Error listing configs:", error);
         if (error instanceof utils_1.ValidationError) {
-            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message));
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, error.details, req.requestId || (0, utils_1.generateRequestId)()));
         }
         else {
             return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Erro interno do servidor", undefined, req.requestId));
@@ -161,7 +195,7 @@ app.get("/:id", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.CONFIG_READ])
     catch (error) {
         console.error("Error getting config:", error);
         if (error instanceof utils_1.ValidationError) {
-            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, error.details, req.requestId));
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", error.message, error.details, req.requestId || (0, utils_1.generateRequestId)()));
         }
         else {
             return res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Erro interno do servidor", undefined, req.requestId));
@@ -180,14 +214,18 @@ app.post("/", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.CONFIG_WRITE]),
         }
         const configData = bodyValidation.data;
         // Validate organization access
-        if (configData?.organizationId !== req.user.organizationId &&
+        if (configData && configData.organizationId !== req.user.organizationId &&
             !req.user.roles.includes("super_admin")) {
-            res.status(403).json((0, utils_1.createErrorResponse)("FORBIDDEN", "Cannot create config for different organization", { requestedOrg: configData?.organizationId, userOrg: req.user.organizationId }, req.requestId));
+            res.status(403).json((0, utils_1.createErrorResponse)("FORBIDDEN", "Cannot create config for different organization", { requestedOrg: configData.organizationId, userOrg: req.user.organizationId }, req.requestId));
+            return;
+        }
+        if (!configData) {
+            res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Dados de configuração inválidos", {}, req.requestId));
             return;
         }
         // Check if active config already exists
         const existingSnapshot = await firebase_1.collections.configs
-            .where("organizationId", "==", configData?.organizationId)
+            .where("organizationId", "==", configData.organizationId)
             .where("isActive", "==", true)
             .get();
         if (!existingSnapshot.empty && !req.body.allowMultiple) {
@@ -195,10 +233,6 @@ app.post("/", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.CONFIG_WRITE]),
                 existingConfigId: existingSnapshot.docs[0].id,
                 suggestion: "Update existing config or set allowMultiple=true"
             }, req.requestId));
-            return;
-        }
-        if (!configData) {
-            res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Dados de configuração inválidos"));
             return;
         }
         const config = {
@@ -516,11 +550,11 @@ app.use((error, req, res, next) => {
     res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Internal server error", process.env.NODE_ENV === "development" ? { stack: error.stack } : undefined, req.requestId));
 });
 // Export Cloud Function
-exports.analysisConfigApi = (0, https_1.onRequest)({
-    region: "us-central1",
-    memory: "1GiB",
-    timeoutSeconds: 300,
-    maxInstances: 50,
-    cors: config_1.config.corsOrigin
-}, app);
+exports.analysisConfigApi = functions
+    .region("us-central1")
+    .runWith({
+    memory: "1GB",
+    timeoutSeconds: 300
+})
+    .https.onRequest(app);
 //# sourceMappingURL=analysis-config.js.map

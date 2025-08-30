@@ -1,5 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Calendar, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -15,7 +26,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Brush
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -25,6 +37,8 @@ interface TrendsChartProps {
   title: string;
   type: 'documents' | 'processing' | 'distribution' | 'scores';
   className?: string;
+  isLoading?: boolean;
+  height?: number;
 }
 
 interface CustomTooltipProps {
@@ -37,23 +51,37 @@ interface CustomTooltipProps {
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, type }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-        <p className="font-medium text-gray-900 mb-2">
+      <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg max-w-xs">
+        <p className="font-semibold text-gray-900 mb-3 border-b pb-2">
           {type === 'distribution' ? label : format(parseISO(label || ''), 'dd/MM/yyyy', { locale: ptBR })}
         </p>
-        {payload.map((entry, index) => (
-          <p key={index} className="text-sm" style={{ color: entry.color }}>
-            <span className="font-medium">{entry.name}:</span>
-            <span className="ml-1">
-              {type === 'documents' && entry.dataKey === 'count' && `${entry.value} documentos`}
-              {type === 'documents' && entry.dataKey === 'score' && `${entry.value.toFixed(1)}%`}
-              {type === 'processing' && entry.dataKey === 'avgTime' && `${entry.value.toFixed(1)}s`}
-              {type === 'processing' && entry.dataKey === 'p95Time' && `${entry.value.toFixed(1)}s`}
-              {type === 'distribution' && `${entry.value} (${((entry.value / payload.reduce((sum, p) => sum + p.value, 0)) * 100).toFixed(1)}%)`}
-              {type === 'scores' && `${entry.value.toFixed(1)}%`}
-            </span>
-          </p>
-        ))}
+        <div className="space-y-2">
+          {payload.map((entry, index) => {
+            let unit = '';
+            if (type === 'processing' && entry.dataKey.includes('Time')) unit = 's';
+            if (type === 'scores' && entry.dataKey.includes('score')) unit = '%';
+            
+            return (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: entry.color }}
+                  />
+                  <span className="text-sm text-gray-700">{entry.name}:</span>
+                </div>
+                <span className="text-sm font-medium" style={{ color: entry.color }}>
+                  {type === 'documents' && entry.dataKey === 'count' && `${entry.value} documentos`}
+                  {type === 'documents' && entry.dataKey === 'score' && `${entry.value.toFixed(1)}%`}
+                  {type === 'processing' && entry.dataKey === 'avgTime' && `${entry.value.toFixed(1)}s`}
+                  {type === 'processing' && entry.dataKey === 'p95Time' && `${entry.value.toFixed(1)}s`}
+                  {type === 'distribution' && `${entry.value} (${((entry.value / payload.reduce((sum, p) => sum + p.value, 0)) * 100).toFixed(1)}%)`}
+                  {type === 'scores' && `${entry.value.toFixed(1)}%`}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   }
@@ -72,26 +100,68 @@ export const TrendsChart: React.FC<TrendsChartProps> = ({
   data, 
   title, 
   type, 
-  className = '' 
+  className = '',
+  isLoading = false,
+  height = 300
 }) => {
+  const [selectedPeriod, setSelectedPeriod] = useState('6m');
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomDomain, setZoomDomain] = useState<[number, number] | null>(null);
+
+  const periodOptions = [
+    { value: '7d', label: '7 dias' },
+    { value: '30d', label: '30 dias' },
+    { value: '3m', label: '3 meses' },
+    { value: '6m', label: '6 meses' },
+    { value: '1y', label: '1 ano' },
+    { value: 'all', label: 'Todos' }
+  ];
+
+  const handleZoomReset = () => {
+    setIsZoomed(false);
+    setZoomDomain(null);
+  };
+
+  const handleBrushChange = (domain: any) => {
+    if (domain && domain.startIndex !== undefined && domain.endIndex !== undefined) {
+      setZoomDomain([domain.startIndex, domain.endIndex]);
+      setIsZoomed(true);
+    }
+  };
+  const ChartSkeleton = () => (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-8 w-24" />
+      </div>
+      <Skeleton className={`w-full h-[${height}px]`} />
+    </div>
+  );
+
   const renderChart = () => {
+    const chartData = zoomDomain 
+      ? data.slice(zoomDomain[0], zoomDomain[1] + 1)
+      : data;
+
     switch (type) {
       case 'documents':
         return (
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={data}>
+          <ResponsiveContainer width="100%" height={height}>
+            <AreaChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={(value) => format(parseISO(value), 'dd/MM', { locale: ptBR })}
                 stroke="#6b7280"
                 fontSize={12}
+                tick={{ fontSize: 11 }}
               />
               <YAxis 
                 yAxisId="count"
                 orientation="left"
                 stroke="#6b7280"
                 fontSize={12}
+                tick={{ fontSize: 11 }}
               />
               <YAxis 
                 yAxisId="score"
@@ -99,9 +169,10 @@ export const TrendsChart: React.FC<TrendsChartProps> = ({
                 domain={[0, 100]}
                 stroke="#6b7280"
                 fontSize={12}
+                tick={{ fontSize: 11 }}
               />
               <Tooltip content={<CustomTooltip type={type} />} />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: '12px' }} />
               <Area
                 yAxisId="count"
                 type="monotone"
@@ -120,35 +191,46 @@ export const TrendsChart: React.FC<TrendsChartProps> = ({
                 name="Score Médio (%)"
                 dot={{ fill: COLORS.secondary, strokeWidth: 2, r: 4 }}
               />
+              {!isZoomed && (
+                <Brush
+                  dataKey="date"
+                  height={30}
+                  stroke={COLORS.primary}
+                  onChange={handleBrushChange}
+                />
+              )}
             </AreaChart>
           </ResponsiveContainer>
         );
 
       case 'processing':
         return (
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data}>
+          <ResponsiveContainer width="100%" height={height}>
+            <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={(value) => format(parseISO(value), 'dd/MM', { locale: ptBR })}
                 stroke="#6b7280"
                 fontSize={12}
+                tick={{ fontSize: 11 }}
               />
               <YAxis 
                 stroke="#6b7280"
                 fontSize={12}
-                label={{ value: 'Tempo (s)', angle: -90, position: 'insideLeft' }}
+                tick={{ fontSize: 11 }}
+                label={{ value: 'Tempo (s)', angle: -90, position: 'insideLeft', style: { fontSize: '11px' } }}
               />
               <Tooltip content={<CustomTooltip type={type} />} />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: '12px' }} />
               <Line
                 type="monotone"
                 dataKey="avgTime"
                 stroke={COLORS.primary}
-                strokeWidth={2}
+                strokeWidth={3}
                 name="Tempo Médio"
-                dot={{ fill: COLORS.primary, strokeWidth: 2, r: 4 }}
+                dot={{ fill: COLORS.primary, strokeWidth: 2, r: 5 }}
+                activeDot={{ r: 7, stroke: COLORS.primary, strokeWidth: 2 }}
               />
               <Line
                 type="monotone"
@@ -159,6 +241,14 @@ export const TrendsChart: React.FC<TrendsChartProps> = ({
                 name="P95"
                 dot={{ fill: COLORS.tertiary, strokeWidth: 2, r: 4 }}
               />
+              {!isZoomed && (
+                <Brush
+                  dataKey="date"
+                  height={30}
+                  stroke={COLORS.primary}
+                  onChange={handleBrushChange}
+                />
+              )}
             </LineChart>
           </ResponsiveContainer>
         );
@@ -206,23 +296,25 @@ export const TrendsChart: React.FC<TrendsChartProps> = ({
 
       case 'scores':
         return (
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={data}>
+          <ResponsiveContainer width="100%" height={height}>
+            <AreaChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={(value) => format(parseISO(value), 'dd/MM', { locale: ptBR })}
                 stroke="#6b7280"
                 fontSize={12}
+                tick={{ fontSize: 11 }}
               />
               <YAxis 
                 domain={[0, 100]}
                 stroke="#6b7280"
                 fontSize={12}
-                label={{ value: 'Score (%)', angle: -90, position: 'insideLeft' }}
+                tick={{ fontSize: 11 }}
+                label={{ value: 'Score (%)', angle: -90, position: 'insideLeft', style: { fontSize: '11px' } }}
               />
               <Tooltip content={<CustomTooltip type={type} />} />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: '12px' }} />
               <Area
                 type="monotone"
                 dataKey="score"
@@ -231,6 +323,14 @@ export const TrendsChart: React.FC<TrendsChartProps> = ({
                 fillOpacity={0.3}
                 name="Score de Conformidade"
               />
+              {!isZoomed && (
+                <Brush
+                  dataKey="date"
+                  height={30}
+                  stroke={COLORS.secondary}
+                  onChange={handleBrushChange}
+                />
+              )}
             </AreaChart>
           </ResponsiveContainer>
         );
@@ -259,30 +359,73 @@ export const TrendsChart: React.FC<TrendsChartProps> = ({
     }
   };
 
+  if (isLoading) {
+    return (
+      <Card className={`${className}`}>
+        <CardHeader>
+          <ChartSkeleton />
+        </CardHeader>
+      </Card>
+    );
+  }
+
   return (
     <Card className={`${className}`}>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">{title}</h3>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+          <div className="flex-1">
+            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+              <span>{title}</span>
+              {isZoomed && (
+                <Badge variant="secondary" className="text-xs">
+                  Zoom Ativo
+                </Badge>
+              )}
+            </CardTitle>
             <p className="text-sm text-gray-600 mt-1">{getDescription()}</p>
           </div>
-          <div className="text-sm text-gray-500">
-            {data.length} {type === 'distribution' ? 'faixas' : 'pontos'}
+          
+          <div className="flex items-center space-x-2">
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-32 h-8">
+                <Calendar className="w-3 h-3 mr-1" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {periodOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {isZoomed && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleZoomReset}
+                className="h-8 px-2"
+              >
+                <RotateCcw className="w-3 h-3" />
+              </Button>
+            )}
           </div>
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
-        {data.length === 0 ? (
-          <div className="flex items-center justify-center h-64 text-gray-500">
-            <div className="text-center">
-              <div className="text-4xl mb-2">📊</div>
-              <p>Nenhum dado disponível</p>
+        <div className="w-full overflow-hidden">
+          {data.length === 0 ? (
+            <div className="flex items-center justify-center h-64 text-gray-500">
+              <div className="text-center">
+                <div className="text-4xl mb-2">📊</div>
+                <p>Nenhum dado disponível</p>
+              </div>
             </div>
-          </div>
-        ) : (
-          renderChart()
-        )}
+          ) : (
+            renderChart()
+          )}
+        </div>
       </CardContent>
     </Card>
   );

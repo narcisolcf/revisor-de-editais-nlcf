@@ -67,7 +67,8 @@ function validateQuery(schema) {
         if (!validation.success) {
             throw new ValidationError(validation.error, validation.details);
         }
-        req.query = validation.data;
+        // Store validated data in a custom property instead of overwriting req.query
+        req.validatedQuery = validation.data;
         return next();
     };
 }
@@ -133,7 +134,8 @@ function validateQueryParams(schema) {
                 details: result.details
             });
         }
-        req.query = result.data;
+        // Store validated data in a custom property instead of overwriting req.query
+        req.validatedQuery = result.data;
         return next();
     };
 }

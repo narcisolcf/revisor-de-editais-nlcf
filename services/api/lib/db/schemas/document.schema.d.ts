@@ -90,13 +90,13 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
             totalProcessingTime?: number | undefined;
         }>>;
     }, "strip", z.ZodTypeAny, {
+        progress: number;
         errors: {
             code: string;
             message: string;
             timestamp: Date;
             step?: string | undefined;
         }[];
-        progress: number;
         completedAt?: Date | undefined;
         currentStep?: string | undefined;
         startedAt?: Date | undefined;
@@ -108,16 +108,16 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         } | undefined;
     }, {
         completedAt?: Date | undefined;
+        currentStep?: string | undefined;
+        progress?: number | undefined;
+        startedAt?: Date | undefined;
+        estimatedCompletion?: Date | undefined;
         errors?: {
             code: string;
             message: string;
             timestamp: Date;
             step?: string | undefined;
         }[] | undefined;
-        currentStep?: string | undefined;
-        progress?: number | undefined;
-        startedAt?: Date | undefined;
-        estimatedCompletion?: Date | undefined;
         metrics?: {
             ocrTime?: number | undefined;
             analysisTime?: number | undefined;
@@ -160,14 +160,14 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
             comments: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             required: boolean;
-            role: string;
             userId: string;
+            role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
         }, {
             required: boolean;
-            role: string;
             userId: string;
+            role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
         }>, "many">>;
@@ -175,8 +175,8 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
         approvers: {
             required: boolean;
-            role: string;
             userId: string;
+            role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
         }[];
@@ -190,8 +190,8 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         dueDate?: Date | undefined;
         approvers?: {
             required: boolean;
-            role: string;
             userId: string;
+            role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
         }[] | undefined;
@@ -206,18 +206,18 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         lastViewed: z.ZodOptional<z.ZodDate>;
         lastDownloaded: z.ZodOptional<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
-        analysisCount: number;
         viewCount: number;
         downloadCount: number;
+        analysisCount: number;
         commentCount: number;
         shareCount: number;
         averageReviewTime?: number | undefined;
         lastViewed?: Date | undefined;
         lastDownloaded?: Date | undefined;
     }, {
-        analysisCount?: number | undefined;
         viewCount?: number | undefined;
         downloadCount?: number | undefined;
+        analysisCount?: number | undefined;
         commentCount?: number | undefined;
         shareCount?: number | undefined;
         averageReviewTime?: number | undefined;
@@ -254,8 +254,8 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
     parentDocumentId: z.ZodOptional<z.ZodString>;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    status: "UPLOADED" | "PROCESSING" | "ARCHIVED" | "ANALYZED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "DELETED";
     organizationId: string;
+    status: "UPLOADED" | "PROCESSING" | "ARCHIVED" | "ANALYZED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "DELETED";
     documentType: "EDITAL" | "TERMO_REFERENCIA" | "PROJETO_BASICO" | "ATA_SESSAO" | "CONTRATO" | "RECURSO" | "IMPUGNACAO" | "ESCLARECIMENTO";
     id: string;
     title: string;
@@ -284,13 +284,13 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
     category?: string | undefined;
     description?: string | undefined;
     processing?: {
+        progress: number;
         errors: {
             code: string;
             message: string;
             timestamp: Date;
             step?: string | undefined;
         }[];
-        progress: number;
         completedAt?: Date | undefined;
         currentStep?: string | undefined;
         startedAt?: Date | undefined;
@@ -316,8 +316,8 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
         approvers: {
             required: boolean;
-            role: string;
             userId: string;
+            role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
         }[];
@@ -326,9 +326,9 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         dueDate?: Date | undefined;
     } | undefined;
     statistics?: {
-        analysisCount: number;
         viewCount: number;
         downloadCount: number;
+        analysisCount: number;
         commentCount: number;
         shareCount: number;
         averageReviewTime?: number | undefined;
@@ -374,16 +374,16 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
     description?: string | undefined;
     processing?: {
         completedAt?: Date | undefined;
+        currentStep?: string | undefined;
+        progress?: number | undefined;
+        startedAt?: Date | undefined;
+        estimatedCompletion?: Date | undefined;
         errors?: {
             code: string;
             message: string;
             timestamp: Date;
             step?: string | undefined;
         }[] | undefined;
-        currentStep?: string | undefined;
-        progress?: number | undefined;
-        startedAt?: Date | undefined;
-        estimatedCompletion?: Date | undefined;
         metrics?: {
             ocrTime?: number | undefined;
             analysisTime?: number | undefined;
@@ -409,16 +409,16 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         dueDate?: Date | undefined;
         approvers?: {
             required: boolean;
-            role: string;
             userId: string;
+            role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
         }[] | undefined;
     } | undefined;
     statistics?: {
-        analysisCount?: number | undefined;
         viewCount?: number | undefined;
         downloadCount?: number | undefined;
+        analysisCount?: number | undefined;
         commentCount?: number | undefined;
         shareCount?: number | undefined;
         averageReviewTime?: number | undefined;
@@ -574,21 +574,21 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             expectedImprovement: z.ZodOptional<z.ZodNumber>;
             complianceImprovement: z.ZodDefault<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             complianceImprovement: boolean;
             estimatedEffort?: string | undefined;
             expectedImprovement?: number | undefined;
         }, {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             estimatedEffort?: string | undefined;
             expectedImprovement?: number | undefined;
@@ -671,11 +671,11 @@ export declare const AnalysisResultSchema: z.ZodObject<{
         }>>;
     }, "strip", z.ZodTypeAny, {
         recommendations: {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             complianceImprovement: boolean;
             estimatedEffort?: string | undefined;
@@ -730,11 +730,11 @@ export declare const AnalysisResultSchema: z.ZodObject<{
         } | undefined;
     }, {
         recommendations: {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             estimatedEffort?: string | undefined;
             expectedImprovement?: number | undefined;
@@ -848,24 +848,24 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         code: string;
         message: string;
-        stack?: string | undefined;
         details?: Record<string, any> | undefined;
+        stack?: string | undefined;
     }, {
         code: string;
         message: string;
-        stack?: string | undefined;
         details?: Record<string, any> | undefined;
+        stack?: string | undefined;
     }>>;
     createdAt: z.ZodDefault<z.ZodDate>;
     createdBy: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    documentId: string;
-    status: "COMPLETED" | "FAILED" | "CANCELLED" | "RUNNING";
-    analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
     organizationId: string;
+    status: "COMPLETED" | "FAILED" | "CANCELLED" | "RUNNING";
     id: string;
     createdBy: string;
     createdAt: Date;
+    documentId: string;
+    analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
     configurationId: string;
     scores: {
         structural: number;
@@ -882,11 +882,11 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     };
     results: {
         recommendations: {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             complianceImprovement: boolean;
             estimatedEffort?: string | undefined;
@@ -958,16 +958,16 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     error?: {
         code: string;
         message: string;
-        stack?: string | undefined;
         details?: Record<string, any> | undefined;
+        stack?: string | undefined;
     } | undefined;
     templateId?: string | undefined;
 }, {
-    documentId: string;
-    analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
     organizationId: string;
     id: string;
     createdBy: string;
+    documentId: string;
+    analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
     configurationId: string;
     scores: {
         structural: number;
@@ -984,11 +984,11 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     };
     results: {
         recommendations: {
-            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             id: string;
             title: string;
             category: string;
             description: string;
+            priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
             estimatedEffort?: string | undefined;
             expectedImprovement?: number | undefined;
@@ -1058,13 +1058,13 @@ export declare const AnalysisResultSchema: z.ZodObject<{
         } | undefined;
     };
     status?: "COMPLETED" | "FAILED" | "CANCELLED" | "RUNNING" | undefined;
+    createdAt?: Date | undefined;
     error?: {
         code: string;
         message: string;
-        stack?: string | undefined;
         details?: Record<string, any> | undefined;
+        stack?: string | undefined;
     } | undefined;
-    createdAt?: Date | undefined;
     templateId?: string | undefined;
 }>;
 export declare const DocumentVersionSchema: z.ZodObject<{
@@ -1144,11 +1144,11 @@ export declare const DocumentVersionSchema: z.ZodObject<{
     createdBy: z.ZodString;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    documentId: string;
-    status: "DRAFT" | "ARCHIVED" | "DEPRECATED" | "PUBLISHED";
+    status: "DRAFT" | "ARCHIVED" | "PUBLISHED" | "DEPRECATED";
     id: string;
     createdBy: string;
     createdAt: Date;
+    documentId: string;
     isActive: boolean;
     file: {
         size: number;
@@ -1158,7 +1158,7 @@ export declare const DocumentVersionSchema: z.ZodObject<{
         checksum: string;
     };
     versionNumber: string;
-    versionType: "DRAFT" | "PATCH" | "MAJOR" | "MINOR";
+    versionType: "DRAFT" | "MAJOR" | "MINOR" | "PATCH";
     title?: string | undefined;
     metadata?: Record<string, any> | undefined;
     description?: string | undefined;
@@ -1180,9 +1180,9 @@ export declare const DocumentVersionSchema: z.ZodObject<{
         approvalNotes?: string | undefined;
     } | undefined;
 }, {
-    documentId: string;
     id: string;
     createdBy: string;
+    documentId: string;
     file: {
         size: number;
         filename: string;
@@ -1191,8 +1191,8 @@ export declare const DocumentVersionSchema: z.ZodObject<{
         checksum: string;
     };
     versionNumber: string;
-    versionType: "DRAFT" | "PATCH" | "MAJOR" | "MINOR";
-    status?: "DRAFT" | "ARCHIVED" | "DEPRECATED" | "PUBLISHED" | undefined;
+    versionType: "DRAFT" | "MAJOR" | "MINOR" | "PATCH";
+    status?: "DRAFT" | "ARCHIVED" | "PUBLISHED" | "DEPRECATED" | undefined;
     title?: string | undefined;
     metadata?: Record<string, any> | undefined;
     createdAt?: Date | undefined;
@@ -1316,16 +1316,16 @@ export declare const ReviewCommentSchema: z.ZodObject<{
     lastModifiedBy: z.ZodOptional<z.ZodString>;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    documentId: string;
+    organizationId: string;
     type: "GENERAL" | "SUGGESTION" | "ISSUE" | "APPROVAL" | "QUESTION";
     status: "OPEN" | "ACKNOWLEDGED" | "RESOLVED" | "DISMISSED";
-    priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
-    organizationId: string;
     id: string;
     content: string;
     createdBy: string;
     createdAt: Date;
     updatedAt: Date;
+    documentId: string;
+    priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
     visibility: "PUBLIC" | "INTERNAL" | "PRIVATE";
     mentions: string[];
     attachments: {
@@ -1359,14 +1359,13 @@ export declare const ReviewCommentSchema: z.ZodObject<{
     parentCommentId?: string | undefined;
     threadId?: string | undefined;
 }, {
-    documentId: string;
-    type: "GENERAL" | "SUGGESTION" | "ISSUE" | "APPROVAL" | "QUESTION";
     organizationId: string;
+    type: "GENERAL" | "SUGGESTION" | "ISSUE" | "APPROVAL" | "QUESTION";
     id: string;
     content: string;
     createdBy: string;
+    documentId: string;
     status?: "OPEN" | "ACKNOWLEDGED" | "RESOLVED" | "DISMISSED" | undefined;
-    priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;
     metadata?: Record<string, any> | undefined;
     createdAt?: Date | undefined;
     updatedAt?: Date | undefined;
@@ -1384,6 +1383,7 @@ export declare const ReviewCommentSchema: z.ZodObject<{
             height?: number | undefined;
         } | undefined;
     } | undefined;
+    priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;
     lastModifiedBy?: string | undefined;
     resolution?: {
         resolvedAt: Date;
@@ -1412,4 +1412,3 @@ export declare const DOCUMENT_COLLECTIONS: {
     readonly VERSIONS: "versions";
     readonly COMMENTS: "comments";
 };
-//# sourceMappingURL=document.schema.d.ts.map

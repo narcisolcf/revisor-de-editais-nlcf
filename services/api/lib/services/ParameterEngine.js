@@ -174,7 +174,7 @@ class ParameterEngine {
         const categoryPerformance = this.calculateCategoryPerformance(analyses);
         // Identificar categorias com baixa performance
         const underperformingCategories = Object.entries(categoryPerformance)
-            .filter(([_, performance]) => performance.averageScore < 70)
+            .filter(([, performance]) => performance.averageScore < 70)
             .map(([category]) => category);
         // Gerar sugestões de ajuste
         const suggestedWeights = { ...currentWeights };

@@ -8,4 +8,3 @@ import { AuditLog } from "../types";
  */
 export declare function createAuditLog(logData: Omit<AuditLog, 'id' | 'timestamp'>): Promise<void>;
 export declare const auditLogger: import("firebase-functions/v2/https").HttpsFunction;
-//# sourceMappingURL=audit.d.ts.map

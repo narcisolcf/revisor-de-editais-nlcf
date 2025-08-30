@@ -152,7 +152,7 @@ function isRetryableError(error) {
         return true;
     }
     // Erros HTTP 5xx e 429
-    if (err.response?.status >= 500 || err.response?.status === 429) {
+    if (err.response?.status && (err.response.status >= 500 || err.response.status === 429)) {
         return true;
     }
     return false;

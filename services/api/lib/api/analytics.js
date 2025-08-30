@@ -60,7 +60,7 @@ app.get("/usage", (0, auth_1.requirePermissions)([auth_1.PERMISSIONS.AUDIT_READ]
             return;
         }
         const analyticsData = analyticsSnapshot.data();
-        const metrics = aggregateMetricsForPeriod(analyticsData?.daily || {}, startDate, endDate, query?.period || 'daily');
+        const metrics = aggregateMetricsForPeriod(analyticsData?.daily || {}, startDate, endDate);
         res.json((0, utils_1.createSuccessResponse)({
             organizationId,
             period: query.period,
@@ -328,7 +328,7 @@ function getEmptyMetrics() {
         activeUsers: 0
     };
 }
-function aggregateMetricsForPeriod(dailyData, startDate, endDate, period) {
+function aggregateMetricsForPeriod(dailyData, startDate, endDate) {
     const metrics = getEmptyMetrics();
     // Iterate through date range and aggregate data
     const currentDate = new Date(startDate);

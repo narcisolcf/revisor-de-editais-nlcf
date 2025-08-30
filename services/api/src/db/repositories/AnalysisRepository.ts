@@ -181,6 +181,10 @@ export class AnalysisRepository extends BaseRepository<Analysis> {
    * Create new analysis
    */
   async createAnalysis(data: Partial<Analysis>): Promise<Analysis> {
+    console.log('=== createAnalysis INPUT ===');
+    console.log('data.request?.options?.customRules:', data.request?.options?.customRules);
+    console.log('isArray:', Array.isArray(data.request?.options?.customRules));
+    
     const analysisData = {
       ...data,
       processing: {
@@ -197,16 +201,24 @@ export class AnalysisRepository extends BaseRepository<Analysis> {
       },
       request: {
         priority: 'NORMAL' as const,
+        timeout: 300,
+        ...data.request,
         options: {
           includeAI: true,
           generateRecommendations: true,
           detailedMetrics: false,
-          customRules: []
-        },
-        timeout: 300,
-        ...data.request
+          ...data.request?.options,
+          // Garantir que customRules seja sempre um array
+          customRules: Array.isArray(data.request?.options?.customRules) 
+            ? data.request.options.customRules 
+            : []
+        }
       }
     };
+
+    console.log('=== createAnalysis PROCESSED ===');
+    console.log('analysisData.request.options.customRules:', analysisData.request.options.customRules);
+    console.log('isArray:', Array.isArray(analysisData.request.options.customRules));
 
     return this.create(analysisData);
   }

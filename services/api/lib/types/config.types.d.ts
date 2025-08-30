@@ -79,9 +79,9 @@ export declare const CustomRuleSchema: z.ZodObject<{
     updatedAt: z.ZodDefault<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
     message: string;
-    name: string;
     createdAt: Date;
     updatedAt: Date;
+    name: string;
     category: ProblemCategory;
     severity: ProblemSeverity;
     description: string;
@@ -119,16 +119,16 @@ export declare const TemplateSectionSchema: z.ZodObject<{
     validationRules: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     order: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    name: string;
     id: string;
+    name: string;
     requiredFields: string[];
     optionalFields: string[];
     validationRules: string[];
     order: number;
     description?: string | undefined;
 }, {
-    name: string;
     id: string;
+    name: string;
     requiredFields: string[];
     order: number;
     description?: string | undefined;
@@ -149,16 +149,16 @@ export declare const OrganizationTemplateSchema: z.ZodObject<{
         validationRules: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
         order: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         requiredFields: string[];
         optionalFields: string[];
         validationRules: string[];
         order: number;
         description?: string | undefined;
     }, {
-        name: string;
         id: string;
+        name: string;
         requiredFields: string[];
         order: number;
         description?: string | undefined;
@@ -170,15 +170,15 @@ export declare const OrganizationTemplateSchema: z.ZodObject<{
     createdAt: z.ZodDefault<z.ZodDate>;
     updatedAt: z.ZodDefault<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
-    name: string;
     documentType: DocumentType;
     id: string;
     createdAt: Date;
     updatedAt: Date;
+    name: string;
     isActive: boolean;
     sections: {
-        name: string;
         id: string;
+        name: string;
         requiredFields: string[];
         optionalFields: string[];
         validationRules: string[];
@@ -188,12 +188,12 @@ export declare const OrganizationTemplateSchema: z.ZodObject<{
     metadata?: Record<string, any> | undefined;
     description?: string | undefined;
 }, {
-    name: string;
     documentType: DocumentType;
     id: string;
+    name: string;
     sections: {
-        name: string;
         id: string;
+        name: string;
         requiredFields: string[];
         order: number;
         description?: string | undefined;
@@ -255,9 +255,9 @@ export declare const OrganizationConfigSchema: z.ZodObject<{
         updatedAt: z.ZodDefault<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
         message: string;
-        name: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         category: ProblemCategory;
         severity: ProblemSeverity;
         description: string;
@@ -300,16 +300,16 @@ export declare const OrganizationConfigSchema: z.ZodObject<{
             validationRules: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
             order: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             optionalFields: string[];
             validationRules: string[];
             order: number;
             description?: string | undefined;
         }, {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             order: number;
             description?: string | undefined;
@@ -321,15 +321,15 @@ export declare const OrganizationConfigSchema: z.ZodObject<{
         createdAt: z.ZodDefault<z.ZodDate>;
         updatedAt: z.ZodDefault<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         documentType: DocumentType;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         isActive: boolean;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             optionalFields: string[];
             validationRules: string[];
@@ -339,12 +339,12 @@ export declare const OrganizationConfigSchema: z.ZodObject<{
         metadata?: Record<string, any> | undefined;
         description?: string | undefined;
     }, {
-        name: string;
         documentType: DocumentType;
         id: string;
+        name: string;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             order: number;
             description?: string | undefined;
@@ -410,9 +410,9 @@ export declare const OrganizationConfigSchema: z.ZodObject<{
     presetType: AnalysisPreset;
     customRules: {
         message: string;
-        name: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         category: ProblemCategory;
         severity: ProblemSeverity;
         description: string;
@@ -426,15 +426,15 @@ export declare const OrganizationConfigSchema: z.ZodObject<{
         appliesToDocumentTypes?: DocumentType[] | undefined;
     }[];
     templates: {
-        name: string;
         documentType: DocumentType;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         isActive: boolean;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             optionalFields: string[];
             validationRules: string[];
@@ -491,12 +491,12 @@ export declare const OrganizationConfigSchema: z.ZodObject<{
         weight?: number | undefined;
     }[] | undefined;
     templates?: {
-        name: string;
         documentType: DocumentType;
         id: string;
+        name: string;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             order: number;
             description?: string | undefined;
@@ -575,9 +575,9 @@ export declare const CreateConfigRequestSchema: z.ZodObject<Omit<{
         updatedAt: z.ZodDefault<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
         message: string;
-        name: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         category: ProblemCategory;
         severity: ProblemSeverity;
         description: string;
@@ -620,16 +620,16 @@ export declare const CreateConfigRequestSchema: z.ZodObject<Omit<{
             validationRules: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
             order: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             optionalFields: string[];
             validationRules: string[];
             order: number;
             description?: string | undefined;
         }, {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             order: number;
             description?: string | undefined;
@@ -641,15 +641,15 @@ export declare const CreateConfigRequestSchema: z.ZodObject<Omit<{
         createdAt: z.ZodDefault<z.ZodDate>;
         updatedAt: z.ZodDefault<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         documentType: DocumentType;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         isActive: boolean;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             optionalFields: string[];
             validationRules: string[];
@@ -659,12 +659,12 @@ export declare const CreateConfigRequestSchema: z.ZodObject<Omit<{
         metadata?: Record<string, any> | undefined;
         description?: string | undefined;
     }, {
-        name: string;
         documentType: DocumentType;
         id: string;
+        name: string;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             order: number;
             description?: string | undefined;
@@ -726,9 +726,9 @@ export declare const CreateConfigRequestSchema: z.ZodObject<Omit<{
     presetType: AnalysisPreset;
     customRules: {
         message: string;
-        name: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         category: ProblemCategory;
         severity: ProblemSeverity;
         description: string;
@@ -742,15 +742,15 @@ export declare const CreateConfigRequestSchema: z.ZodObject<Omit<{
         appliesToDocumentTypes?: DocumentType[] | undefined;
     }[];
     templates: {
-        name: string;
         documentType: DocumentType;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         isActive: boolean;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             optionalFields: string[];
             validationRules: string[];
@@ -803,12 +803,12 @@ export declare const CreateConfigRequestSchema: z.ZodObject<Omit<{
         weight?: number | undefined;
     }[] | undefined;
     templates?: {
-        name: string;
         documentType: DocumentType;
         id: string;
+        name: string;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             order: number;
             description?: string | undefined;
@@ -882,9 +882,9 @@ export declare const UpdateConfigRequestSchema: z.ZodObject<Omit<{
         updatedAt: z.ZodDefault<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
         message: string;
-        name: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         category: ProblemCategory;
         severity: ProblemSeverity;
         description: string;
@@ -927,16 +927,16 @@ export declare const UpdateConfigRequestSchema: z.ZodObject<Omit<{
             validationRules: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
             order: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             optionalFields: string[];
             validationRules: string[];
             order: number;
             description?: string | undefined;
         }, {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             order: number;
             description?: string | undefined;
@@ -948,15 +948,15 @@ export declare const UpdateConfigRequestSchema: z.ZodObject<Omit<{
         createdAt: z.ZodDefault<z.ZodDate>;
         updatedAt: z.ZodDefault<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         documentType: DocumentType;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         isActive: boolean;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             optionalFields: string[];
             validationRules: string[];
@@ -966,12 +966,12 @@ export declare const UpdateConfigRequestSchema: z.ZodObject<Omit<{
         metadata?: Record<string, any> | undefined;
         description?: string | undefined;
     }, {
-        name: string;
         documentType: DocumentType;
         id: string;
+        name: string;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             order: number;
             description?: string | undefined;
@@ -1035,9 +1035,9 @@ export declare const UpdateConfigRequestSchema: z.ZodObject<Omit<{
     presetType?: AnalysisPreset | undefined;
     customRules?: {
         message: string;
-        name: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         category: ProblemCategory;
         severity: ProblemSeverity;
         description: string;
@@ -1051,15 +1051,15 @@ export declare const UpdateConfigRequestSchema: z.ZodObject<Omit<{
         appliesToDocumentTypes?: DocumentType[] | undefined;
     }[] | undefined;
     templates?: {
-        name: string;
         documentType: DocumentType;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         isActive: boolean;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             optionalFields: string[];
             validationRules: string[];
@@ -1112,12 +1112,12 @@ export declare const UpdateConfigRequestSchema: z.ZodObject<Omit<{
         weight?: number | undefined;
     }[] | undefined;
     templates?: {
-        name: string;
         documentType: DocumentType;
         id: string;
+        name: string;
         sections: {
-            name: string;
             id: string;
+            name: string;
             requiredFields: string[];
             order: number;
             description?: string | undefined;
@@ -1189,4 +1189,3 @@ export declare const toPercentageDict: (weights: AnalysisWeights) => Record<stri
 export declare const generateConfigHash: (config: OrganizationConfig) => string;
 export declare const createConfigSummary: (config: OrganizationConfig) => ConfigSummary;
 export declare const testPatternMatch: (rule: CustomRule, text: string) => boolean;
-//# sourceMappingURL=config.types.d.ts.map

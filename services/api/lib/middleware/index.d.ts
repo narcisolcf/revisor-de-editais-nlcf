@@ -45,13 +45,3 @@ export declare const featureFlag: (flagName: string, defaultValue?: boolean) => 
  * Response time middleware
  */
 export declare const responseTime: (req: Request, res: Response, next: NextFunction) => void;
-declare global {
-    namespace Express {
-        interface Request {
-            requestId?: string;
-            correlationId?: string;
-            apiVersion?: string;
-        }
-    }
-}
-//# sourceMappingURL=index.d.ts.map

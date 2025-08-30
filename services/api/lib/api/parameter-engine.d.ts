@@ -7,4 +7,3 @@
  * 🚀 CORE DIFFERENTIATOR: Engine adaptativo de parâmetros
  */
 export declare const parameterEngineApi: import("firebase-functions/v2/https").HttpsFunction;
-//# sourceMappingURL=parameter-engine.d.ts.map

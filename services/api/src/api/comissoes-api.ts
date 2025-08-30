@@ -3,13 +3,21 @@
  * LicitaReview Cloud Functions
  */
 
-import { onRequest } from "firebase-functions/v2/https";
+import * as functions from 'firebase-functions/v1';
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-
 import { z } from "zod";
+import { getFirestore } from 'firebase-admin/firestore';
+import { 
+  initializeSecurity, 
+  securityHeaders, 
+  rateLimit, 
+  attackProtection, 
+  auditAccess 
+} from '../middleware/security';
+import { LoggingService } from '../services/LoggingService';
+import { MetricsService } from '../services/MetricsService';
+
 
 import { 
   CreateComissaoRequestSchema,
@@ -59,22 +67,35 @@ const ComissaoServidorSchema = z.object({
   servidorId: z.string().uuid()
 });
 
+// Inicializar serviços de segurança
+const db = getFirestore();
+const loggingService = new LoggingService('comissoes-api');
+const metricsService = new MetricsService('comissoes-api');
+
+// Inicializar middleware de segurança
+const securityManager = initializeSecurity(db, loggingService, metricsService, {
+  rateLimit: {
+    windowMs: config.rateLimitWindowMs || 15 * 60 * 1000, // 15 minutos
+    maxRequests: config.rateLimitMax || 100 // máximo 100 requests por IP por janela
+  },
+  audit: {
+    enabled: true,
+    sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
+    excludePaths: []
+  }
+});
+
 const app = express();
 
-// Middleware
-app.use(helmet());
+// Middleware básico
 app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json({ limit: config.maxRequestSize }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: config.rateLimitWindowMs,
-  max: config.rateLimitMax,
-  message: { error: "Too many requests, please try again later" },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use(limiter);
+// Aplicar middlewares de segurança
+app.use(securityHeaders);
+app.use(rateLimit);
+app.use(attackProtection);
+app.use(auditAccess);
 
 // Request ID middleware
 app.use((req, res, next) => {
@@ -195,7 +216,6 @@ app.put("/:id",
       } else {
         res.status(500).json(createErrorResponse("INTERNAL_ERROR", "Erro interno do servidor", {}, requestId));
       }
-      return;
       return;
     }
   }
@@ -406,7 +426,7 @@ app.get("/:id/history",
 );
 
 // Error handling middleware
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error, req: express.Request, res: express.Response) => {
   console.error('Comissões API Error:', error);
   const errorResponse = createErrorResponse(
     "INTERNAL_ERROR",
@@ -418,10 +438,10 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
 });
 
 // Export the Cloud Function
-export const comissoesApi = onRequest({
-  region: "us-central1",
-  memory: "1GiB",
-  timeoutSeconds: 300,
-  maxInstances: 100,
-  cors: config.corsOrigin
-}, app);
+export const comissoesApi = functions
+  .region("us-central1")
+  .runWith({
+    memory: "1GB",
+    timeoutSeconds: 300
+  })
+  .https.onRequest(app);

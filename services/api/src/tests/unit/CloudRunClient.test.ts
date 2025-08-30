@@ -157,9 +157,9 @@ describe('CloudRunClient', () => {
           findings: [
             {
               type: 'warning',
-              category: 'structural',
+              category: 'ESTRUTURAL',
               message: 'Seção incompleta',
-              severity: 'medium',
+              severity: 'MEDIA',
               location: { page: 5, section: '3.2' }
             }
           ],
@@ -345,14 +345,19 @@ describe('CloudRunClient', () => {
   describe('retryWithBackoff', () => {
     it('deve implementar backoff exponencial', async () => {
       // Arrange
+      // @ts-ignore
       const operation = jest.fn()
+        // @ts-ignore
         .mockRejectedValueOnce(new Error('Temporary failure 1'))
+        // @ts-ignore
         .mockRejectedValueOnce(new Error('Temporary failure 2'))
+        // @ts-ignore
         .mockResolvedValueOnce('Success');
 
       const isRetryable = jest.fn().mockReturnValue(true);
 
       // Act
+      // @ts-ignore
       const result = await (client as unknown as { retryWithBackoff: (op: () => Promise<string>, isRetryable: (error: unknown) => boolean, config: unknown) => Promise<string> }).retryWithBackoff(
         operation,
         isRetryable,

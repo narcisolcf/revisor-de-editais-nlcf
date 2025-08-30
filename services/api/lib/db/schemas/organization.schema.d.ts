@@ -106,12 +106,12 @@ export declare const OrganizationProfileSchema: z.ZodObject<{
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING_APPROVAL";
-    name: string;
     id: string;
     createdBy: string;
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
+    name: string;
     settings: {
         language: string;
         enableAIAnalysis: boolean;
@@ -146,9 +146,9 @@ export declare const OrganizationProfileSchema: z.ZodObject<{
     lastModifiedBy?: string | undefined;
     displayName?: string | undefined;
 }, {
-    name: string;
     id: string;
     createdBy: string;
+    name: string;
     settings: {
         language?: string | undefined;
         enableAIAnalysis?: boolean | undefined;
@@ -232,8 +232,8 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
             defaultValue: z.ZodOptional<z.ZodAny>;
         }, "strip", z.ZodTypeAny, {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            name: string;
             id: string;
+            name: string;
             required: boolean;
             validation?: {
                 options?: string[] | undefined;
@@ -248,8 +248,8 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
             defaultValue?: any;
         }, {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            name: string;
             id: string;
+            name: string;
             validation?: {
                 options?: string[] | undefined;
                 pattern?: string | undefined;
@@ -266,15 +266,15 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
         validationRules: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
         conditionalLogic: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         validationRules: string[];
         order: number;
         required: boolean;
         fields: {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            name: string;
             id: string;
+            name: string;
             required: boolean;
             validation?: {
                 options?: string[] | undefined;
@@ -291,13 +291,13 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
         description?: string | undefined;
         conditionalLogic?: Record<string, any> | undefined;
     }, {
-        name: string;
         id: string;
+        name: string;
         order: number;
         fields: {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            name: string;
             id: string;
+            name: string;
             validation?: {
                 options?: string[] | undefined;
                 pattern?: string | undefined;
@@ -341,9 +341,8 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    status: "DRAFT" | "ARCHIVED" | "ACTIVE" | "DEPRECATED";
-    name: string;
     organizationId: string;
+    status: "DRAFT" | "ARCHIVED" | "DEPRECATED" | "ACTIVE";
     documentType: "EDITAL" | "TERMO_REFERENCIA" | "PROJETO_BASICO" | "ATA_SESSAO" | "CONTRATO" | "RECURSO" | "IMPUGNACAO" | "ESCLARECIMENTO";
     id: string;
     createdBy: string;
@@ -351,17 +350,18 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
+    name: string;
     requiredFields: string[];
     sections: {
-        name: string;
         id: string;
+        name: string;
         validationRules: string[];
         order: number;
         required: boolean;
         fields: {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            name: string;
             id: string;
+            name: string;
             required: boolean;
             validation?: {
                 options?: string[] | undefined;
@@ -390,19 +390,19 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
         averageCompletionTime?: number | undefined;
     } | undefined;
 }, {
-    name: string;
     organizationId: string;
     documentType: "EDITAL" | "TERMO_REFERENCIA" | "PROJETO_BASICO" | "ATA_SESSAO" | "CONTRATO" | "RECURSO" | "IMPUGNACAO" | "ESCLARECIMENTO";
     id: string;
     createdBy: string;
+    name: string;
     sections: {
-        name: string;
         id: string;
+        name: string;
         order: number;
         fields: {
             type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTISELECT" | "FILE";
-            name: string;
             id: string;
+            name: string;
             validation?: {
                 options?: string[] | undefined;
                 pattern?: string | undefined;
@@ -421,7 +421,7 @@ export declare const DocumentTemplateSchema: z.ZodObject<{
         required?: boolean | undefined;
         conditionalLogic?: Record<string, any> | undefined;
     }[];
-    status?: "DRAFT" | "ARCHIVED" | "ACTIVE" | "DEPRECATED" | undefined;
+    status?: "DRAFT" | "ARCHIVED" | "DEPRECATED" | "ACTIVE" | undefined;
     metadata?: Record<string, any> | undefined;
     version?: string | undefined;
     tags?: string[] | undefined;
@@ -507,17 +507,17 @@ export declare const AnalysisRuleSchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    priority: number;
-    name: string;
     organizationId: string;
     id: string;
     createdBy: string;
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
+    name: string;
     category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
     severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
     description: string;
+    priority: number;
     pattern: string;
     patternType: "regex" | "keyword" | "phrase" | "nlp";
     weight: number;
@@ -546,10 +546,10 @@ export declare const AnalysisRuleSchema: z.ZodObject<{
         lastExecuted?: Date | undefined;
     } | undefined;
 }, {
-    name: string;
     organizationId: string;
     id: string;
     createdBy: string;
+    name: string;
     category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
     severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
     description: string;
@@ -565,11 +565,11 @@ export declare const AnalysisRuleSchema: z.ZodObject<{
         type: "CUSTOM" | "CONTAINS" | "NOT_CONTAINS" | "MATCHES" | "NOT_MATCHES";
         flags?: string[] | undefined;
     };
-    priority?: number | undefined;
     metadata?: Record<string, any> | undefined;
     tags?: string[] | undefined;
     createdAt?: Date | undefined;
     updatedAt?: Date | undefined;
+    priority?: number | undefined;
     patternType?: "regex" | "keyword" | "phrase" | "nlp" | undefined;
     appliesToDocumentTypes?: string[] | undefined;
     weight?: number | undefined;
@@ -691,15 +691,15 @@ export declare const CustomParametersSchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    status: "DRAFT" | "ARCHIVED" | "ACTIVE";
-    name: string;
     organizationId: string;
+    status: "DRAFT" | "ARCHIVED" | "ACTIVE";
     id: string;
     createdBy: string;
     version: string;
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
+    name: string;
     weights: {
         structural: number;
         legal: number;
@@ -736,10 +736,10 @@ export declare const CustomParametersSchema: z.ZodObject<{
         parallelProcessing: boolean;
     } | undefined;
 }, {
-    name: string;
     organizationId: string;
     id: string;
     createdBy: string;
+    name: string;
     weights: {
         structural: number;
         legal: number;
@@ -816,14 +816,14 @@ export declare const OrganizationUserSchema: z.ZodObject<{
         analysisCount: z.ZodDefault<z.ZodNumber>;
         averageSessionTime: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        documentCount: number;
         analysisCount: number;
+        documentCount: number;
         lastLogin?: Date | undefined;
         averageSessionTime?: number | undefined;
     }, {
+        analysisCount?: number | undefined;
         lastLogin?: Date | undefined;
         documentCount?: number | undefined;
-        analysisCount?: number | undefined;
         averageSessionTime?: number | undefined;
     }>>;
     createdAt: z.ZodDefault<z.ZodDate>;
@@ -832,13 +832,13 @@ export declare const OrganizationUserSchema: z.ZodObject<{
     invitedAt: z.ZodOptional<z.ZodDate>;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING_INVITATION";
-    uid: string;
     organizationId: string;
+    status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING_INVITATION";
     id: string;
     createdAt: Date;
     updatedAt: Date;
     email: string;
+    uid: string;
     permissions: ("READ_DOCUMENTS" | "WRITE_DOCUMENTS" | "DELETE_DOCUMENTS" | "MANAGE_TEMPLATES" | "MANAGE_RULES" | "MANAGE_CONFIGS" | "MANAGE_USERS" | "VIEW_ANALYTICS" | "EXPORT_DATA" | "MANAGE_BILLING")[];
     role: "OWNER" | "ADMIN" | "EDITOR" | "VIEWER" | "GUEST";
     metadata?: Record<string, any> | undefined;
@@ -852,18 +852,18 @@ export declare const OrganizationUserSchema: z.ZodObject<{
         defaultView?: string | undefined;
     } | undefined;
     activity?: {
-        documentCount: number;
         analysisCount: number;
+        documentCount: number;
         lastLogin?: Date | undefined;
         averageSessionTime?: number | undefined;
     } | undefined;
     invitedBy?: string | undefined;
     invitedAt?: Date | undefined;
 }, {
-    uid: string;
     organizationId: string;
     id: string;
     email: string;
+    uid: string;
     role: "OWNER" | "ADMIN" | "EDITOR" | "VIEWER" | "GUEST";
     status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING_INVITATION" | undefined;
     metadata?: Record<string, any> | undefined;
@@ -880,9 +880,9 @@ export declare const OrganizationUserSchema: z.ZodObject<{
         defaultView?: string | undefined;
     } | undefined;
     activity?: {
+        analysisCount?: number | undefined;
         lastLogin?: Date | undefined;
         documentCount?: number | undefined;
-        analysisCount?: number | undefined;
         averageSessionTime?: number | undefined;
     } | undefined;
     invitedBy?: string | undefined;
@@ -900,4 +900,3 @@ export declare const ORGANIZATION_COLLECTIONS: {
     readonly CUSTOM_PARAMS: "custom_params";
     readonly USERS: "users";
 };
-//# sourceMappingURL=organization.schema.d.ts.map

@@ -4,7 +4,7 @@
  * Conecta configurações do Firestore com serviço de análise do Cloud Run
  */
 
-import { onRequest } from "firebase-functions/v2/https";
+import * as functions from 'firebase-functions/v1';
 import { Request, Response } from "express";
 import { z } from "zod";
 
@@ -13,6 +13,7 @@ import { OrganizationConfigService } from '../services/OrganizationConfigService
 import { createSuccessResponse, createErrorResponse, CommonSchemas, generateRequestId } from '../utils';
 import { authenticateUser, requireOrganization, requirePermissions, PERMISSIONS } from '../middleware/auth';
 import { logger } from 'firebase-functions';
+
 
 // Schemas de validação
 const OrganizationIdSchema = z.object({
@@ -43,14 +44,21 @@ const configService = new OrganizationConfigService(firestore, analyzerConfig);
 /**
  * Handler principal para configurações organizacionais
  */
-export const organizationConfig = onRequest(
-  {
-    cors: true,
-    maxInstances: 10,
-    timeoutSeconds: 60,
-    memory: "512MiB"
-  },
-  async (req: Request, res: Response) => {
+export const organizationConfig = functions
+  .runWith({
+    memory: "512MB",
+    timeoutSeconds: 60
+  })
+  .https.onRequest(async (req: functions.Request, res: functions.Response) => {
+    // Enable CORS
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
     try {
       // Adicionar request ID
       req.requestId = generateRequestId();

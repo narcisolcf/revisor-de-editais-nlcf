@@ -1,27 +1,40 @@
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  FileText,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   TrendingUp,
   TrendingDown,
+  FileText,
   Clock,
   Target,
-  CheckCircle,
-  Activity
+  Activity,
+  Info
 } from 'lucide-react';
 
-interface OverviewData {
+interface DashboardMetrics {
   totalDocuments: number;
-  documentsThisMonth: number;
   averageScore: number;
   averageProcessingTime: number;
-  totalAnalyses: number;
   successRate: number;
+  trends: {
+    documents: number;
+    score: number;
+    processingTime: number;
+    successRate: number;
+  };
 }
 
 interface MetricsCardsProps {
-  data: OverviewData;
+  metrics: DashboardMetrics;
+  isLoading?: boolean;
+  isRefreshing?: boolean;
 }
 
 interface MetricCardProps {
@@ -152,82 +165,133 @@ const MetricCard: React.FC<MetricCardProps> = ({
   );
 };
 
-export const MetricsCards: React.FC<MetricsCardsProps> = ({ data }) => {
-  // Calcular tendências (simuladas para demonstração)
-  const documentsTrend = {
-    value: 12.5,
-    isPositive: true,
-    period: 'vs. mês anterior'
-  };
-  
-  const scoreTrend = {
-    value: 3.2,
-    isPositive: true,
-    period: 'vs. mês anterior'
-  };
-  
-  const timeTrend = {
-    value: -8.1,
-    isPositive: true, // Redução no tempo é positiva
-    period: 'vs. mês anterior'
-  };
-  
-  const successTrend = {
-    value: 1.8,
-    isPositive: true,
-    period: 'vs. mês anterior'
+const MetricsCards: React.FC<MetricsCardsProps> = ({ 
+  metrics, 
+  isLoading = false, 
+  isRefreshing = false 
+}) => {
+  const formatTrend = (value: number) => {
+    const isPositive = value > 0;
+    const isNegative = value < 0;
+    const Icon = isPositive ? TrendingUp : isNegative ? TrendingDown : Activity;
+    const colorClass = isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-gray-600';
+    
+    return (
+      <div className={`flex items-center space-x-1 ${colorClass} transition-colors duration-200`}>
+        <Icon className="w-4 h-4" />
+        <span className="text-sm font-medium">
+          {isPositive ? '+' : ''}{value.toFixed(1)}%
+        </span>
+      </div>
+    );
   };
 
+  const MetricCardSkeleton = () => (
+    <Card className="transition-all duration-200 hover:shadow-md">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-4 rounded" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-8 w-20 mb-2" />
+        <div className="flex items-center space-x-2">
+          <Skeleton className="h-4 w-4 rounded" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const metricsData = [
+    {
+      title: 'Total de Documentos',
+      value: metrics.totalDocuments.toLocaleString('pt-BR'),
+      trend: metrics.trends.documents,
+      icon: FileText,
+      description: 'Documentos processados este mês',
+      tooltip: 'Inclui todos os documentos enviados para análise, independente do status final.'
+    },
+    {
+      title: 'Score Médio',
+      value: `${metrics.averageScore.toFixed(1)}%`,
+      trend: metrics.trends.score,
+      icon: Target,
+      description: 'Qualidade média dos documentos analisados',
+      tooltip: 'Score baseado em critérios de conformidade, completude e qualidade técnica.'
+    },
+    {
+      title: 'Tempo de Processamento',
+      value: `${metrics.averageProcessingTime.toFixed(1)}s`,
+      trend: metrics.trends.processingTime,
+      icon: Clock,
+      description: 'Tempo médio para processar um documento',
+      tooltip: 'Tempo desde o upload até a conclusão da análise, incluindo OCR e validações.'
+    },
+    {
+      title: 'Taxa de Sucesso',
+      value: `${metrics.successRate.toFixed(1)}%`,
+      trend: metrics.trends.successRate,
+      icon: Activity,
+      description: 'Percentual de documentos processados com sucesso',
+      tooltip: 'Documentos que foram processados sem erros críticos ou falhas técnicas.'
+    }
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <MetricCardSkeleton key={index} />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <MetricCard
-        title="Total de Documentos"
-        subtitle="Processados"
-        value={data.totalDocuments}
-        icon={FileText}
-        trend={documentsTrend}
-        progress={{
-          value: data.documentsThisMonth,
-          max: 100
-        }}
-        color="blue"
-      />
-      
-      <MetricCard
-        title="Score Médio"
-        subtitle="Conformidade"
-        value={`${data.averageScore.toFixed(1)}%`}
-        icon={Target}
-        trend={scoreTrend}
-        progress={{
-          value: data.averageScore,
-          max: 100
-        }}
-        color="green"
-      />
-      
-      <MetricCard
-        title="Tempo Médio"
-        subtitle="Processamento"
-        value={`${data.averageProcessingTime.toFixed(1)}s`}
-        icon={Clock}
-        trend={timeTrend}
-        color="orange"
-      />
-      
-      <MetricCard
-        title="Taxa de Sucesso"
-        subtitle="Análises"
-        value={`${data.successRate.toFixed(1)}%`}
-        icon={CheckCircle}
-        trend={successTrend}
-        progress={{
-          value: data.successRate,
-          max: 100
-        }}
-        color="purple"
-      />
-    </div>
+    <TooltipProvider>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {metricsData.map((metric, index) => {
+          const Icon = metric.icon;
+          
+          return (
+            <Card 
+              key={index} 
+              className={`transition-all duration-300 hover:shadow-lg hover:scale-105 ${
+                isRefreshing ? 'opacity-75 animate-pulse' : ''
+              }`}
+            >
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="flex items-center space-x-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">
+                    {metric.title}
+                  </CardTitle>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">{metric.tooltip}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Icon className="w-4 h-4 text-gray-400" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-900 mb-2 transition-all duration-200">
+                  {metric.value}
+                </div>
+                <div className="flex items-center justify-between">
+                  {formatTrend(metric.trend)}
+                  <p className="text-xs text-gray-500 ml-2 truncate">
+                    {metric.description}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </TooltipProvider>
   );
 };
 

@@ -4,13 +4,22 @@
  * LicitaReview Cloud Functions
  */
 
-import { onRequest } from "firebase-functions/v2/https";
+import * as functions from 'firebase-functions/v1';
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
+import { getFirestore } from 'firebase-admin/firestore';
+import { 
+  initializeSecurity, 
+  securityHeaders, 
+  rateLimit, 
+  attackProtection, 
+  auditAccess 
+} from '../middleware/security';
+import { LoggingService } from '../services/LoggingService';
+import { MetricsService } from '../services/MetricsService';
+
 
 import { collections, firestore } from "../config/firebase";
 import {
@@ -42,22 +51,35 @@ import {
 } from "../utils";
 import { config } from "../config";
 
+// Inicializar serviços de segurança
+const db = getFirestore();
+const loggingService = new LoggingService('analysis-config-api');
+const metricsService = new MetricsService('analysis-config-api');
+
+// Inicializar middleware de segurança
+const securityManager = initializeSecurity(db, loggingService, metricsService, {
+  rateLimit: {
+    windowMs: config.rateLimitWindowMs || 15 * 60 * 1000, // 15 minutos
+    maxRequests: config.rateLimitMax || 100 // máximo 100 requests por IP por janela
+  },
+  audit: {
+    enabled: true,
+    sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
+    excludePaths: []
+  }
+});
+
 const app = express();
 
-// Middleware
-app.use(helmet());
+// Middleware básico
 app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json({ limit: config.maxRequestSize }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: config.rateLimitWindowMs,
-  max: config.rateLimitMax,
-  message: { error: "Too many requests, please try again later" },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use(limiter);
+// Aplicar middlewares de segurança
+app.use(securityHeaders);
+app.use(rateLimit);
+app.use(attackProtection);
+app.use(auditAccess);
 
 // Request ID middleware
 app.use((req, res, next) => {
@@ -85,7 +107,7 @@ app.get("/",
           "VALIDATION_ERROR",
           "Parâmetros de consulta inválidos",
           queryValidation.details as Record<string, unknown>,
-          req.requestId
+          req.requestId || generateRequestId()
         ));
       }
       
@@ -106,9 +128,10 @@ app.get("/",
       const total = countQuery.data().count;
       
       // Apply pagination
-      const offset = (page - 1) * limit;
-      firestoreQuery = firestoreQuery.offset(offset).limit(limit);
+      firestoreQuery = firestoreQuery.limit(limit);
       
+      // For pages beyond the first, we would need to implement cursor-based pagination
+      // For now, we'll just limit the results
       const snapshot = await firestoreQuery.get();
       
       const configs: ConfigSummary[] = snapshot.docs.map((doc: any) => {
@@ -134,7 +157,7 @@ app.get("/",
       console.error("Error listing configs:", error);
       
       if (error instanceof ValidationError) {
-        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown> | undefined, req.requestId || generateRequestId()));
       } else {
         return res.status(500).json(createErrorResponse(
           "INTERNAL_ERROR",
@@ -260,7 +283,7 @@ app.get("/:id",
       console.error("Error getting config:", error);
       
       if (error instanceof ValidationError) {
-        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown> | undefined, req.requestId));
+        return res.status(400).json(createErrorResponse("VALIDATION_ERROR", error.message, error.details as Record<string, unknown> | undefined, req.requestId || generateRequestId()));
       } else {
         return res.status(500).json(createErrorResponse(
           "INTERNAL_ERROR",
@@ -294,12 +317,22 @@ app.post("/",
       const configData = bodyValidation.data;
       
       // Validate organization access
-      if (configData?.organizationId !== req.user!.organizationId &&
+      if (configData && configData.organizationId !== req.user!.organizationId &&
           !req.user!.roles.includes("super_admin")) {
         res.status(403).json(createErrorResponse(
           "FORBIDDEN",
           "Cannot create config for different organization",
-          { requestedOrg: configData?.organizationId, userOrg: req.user!.organizationId },
+          { requestedOrg: configData.organizationId, userOrg: req.user!.organizationId },
+          req.requestId
+        ));
+        return;
+      }
+      
+      if (!configData) {
+        res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Dados de configuração inválidos",
+          {},
           req.requestId
         ));
         return;
@@ -307,7 +340,7 @@ app.post("/",
       
       // Check if active config already exists
       const existingSnapshot = await collections.configs
-        .where("organizationId", "==", configData?.organizationId)
+        .where("organizationId", "==", configData.organizationId)
         .where("isActive", "==", true)
         .get();
       
@@ -324,13 +357,7 @@ app.post("/",
         return;
       }
       
-      if (!configData) {
-        res.status(400).json(createErrorResponse(
-          "VALIDATION_ERROR",
-          "Dados de configuração inválidos"
-        ));
-        return;
-      }
+
 
       const config: OrganizationConfig = {
         id: uuidv4(),
@@ -779,7 +806,7 @@ function getPresetDescription(preset: AnalysisPreset): string {
 }
 
 // Error handling middleware
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error, req: express.Request, res: express.Response) => {
   console.error("Unhandled error in analysis-config API:", error);
   
   res.status(500).json(createErrorResponse(
@@ -791,10 +818,10 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
 });
 
 // Export Cloud Function
-export const analysisConfigApi = onRequest({
-  region: "us-central1",
-  memory: "1GiB",
-  timeoutSeconds: 300,
-  maxInstances: 50,
-  cors: config.corsOrigin
-}, app);
+export const analysisConfigApi = functions
+  .region("us-central1")
+  .runWith({
+    memory: "1GB",
+    timeoutSeconds: 300
+  })
+  .https.onRequest(app);

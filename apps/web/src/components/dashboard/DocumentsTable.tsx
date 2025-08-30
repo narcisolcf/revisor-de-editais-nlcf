@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -27,7 +28,10 @@ import {
   CheckCircle,
   Clock,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -42,12 +46,17 @@ interface Document {
   processingTime: number;
 }
 
+type SortField = 'name' | 'createdAt' | 'score';
+type SortDirection = 'asc' | 'desc';
+
 interface DocumentsTableProps {
   documents: Document[];
   showAll?: boolean;
   onDocumentClick?: (document: Document) => void;
   onViewDocument?: (document: Document) => void;
   onDownloadDocument?: (document: Document) => void;
+  isLoading?: boolean;
+  pageSize?: number;
 }
 
 const getStatusConfig = (status: Document['status']) => {
@@ -102,70 +111,263 @@ const getTypeIcon = (type: string) => {
   }
 };
 
+// Memoized row component for better performance
+const DocumentRow = memo<{
+  document: Document;
+  onDocumentClick?: (document: Document) => void;
+  onViewDocument?: (document: Document) => void;
+  onDownloadDocument?: (document: Document) => void;
+}>(({ document, onDocumentClick, onViewDocument, onDownloadDocument }) => {
+  const handleViewDocument = useCallback(() => {
+    if (onViewDocument) {
+      onViewDocument(document);
+    } else {
+      console.log('Visualizar documento:', document.id);
+    }
+  }, [onViewDocument, document]);
+
+  const handleDownloadDocument = useCallback(() => {
+    if (onDownloadDocument) {
+      onDownloadDocument(document);
+    } else {
+      console.log('Download documento:', document.id);
+    }
+  }, [onDownloadDocument, document]);
+
+  const handleRowClick = useCallback(() => {
+    onDocumentClick?.(document);
+  }, [onDocumentClick, document]);
+
+  const statusConfig = getStatusConfig(document.status);
+  const StatusIcon = statusConfig.icon;
+
+  return (
+    <TableRow 
+      className="hover:bg-gray-50 cursor-pointer transition-colors"
+      onClick={handleRowClick}
+    >
+      <TableCell>
+        <div className="flex items-center space-x-3">
+          <div className="text-2xl">
+            {getTypeIcon(document.type)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-medium text-gray-900 truncate" title={document.name}>
+              {document.name}
+            </p>
+            <p className="text-sm text-gray-500">
+              {document.type.toUpperCase()}
+            </p>
+          </div>
+        </div>
+      </TableCell>
+      
+      <TableCell>
+        <Badge className={statusConfig.color}>
+          <StatusIcon className="w-3 h-3 mr-1" />
+          {statusConfig.label}
+        </Badge>
+      </TableCell>
+      
+      <TableCell>
+        {document.status === 'completed' ? (
+          <div className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${getScoreColor(document.score)}`}>
+            {document.score.toFixed(1)}%
+          </div>
+        ) : (
+          <span className="text-gray-400">-</span>
+        )}
+      </TableCell>
+      
+      <TableCell>
+        {document.status === 'completed' ? (
+          <span className="text-sm text-gray-600">
+            {document.processingTime.toFixed(1)}s
+          </span>
+        ) : document.status === 'processing' ? (
+          <div className="flex items-center space-x-1 text-blue-600">
+            <RefreshCw className="w-3 h-3 animate-spin" />
+            <span className="text-sm">Processando...</span>
+          </div>
+        ) : (
+          <span className="text-gray-400">-</span>
+        )}
+      </TableCell>
+      
+      <TableCell>
+        <span className="text-sm text-gray-600">
+          {format(document.createdAt, 'dd/MM HH:mm', { locale: ptBR })}
+        </span>
+      </TableCell>
+      
+      <TableCell>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={(e) => e.stopPropagation()}
+              className="h-8 w-8 p-0"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewDocument();
+              }}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Visualizar
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDownloadDocument();
+              }}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+    </TableRow>
+  );
+});
+
+DocumentRow.displayName = 'DocumentRow';
+
 export const DocumentsTable: React.FC<DocumentsTableProps> = ({
   documents,
   showAll = false,
   onDocumentClick,
   onViewDocument,
-  onDownloadDocument
+  onDownloadDocument,
+  isLoading = false,
+  pageSize = 10
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'name' | 'createdAt' | 'score'>('createdAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortBy, setSortBy] = useState<SortField>('createdAt');
+  const [sortOrder, setSortOrder] = useState<SortDirection>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Filtrar e ordenar documentos
-  const filteredAndSortedDocuments = documents
-    .filter(doc => {
-      const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || doc.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => {
-      let comparison = 0;
-      
-      switch (sortBy) {
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case 'createdAt':
-          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          break;
-        case 'score':
-          comparison = a.score - b.score;
-          break;
-      }
-      
-      return sortOrder === 'asc' ? comparison : -comparison;
-    })
-    .slice(0, showAll ? undefined : 10);
+  // Filtrar e ordenar documentos com memoização
+  const filteredAndSortedDocuments = useMemo(() => {
+    return documents
+      .filter(doc => {
+        const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || doc.status === statusFilter;
+        return matchesSearch && matchesStatus;
+      })
+      .sort((a, b) => {
+        let comparison = 0;
+        
+        switch (sortBy) {
+          case 'name':
+            comparison = a.name.localeCompare(b.name);
+            break;
+          case 'createdAt':
+            comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            break;
+          case 'score':
+            comparison = a.score - b.score;
+            break;
+        }
+        
+        return sortOrder === 'asc' ? comparison : -comparison;
+      });
+  }, [documents, searchQuery, statusFilter, sortBy, sortOrder]);
 
-  const handleSort = (field: 'name' | 'createdAt' | 'score') => {
+  // Paginação inteligente
+  const totalPages = showAll ? Math.ceil(filteredAndSortedDocuments.length / pageSize) : 1;
+  const startIndex = showAll ? (currentPage - 1) * pageSize : 0;
+  const endIndex = showAll ? startIndex + pageSize : (filteredAndSortedDocuments.length > 10 ? 10 : filteredAndSortedDocuments.length);
+  const paginatedDocuments = filteredAndSortedDocuments.slice(startIndex, endIndex);
+
+  // Reset página quando filtros mudam
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, sortBy, sortOrder]);
+
+  const handleSort = useCallback((field: SortField) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(field);
       setSortOrder('desc');
     }
-  };
+  }, [sortBy, sortOrder]);
 
-  const handleViewDocument = (document: Document) => {
-    if (onViewDocument) {
-      onViewDocument(document);
-    } else {
-      // Implementação padrão
-      console.log('Visualizar documento:', document.id);
-    }
-  };
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
 
-  const handleDownloadDocument = (document: Document) => {
-    if (onDownloadDocument) {
-      onDownloadDocument(document);
-    } else {
-      // Implementação padrão
-      console.log('Download documento:', document.id);
-    }
-  };
+  const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <TableHead 
+      className="cursor-pointer hover:bg-gray-50 transition-colors select-none"
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center space-x-1">
+        <span>{children}</span>
+        <ArrowUpDown className={`h-3 w-3 transition-colors ${
+          sortBy === field ? 'text-blue-600' : 'text-gray-400'
+        }`} />
+        {sortBy === field && (
+          <span className="text-xs text-blue-600">
+            {sortOrder === 'asc' ? '↑' : '↓'}
+          </span>
+        )}
+      </div>
+    </TableHead>
+  );
+
+  const TableSkeleton = () => (
+    <div className="space-y-3">
+      {Array.from({ length: showAll ? pageSize : 5 }).map((_, index) => (
+        <div key={index} className="flex space-x-4 items-center">
+          <Skeleton className="h-12 w-12 rounded" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <Skeleton className="h-6 w-20" />
+          <Skeleton className="h-6 w-16" />
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-8 w-8" />
+        </div>
+      ))}
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <Skeleton className="h-9 w-24" />
+          </div>
+          {showAll && (
+            <div className="flex flex-col sm:flex-row gap-4 mt-4">
+              <Skeleton className="h-10 flex-1" />
+              <Skeleton className="h-10 w-32" />
+            </div>
+          )}
+        </CardHeader>
+        <CardContent>
+          <TableSkeleton />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -179,6 +381,11 @@ export const DocumentsTable: React.FC<DocumentsTableProps> = ({
                 {filteredAndSortedDocuments.length}
                 {!showAll && documents.length > 10 && ` de ${documents.length}`}
               </Badge>
+              {showAll && totalPages > 1 && (
+                <Badge variant="secondary">
+                  Página {currentPage} de {totalPages}
+                </Badge>
+              )}
             </CardTitle>
             <p className="text-sm text-gray-600 mt-1">
               {showAll ? 'Todos os documentos' : 'Últimos documentos processados'}
@@ -248,158 +455,91 @@ export const DocumentsTable: React.FC<DocumentsTableProps> = ({
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('name')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Documento</span>
-                      {sortBy === 'name' && (
-                        <span className="text-xs">
-                          {sortOrder === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </div>
-                  </TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('score')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Score</span>
-                      {sortBy === 'score' && (
-                        <span className="text-xs">
-                          {sortOrder === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </div>
-                  </TableHead>
-                  <TableHead>Tempo</TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort('createdAt')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Data</span>
-                      {sortBy === 'createdAt' && (
-                        <span className="text-xs">
-                          {sortOrder === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </div>
-                  </TableHead>
-                  <TableHead className="w-[100px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAndSortedDocuments.map((document) => {
-                  const statusConfig = getStatusConfig(document.status);
-                  const StatusIcon = statusConfig.icon;
-                  
-                  return (
-                    <TableRow 
+          <>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <SortableHeader field="name">Documento</SortableHeader>
+                    <TableHead>Status</TableHead>
+                    <SortableHeader field="score">Score</SortableHeader>
+                    <TableHead>Tempo</TableHead>
+                    <SortableHeader field="createdAt">Data</SortableHeader>
+                    <TableHead className="w-[100px]">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedDocuments.map((document) => (
+                    <DocumentRow
                       key={document.id}
-                      className="hover:bg-gray-50 cursor-pointer"
-                      onClick={() => onDocumentClick?.(document)}
-                    >
-                      <TableCell>
-                        <div className="flex items-center space-x-3">
-                          <div className="text-2xl">
-                            {getTypeIcon(document.type)}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-gray-900 truncate">
-                              {document.name}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {document.type.toUpperCase()}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
+                      document={document}
+                      onDocumentClick={onDocumentClick}
+                      onViewDocument={onViewDocument}
+                      onDownloadDocument={onDownloadDocument}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            
+            {/* Pagination Controls */}
+            {showAll && totalPages > 1 && (
+              <div className="flex items-center justify-between mt-4">
+                <div className="text-sm text-gray-600">
+                  Mostrando {startIndex + 1} a {Math.min(endIndex, filteredAndSortedDocuments.length)} de {filteredAndSortedDocuments.length} documentos
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="h-8 px-2"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  <div className="flex items-center space-x-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
                       
-                      <TableCell>
-                        <Badge className={statusConfig.color}>
-                          <StatusIcon className="w-3 h-3 mr-1" />
-                          {statusConfig.label}
-                        </Badge>
-                      </TableCell>
-                      
-                      <TableCell>
-                        {document.status === 'completed' ? (
-                          <div className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${getScoreColor(document.score)}`}>
-                            {document.score.toFixed(1)}%
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      
-                      <TableCell>
-                        {document.status === 'completed' ? (
-                          <span className="text-sm text-gray-600">
-                            {document.processingTime.toFixed(1)}s
-                          </span>
-                        ) : document.status === 'processing' ? (
-                          <div className="flex items-center space-x-1 text-blue-600">
-                            <RefreshCw className="w-3 h-3 animate-spin" />
-                            <span className="text-sm">Processando...</span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      
-                      <TableCell>
-                        <span className="text-sm text-gray-600">
-                          {format(document.createdAt, 'dd/MM HH:mm', { locale: ptBR })}
-                        </span>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewDocument(document);
-                              }}
-                            >
-                              <Eye className="w-4 h-4 mr-2" />
-                              Visualizar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDownloadDocument(document);
-                              }}
-                            >
-                              <Download className="w-4 h-4 mr-2" />
-                              Download
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handlePageChange(pageNum)}
+                          className="h-8 w-8 p-0"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="h-8 px-2"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>

@@ -53,4 +53,3 @@ export declare const getComissaoStats: (req: Request, res: Response) => Promise<
  * Get comissão history
  */
 export declare const getComissaoHistory: (req: Request, res: Response) => Promise<Response<any, Record<string, any>> | undefined>;
-//# sourceMappingURL=comissoes.d.ts.map

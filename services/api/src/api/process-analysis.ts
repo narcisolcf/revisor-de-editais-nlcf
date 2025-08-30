@@ -3,8 +3,8 @@
  * Chamada pelo TaskQueueService via Cloud Tasks
  */
 
-import { onRequest } from "firebase-functions/v2/https";
-import { logger } from "firebase-functions";
+import * as functions from 'firebase-functions/v1';
+const logger = functions.logger;
 import { AnalysisOrchestrator } from "../services/AnalysisOrchestrator";
 import { firestore } from "../config";
 import { TaskPayload } from "../services/TaskQueueService";
@@ -13,12 +13,13 @@ import { TaskPayload } from "../services/TaskQueueService";
 /**
  * Processa uma tarefa de análise da fila
  */
-export const processAnalysis = onRequest({
-  region: "us-central1",
-  memory: "1GiB",
-  timeoutSeconds: 540, // 9 minutos
-  maxInstances: 10
-}, async (req, res) => {
+export const processAnalysis = functions
+  .region("us-central1")
+  .runWith({
+    memory: "1GB",
+    timeoutSeconds: 540 // 9 minutos
+  })
+  .https.onRequest(async (req: functions.Request, res: functions.Response) => {
   try {
     // Validar método HTTP
     if (req.method !== 'POST') {
@@ -76,11 +77,18 @@ export const processAnalysis = onRequest({
       priority: queuePayload.analysisRequest.priority || 'normal'
     };
 
-    // Inicializar o AnalysisOrchestrator
+    // Inicializar o AnalysisOrchestrator com configuração de autenticação
     const orchestrator = new AnalysisOrchestrator(
       firestore,
       process.env.CLOUD_RUN_SERVICE_URL || 'https://analysis-service-url',
-      process.env.GOOGLE_CLOUD_PROJECT || 'licitareview'
+      process.env.GOOGLE_CLOUD_PROJECT || 'licitareview',
+      {
+        projectId: process.env.GOOGLE_CLOUD_PROJECT,
+        serviceAccountEmail: process.env.CLOUD_RUN_SERVICE_ACCOUNT_EMAIL,
+        serviceAccountKeyFile: process.env.CLOUD_RUN_SERVICE_ACCOUNT_KEY_FILE,
+        audience: process.env.CLOUD_RUN_IAP_AUDIENCE,
+        scopes: ['https://www.googleapis.com/auth/cloud-platform']
+      }
     );
 
     // Processar a análise

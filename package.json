@@ -27,7 +27,17 @@
     "db:migrate": "turbo run db:migrate --filter=api",
     "db:seed": "turbo run db:seed --filter=api",
     "analyze": "turbo run analyze",
-    "security:audit": "npm audit --recursive"
+    "security:audit": "npm audit --recursive",
+    "validate:production": "tsx scripts/validate-production.ts",
+    "validate:staging": "tsx scripts/validate-production.ts staging",
+    "validate:prod": "tsx scripts/validate-production.ts production",
+    "validate:deploy": "tsx scripts/deploy-validation.ts",
+    "validate:deploy:staging": "tsx scripts/deploy-validation.ts staging",
+    "validate:deploy:prod": "tsx scripts/deploy-validation.ts production",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:headed": "playwright test --headed",
+    "e2e:debug": "playwright test --debug"
   },
   "keywords": [
     "licitação",
@@ -53,8 +63,11 @@
   "devDependencies": {
     "@commitlint/cli": "^19.0.3",
     "@commitlint/config-conventional": "^19.0.3",
+    "@playwright/test": "^1.55.0",
     "@turbo/gen": "^1.12.4",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.11.24",
+    "@types/node-fetch": "^2.6.13",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
@@ -63,8 +76,12 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "husky": "^9.0.11",
+    "jest-environment-jsdom": "^30.1.1",
     "lint-staged": "^15.2.2",
+    "node-fetch": "^3.3.2",
+    "playwright": "^1.55.0",
     "prettier": "^3.2.5",
+    "tsx": "^4.20.5",
     "turbo": "^1.12.4",
     "typescript": "^5.3.3"
   },
@@ -92,7 +109,8 @@
   "dependencies": {
     "@vitest/coverage-v8": "3.2.4",
     "@vitest/ui": "3.2.4",
-    "firebase-admin": "^13.4.0",
+    "firebase-admin": "^13.5.0",
+    "framer-motion": "^12.23.12",
     "vitest": "3.2.4"
   }
 }

@@ -3,112 +3,44 @@
  * Health Check API
  * LicitaReview Cloud Functions
  */
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.healthCheck = void 0;
-const https_1 = require("firebase-functions/v2/https");
-const express_1 = __importDefault(require("express"));
+const functions = __importStar(require("firebase-functions/v1"));
 const firebase_1 = require("../config/firebase");
 const utils_1 = require("../utils");
-const config_1 = require("../config");
-const app = (0, express_1.default)();
-app.use(express_1.default.json());
-/**
- * GET /health
- * Basic health check endpoint
- */
-app.get("/", async (req, res) => {
-    try {
-        const systemHealth = await checkSystemHealth();
-        const statusCode = systemHealth.overall === "healthy" ? 200 :
-            systemHealth.overall === "degraded" ? 200 : 503;
-        res.status(statusCode).json((0, utils_1.createSuccessResponse)(systemHealth));
-    }
-    catch (error) {
-        console.error("Health check failed:", error);
-        res.status(503).json((0, utils_1.createErrorResponse)("HEALTH_CHECK_FAILED", "Health check failed", { error: error instanceof Error ? error.message : String(error) }, undefined));
-    }
-});
-/**
- * GET /health/detailed
- * Detailed health check with all services
- */
-app.get("/detailed", async (req, res) => {
-    try {
-        const services = await Promise.allSettled([
-            checkFirestore(),
-            checkStorage(),
-            checkAuth(),
-            checkMemory(),
-            checkEnvironment()
-        ]);
-        const serviceResults = services.map((result, index) => {
-            const serviceNames = ["firestore", "storage", "auth", "memory", "environment"];
-            if (result.status === "fulfilled") {
-                return result.value;
-            }
-            else {
-                return {
-                    service: serviceNames[index],
-                    status: "unhealthy",
-                    timestamp: new Date(),
-                    details: { error: result.reason?.message || "Unknown error" }
-                };
-            }
-        });
-        const overall = determineOverallHealth(serviceResults);
-        const systemHealth = {
-            overall,
-            services: serviceResults,
-            timestamp: new Date(),
-            version: process.env.npm_package_version || "1.0.0",
-            uptime: process.uptime()
-        };
-        const statusCode = overall === "healthy" ? 200 :
-            overall === "degraded" ? 200 : 503;
-        res.status(statusCode).json((0, utils_1.createSuccessResponse)(systemHealth));
-    }
-    catch (error) {
-        console.error("Detailed health check failed:", error);
-        res.status(503).json((0, utils_1.createErrorResponse)("DETAILED_HEALTH_CHECK_FAILED", "Detailed health check failed", { error: error instanceof Error ? error.message : String(error) }, undefined));
-    }
-});
-/**
- * GET /health/liveness
- * Kubernetes liveness probe endpoint
- */
-app.get("/liveness", (req, res) => {
-    res.status(200).json({
-        status: "alive",
-        timestamp: new Date().toISOString()
-    });
-});
-/**
- * GET /health/readiness
- * Kubernetes readiness probe endpoint
- */
-app.get("/readiness", async (req, res) => {
-    try {
-        // Check critical services for readiness
-        await Promise.all([
-            checkFirestore(),
-            checkAuth()
-        ]);
-        res.status(200).json({
-            status: "ready",
-            timestamp: new Date().toISOString()
-        });
-    }
-    catch (error) {
-        res.status(503).json({
-            status: "not ready",
-            error: error instanceof Error ? error.message : String(error),
-            timestamp: new Date().toISOString()
-        });
-    }
-});
 // Individual service health checks
 async function checkSystemHealth() {
     // const startTime = Date.now(); // Not used
@@ -195,73 +127,6 @@ async function checkAuth() {
         };
     }
 }
-async function checkMemory() {
-    const startTime = Date.now();
-    try {
-        const used = process.memoryUsage();
-        const totalMB = used.heapTotal / 1024 / 1024;
-        const usedMB = used.heapUsed / 1024 / 1024;
-        const usagePercent = (usedMB / totalMB) * 100;
-        const status = usagePercent > 90 ? "unhealthy" :
-            usagePercent > 75 ? "degraded" : "healthy";
-        return {
-            service: "memory",
-            status,
-            timestamp: new Date(),
-            responseTime: Date.now() - startTime,
-            details: {
-                heapUsed: `${Math.round(usedMB)}MB`,
-                heapTotal: `${Math.round(totalMB)}MB`,
-                usagePercent: `${Math.round(usagePercent)}%`,
-                external: `${Math.round(used.external / 1024 / 1024)}MB`,
-                rss: `${Math.round(used.rss / 1024 / 1024)}MB`
-            }
-        };
-    }
-    catch (error) {
-        return {
-            service: "memory",
-            status: "unhealthy",
-            timestamp: new Date(),
-            responseTime: Date.now() - startTime,
-            details: { error: error instanceof Error ? error.message : String(error) }
-        };
-    }
-}
-async function checkEnvironment() {
-    const startTime = Date.now();
-    try {
-        const requiredEnvVars = [
-            "GCLOUD_PROJECT",
-            "FIREBASE_PROJECT_ID"
-        ];
-        const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-        const status = missingVars.length === 0 ? "healthy" : "unhealthy";
-        return {
-            service: "environment",
-            status,
-            timestamp: new Date(),
-            responseTime: Date.now() - startTime,
-            details: {
-                nodeVersion: process.version,
-                platform: process.platform,
-                environment: process.env.NODE_ENV || "development",
-                missingVariables: missingVars.length > 0 ? missingVars : undefined,
-                functionRegion: process.env.FUNCTION_REGION,
-                projectId: config_1.config.projectId
-            }
-        };
-    }
-    catch (error) {
-        return {
-            service: "environment",
-            status: "unhealthy",
-            timestamp: new Date(),
-            responseTime: Date.now() - startTime,
-            details: { error: error instanceof Error ? error.message : String(error) }
-        };
-    }
-}
 function determineOverallHealth(services) {
     const unhealthyServices = services.filter(s => s.status === "unhealthy");
     const degradedServices = services.filter(s => s.status === "degraded");
@@ -282,11 +147,30 @@ function determineOverallHealth(services) {
     return "healthy";
 }
 // Export Cloud Function
-exports.healthCheck = (0, https_1.onRequest)({
-    region: "us-central1",
-    memory: "256MiB",
-    timeoutSeconds: 60,
-    maxInstances: 10,
-    cors: true
-}, app);
+exports.healthCheck = functions
+    .region("us-central1")
+    .runWith({
+    memory: "256MB",
+    timeoutSeconds: 60
+})
+    .https.onRequest(async (req, res) => {
+    // Enable CORS
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.status(204).send('');
+        return;
+    }
+    try {
+        const systemHealth = await checkSystemHealth();
+        const statusCode = systemHealth.overall === "healthy" ? 200 :
+            systemHealth.overall === "degraded" ? 200 : 503;
+        res.status(statusCode).json((0, utils_1.createSuccessResponse)(systemHealth));
+    }
+    catch (error) {
+        console.error("Health check failed:", error);
+        res.status(503).json((0, utils_1.createErrorResponse)("HEALTH_CHECK_FAILED", "Health check failed", { error: error instanceof Error ? error.message : String(error) }, undefined));
+    }
+});
 //# sourceMappingURL=health.js.map

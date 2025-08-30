@@ -6,10 +6,11 @@
 import { onRequest } from "firebase-functions/v2/https";
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
+import { getFirestore } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
 
 import { collections } from "../config/firebase";
 import { 
@@ -19,14 +20,32 @@ import {
   UpdateDocumentRequestSchema,
   DocumentSummary,
   DocumentStatus,
-  PaginatedResponse
+  DocumentType,
+  PaginatedResponse,
+  UserContext
 } from "../types";
+
 import {
   authenticateUser,
   requireOrganization,
   requirePermissions,
   PERMISSIONS
 } from "../middleware/auth";
+
+// Authenticated Request type
+interface AuthenticatedRequest extends express.Request {
+  user: UserContext;
+  requestId: string;
+}
+import {
+  initializeSecurity,
+  securityHeaders,
+  rateLimit,
+  attackProtection,
+  auditAccess
+} from "../middleware/security";
+import { LoggingService } from "../services/LoggingService";
+import { MetricsService } from "../services/MetricsService";
 import {
   validateData,
   ValidationError,
@@ -38,22 +57,35 @@ import {
 } from "../utils";
 import { config } from "../config";
 
+// Inicializar serviços
+const db = getFirestore();
+const loggingService = new LoggingService('documents-api');
+const metricsService = new MetricsService('documents-api');
+
+// Inicializar middleware de segurança
+const securityManager = initializeSecurity(db, loggingService, metricsService, {
+  rateLimit: {
+    windowMs: config.rateLimitWindowMs || 15 * 60 * 1000, // 15 minutos
+    maxRequests: config.rateLimitMax || 100 // máximo 100 requests por IP por janela
+  },
+  audit: {
+    enabled: true,
+    sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
+    excludePaths: []
+  }
+});
+
 const app = express();
 
-// Middleware
-app.use(helmet());
+// Middleware básico
 app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json({ limit: config.maxRequestSize }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: config.rateLimitWindowMs,
-  max: config.rateLimitMax,
-  message: { error: "Too many requests, please try again later" },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use(limiter);
+// Aplicar middlewares de segurança
+app.use(securityHeaders);
+app.use(rateLimit);
+app.use(attackProtection);
+app.use(auditAccess);
 
 // Request ID middleware
 app.use((req, res, next) => {
@@ -65,6 +97,29 @@ app.use((req, res, next) => {
 // Authentication middleware
 app.use(authenticateUser);
 app.use(requireOrganization);
+
+// Configurar multer para upload de arquivos
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB
+    files: 1
+  },
+  fileFilter: (req, file, cb) => {
+    // Aceitar apenas PDFs e documentos Word
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Tipo de arquivo não suportado. Apenas PDF e Word são aceitos.'));
+    }
+  }
+});
 
 /**
  * GET /documents
@@ -447,8 +502,8 @@ app.put("/:id",
             "INTERNAL_ERROR",
             "Internal server error while updating document",
             undefined,
-          req.requestId
-        ));
+            req.requestId
+          ));
       }
     }
   }
@@ -618,8 +673,349 @@ app.patch("/:id/status",
   }
 );
 
+/**
+ * POST /upload
+ * Upload de documento com análise automática
+ */
+app.post(
+  "/upload",
+  requirePermissions([PERMISSIONS.DOCUMENTS_WRITE]),
+  upload.single('document'),
+  async (req: express.Request, res: express.Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          "Nenhum arquivo foi enviado",
+          undefined,
+          req.requestId
+        ));
+      }
+
+      const { organizationId, uid: userId } = (req as AuthenticatedRequest).user!;
+      const file = req.file;
+      const documentId = uuidv4();
+      const fileName = `${documentId}_${file.originalname}`;
+      const storagePath = `organizations/${organizationId}/documents/${fileName}`;
+
+      // Verificar se deve iniciar análise automática
+      const autoAnalyze = req.body.autoAnalyze === 'true' || req.body.autoAnalyze === true;
+      const analysisOptions = {
+        includeAI: req.body.includeAI === 'true' || req.body.includeAI === true,
+        generateRecommendations: req.body.generateRecommendations !== 'false',
+        detailedMetrics: req.body.detailedMetrics === 'true' || req.body.detailedMetrics === true,
+        priority: req.body.priority || 'normal'
+      };
+
+      // Upload para Firebase Storage
+      const bucket = getStorage().bucket();
+      const fileRef = bucket.file(storagePath);
+      
+      await fileRef.save(file.buffer, {
+        metadata: {
+          contentType: file.mimetype,
+          metadata: {
+            uploadedBy: userId,
+            originalName: file.originalname,
+            documentId: documentId
+          }
+        }
+      });
+
+      // Criar documento no Firestore
+      const now = new Date();
+      const document: Omit<Document, 'id'> = {
+        title: file.originalname,
+        content: '', // Será preenchido após processamento
+        classification: {
+          primaryCategory: 'documento',
+          documentType: getDocumentTypeFromMimeType(file.mimetype),
+          complexityLevel: 'media'
+        },
+        status: autoAnalyze ? DocumentStatus.PROCESSING : DocumentStatus.UPLOADED,
+        organizationId,
+        createdBy: userId,
+        createdAt: now,
+        updatedAt: now,
+        version: 1,
+        tags: [],
+        metadata: {
+          fileName: file.originalname,
+          fileSize: file.size,
+          fileType: file.mimetype,
+          language: 'pt-BR',
+          organizationId,
+          uploadedBy: userId,
+          uploadedAt: now
+        }
+      };
+
+      await collections.documents.doc(documentId).set(document);
+
+      // Log da ação
+      await loggingService.audit(
+            'document_uploaded',
+            {
+              user: { uid: userId, organizationId },
+              requestId: req.requestId,
+              resourceId: documentId,
+              metadata: {
+                fileName: file.originalname,
+                fileSize: file.size,
+                mimeType: file.mimetype,
+                ipAddress: req.ip,
+                userAgent: req.get('User-Agent')
+              }
+            }
+          );
+
+      // Métricas
+      await metricsService.incrementCounter('documents_uploaded', 1, {
+        organizationId,
+        documentType: document.classification.documentType
+      });
+
+      let analysisId = null;
+      
+      // Se análise automática estiver habilitada, iniciar via AnalysisOrchestrator
+      if (autoAnalyze) {
+        try {
+          // Inicializar AnalysisOrchestrator
+          const { AnalysisOrchestrator } = await import('../services/AnalysisOrchestrator');
+          const orchestrator = new AnalysisOrchestrator(
+            db,
+            process.env.CLOUD_RUN_SERVICE_URL || 'https://analysis-service-url',
+            process.env.GOOGLE_CLOUD_PROJECT || 'default-project',
+            {
+              projectId: process.env.GOOGLE_CLOUD_PROJECT,
+              serviceAccountEmail: process.env.CLOUD_RUN_SERVICE_ACCOUNT_EMAIL,
+              serviceAccountKeyFile: process.env.CLOUD_RUN_SERVICE_ACCOUNT_KEY_FILE,
+              audience: process.env.CLOUD_RUN_IAP_AUDIENCE,
+              scopes: ['https://www.googleapis.com/auth/cloud-platform']
+            }
+          );
+
+          // Usar o novo método startAnalysisWithUpload
+          const analysisResult = await orchestrator.startAnalysisWithUpload(
+            file.buffer,
+            file.originalname,
+            organizationId,
+            userId,
+            analysisOptions,
+            analysisOptions.priority || 'normal'
+          );
+
+          if (analysisResult.success && analysisResult.analysisId) {
+            analysisId = analysisResult.analysisId;
+
+            await loggingService.audit(
+               'analysis_started',
+               {
+                 user: (req as AuthenticatedRequest).user!,
+                 requestId: req.requestId,
+                 resourceId: analysisResult.analysisId,
+                 metadata: {
+                   documentId,
+                   fileName: file.originalname,
+                   analysisOptions,
+                   ipAddress: req.ip,
+                   userAgent: req.get('User-Agent')
+                 }
+               }
+             );
+          }
+        } catch (analysisError) {
+          console.error('Error starting automatic analysis:', analysisError);
+          // Não falhar o upload se a análise falhar
+        }
+      }
+
+      res.status(201).json(createSuccessResponse(
+        {
+          id: documentId,
+          ...document,
+          analysisId,
+          downloadUrl: await fileRef.getSignedUrl({
+            action: 'read',
+            expires: Date.now() + 24 * 60 * 60 * 1000 // 24 horas
+          }).then(urls => urls[0])
+        },
+        req.requestId
+      ));
+
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      
+      if (error instanceof Error && error.message.includes('Tipo de arquivo')) {
+        return res.status(400).json(createErrorResponse(
+          "VALIDATION_ERROR",
+          error.message,
+          undefined,
+          req.requestId
+        ));
+      }
+      
+      res.status(500).json(createErrorResponse(
+        "UPLOAD_ERROR",
+        "Failed to upload document",
+        { error: (error as Error).message },
+        req.requestId
+      ));
+    }
+  }
+);
+
+/**
+ * GET /documents/:id/status
+ * Verificar status de processamento de um documento
+ */
+app.get(
+  "/documents/:id/status",
+  requirePermissions([PERMISSIONS.DOCUMENTS_READ]),
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const { id } = req.params;
+      const { organizationId } = (req as AuthenticatedRequest).user;
+
+      // Buscar documento
+      const docRef = collections.documents.doc(id);
+      const docSnap = await docRef.get();
+
+      if (!docSnap.exists) {
+        return res.status(404).json(createErrorResponse(
+          "NOT_FOUND",
+          "Documento não encontrado",
+          undefined,
+          req.requestId
+        ));
+      }
+
+      const document = { id: docSnap.id, ...docSnap.data() } as Document;
+
+      // Verificar permissão de organização
+      if (document.organizationId !== organizationId) {
+        return res.status(403).json(createErrorResponse(
+          "FORBIDDEN",
+          "Acesso negado",
+          undefined,
+          req.requestId
+        ));
+      }
+
+      // Buscar informações de processamento se existirem
+      let processingInfo = null;
+      if (document.status === DocumentStatus.PROCESSING || document.status === DocumentStatus.ANALYSIS_COMPLETE) {
+        const analysisQuery = await collections.analysis
+          .where('documentId', '==', id)
+          .orderBy('createdAt', 'desc')
+          .limit(1)
+          .get();
+
+        if (!analysisQuery.empty) {
+          const analysisDoc = analysisQuery.docs[0];
+          processingInfo = {
+            analysisId: analysisDoc.id,
+            ...analysisDoc.data(),
+            progress: analysisDoc.data().status === 'completed' ? 100 : 
+                     analysisDoc.data().status === 'processing' ? 50 : 0
+          };
+        }
+      }
+
+      // Buscar tarefas de processamento na fila
+      let queueInfo = null;
+      if (document.status === DocumentStatus.PROCESSING) {
+        const queueQuery = await db
+          .collection('processing_queue')
+          .where('documentId', '==', id)
+          .where('status', 'in', ['pending', 'processing'])
+          .orderBy('createdAt', 'desc')
+          .limit(1)
+          .get();
+
+        if (!queueQuery.empty) {
+          const queueDoc = queueQuery.docs[0];
+          queueInfo = {
+            taskId: queueDoc.id,
+            status: queueDoc.data().status,
+            createdAt: queueDoc.data().createdAt,
+            estimatedCompletion: queueDoc.data().estimatedCompletion
+          };
+        }
+      }
+
+      res.json(createSuccessResponse(
+        {
+          document: {
+            id: document.id,
+            title: document.title,
+            status: document.status,
+            uploadedAt: document.metadata.uploadedAt,
+            updatedAt: document.updatedAt
+          },
+          processing: processingInfo,
+          queue: queueInfo,
+          statusHistory: [
+            {
+              status: DocumentStatus.UPLOADED,
+              timestamp: document.metadata.uploadedAt,
+              description: 'Documento carregado com sucesso'
+            },
+            ...(document.status !== DocumentStatus.UPLOADED ? [{
+              status: document.status,
+              timestamp: document.updatedAt,
+              description: getStatusDescription(document.status)
+            }] : [])
+          ]
+        },
+        req.requestId
+      ));
+
+    } catch (error) {
+      console.error("Error getting document status:", error);
+      res.status(500).json(createErrorResponse(
+        "INTERNAL_ERROR",
+        "Erro interno do servidor",
+        process.env.NODE_ENV === "development" ? { error: (error as Error).message } : undefined,
+        req.requestId
+      ));
+    }
+  }
+);
+
+// Função auxiliar para determinar tipo de documento baseado no MIME type
+function getDocumentTypeFromMimeType(mimeType: string): DocumentType {
+  switch (mimeType) {
+    case 'application/pdf':
+      return DocumentType.EDITAL;
+    case 'application/msword':
+    case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      return DocumentType.TERMO_REFERENCIA;
+    default:
+      return DocumentType.ANEXO_TECNICO;
+  }
+}
+
+// Função auxiliar para descrição de status
+function getStatusDescription(status: DocumentStatus): string {
+  switch (status) {
+    case DocumentStatus.UPLOADED:
+      return 'Documento carregado com sucesso';
+    case DocumentStatus.PROCESSING:
+      return 'Documento sendo processado';
+    case DocumentStatus.ANALYSIS_COMPLETE:
+      return 'Análise concluída';
+    case DocumentStatus.ERROR:
+      return 'Erro no processamento';
+    case DocumentStatus.ARCHIVED:
+      return 'Documento arquivado';
+    default:
+      return 'Status desconhecido';
+  }
+}
+
 // Error handling middleware
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error, req: express.Request, res: express.Response) => {
   console.error("Unhandled error in documents API:", error);
   
   res.status(500).json(createErrorResponse(

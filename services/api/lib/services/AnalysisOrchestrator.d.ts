@@ -104,7 +104,7 @@ export declare class AnalysisOrchestrator {
     /**
      * Cancela uma análise
      */
-    cancelAnalysis(analysisId: string, userId: string): Promise<boolean>;
+    cancelAnalysis(analysisId: string, _userId: string): Promise<boolean>;
     /**
      * Lista análises ativas
      */
@@ -145,4 +145,3 @@ export declare class AnalysisOrchestrator {
      */
     private loadOrganizationConfig;
 }
-//# sourceMappingURL=AnalysisOrchestrator.d.ts.map

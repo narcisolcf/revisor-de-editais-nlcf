@@ -17,24 +17,42 @@ import {
   getComissaoHistory
 } from '../comissoes';
 import { authenticateUser } from '../../middleware/auth';
-import { rateLimit } from 'express-rate-limit';
+import { 
+  initializeSecurity, 
+  securityHeaders, 
+  rateLimit, 
+  attackProtection, 
+  auditAccess 
+} from '../../middleware/security';
+import { LoggingService } from '../../services/LoggingService';
+import { MetricsService } from '../../services/MetricsService';
+import { getFirestore } from 'firebase-admin/firestore';
+
+// Inicializar serviços de segurança
+const db = getFirestore();
+const loggingService = new LoggingService('comissoes-routes');
+const metricsService = new MetricsService('comissoes-routes');
+
+// Inicializar middleware de segurança
+const securityManager = initializeSecurity(db, loggingService, metricsService, {
+  rateLimit: {
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    maxRequests: 100 // máximo 100 requests por IP por janela
+  },
+  audit: {
+    enabled: true,
+    sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
+    excludePaths: []
+  }
+});
 
 const router = Router();
 
-// Rate limiting for comissões endpoints
-const comissoesRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    success: false,
-    error: 'Too many requests, please try again later'
-  },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-// Apply middleware to all routes
-router.use(comissoesRateLimit);
+// Aplicar middlewares de segurança
+router.use(securityHeaders);
+router.use(rateLimit);
+router.use(attackProtection);
+router.use(auditAccess);
 router.use(authenticateUser);
 
 // Main CRUD routes

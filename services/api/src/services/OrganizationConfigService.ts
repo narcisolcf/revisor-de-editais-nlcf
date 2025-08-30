@@ -78,7 +78,7 @@ export class OrganizationConfigService {
         return config;
       },
       (error) => {
-        logger.error('Request interceptor error', { error: error.message });
+        logger.error('Request interceptor error', new Error(error.message));
         return Promise.reject(error);
       }
     );
@@ -125,7 +125,7 @@ export class OrganizationConfigService {
       const customParams = await this.customParamsRepo.findByOrganization(organizationId);
 
       // Construir configuração de análise
-      const config = await this.buildAnalysisConfig(organization, customParams);
+      const config = this.buildAnalysisConfig(organization, customParams);
 
       // Armazenar no cache
       this.configCache.set(organizationId, {
@@ -141,10 +141,13 @@ export class OrganizationConfigService {
 
       return config;
     } catch (error) {
-      logger.error('Error getting analysis config', {
-        organizationId,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      logger.error(
+        'Error getting analysis config',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          organizationId
+        }
+      );
       throw error;
     }
   }
@@ -164,10 +167,13 @@ export class OrganizationConfigService {
 
       logger.info('Config synced with analyzer service', { organizationId });
     } catch (error) {
-      logger.error('Error syncing config with analyzer', {
-        organizationId,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      logger.error(
+        'Error syncing config with analyzer',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          organizationId
+        }
+      );
       throw error;
     }
   }
@@ -180,10 +186,13 @@ export class OrganizationConfigService {
       const response = await this.analyzerClient.post('/config/validate', config);
       return response.data;
     } catch (error) {
-      logger.error('Error validating config', {
-        organizationId: config.organizationId,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      logger.error(
+        'Error validating config',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          organizationId: config.organizationId
+        }
+      );
       throw error;
     }
   }
@@ -196,9 +205,11 @@ export class OrganizationConfigService {
       const response = await this.analyzerClient.get('/config/presets');
       return response.data;
     } catch (error) {
-      logger.error('Error getting available presets', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      logger.error(
+        'Error getting available presets',
+        error instanceof Error ? error : new Error(String(error)),
+        {}
+      );
       throw error;
     }
   }
@@ -254,7 +265,11 @@ export class OrganizationConfigService {
         }))
       ];
     } catch (error) {
-      logger.error('Error getting presets:', { error: String(error), organizationId });
+      logger.error(
+        'Error getting presets',
+        error instanceof Error ? error : new Error(String(error)),
+        { organizationId }
+      );
       throw error;
     }
   }
@@ -292,7 +307,11 @@ export class OrganizationConfigService {
       
       return preset;
     } catch (error) {
-      logger.error('Error creating preset:', { error: String(error), organizationId });
+      logger.error(
+        'Error creating preset',
+        error instanceof Error ? error : new Error(String(error)),
+        { organizationId }
+      );
       throw error;
     }
   }
@@ -318,7 +337,11 @@ export class OrganizationConfigService {
         avgAnalysisTime: 0 // Seria calculado das análises
       };
     } catch (error) {
-      logger.error('Error getting usage stats:', { error: String(error), organizationId });
+      logger.error(
+        'Error getting usage stats',
+        error instanceof Error ? error : new Error(String(error)),
+        { organizationId }
+      );
       throw error;
     }
   }
@@ -347,7 +370,11 @@ export class OrganizationConfigService {
        
        logger.info('Configuration synced with analyzer', { organizationId });
      } catch (error) {
-       logger.error('Error syncing with analyzer:', { error: String(error), organizationId });
+       logger.error(
+         'Error syncing with analyzer',
+         error instanceof Error ? error : new Error(String(error)),
+         { organizationId }
+       );
        throw error;
      }
    }
@@ -355,10 +382,10 @@ export class OrganizationConfigService {
   /**
    * Constrói configuração de análise baseada nos dados da organização
    */
-  private async buildAnalysisConfig(
+  private buildAnalysisConfig(
     organization: OrganizationProfile,
     customParams: CustomParameters[]
-  ): Promise<AnalysisConfig> {
+  ): AnalysisConfig {
     // Pesos padrão baseados no tipo de organização
     const defaultWeights = this.getDefaultWeightsByType(organization.organizationType);
     
@@ -469,22 +496,14 @@ export class OrganizationConfigService {
     lastUsed: Date | null;
     configVersion: number;
   }> {
-    try {
-      // Implementar busca de estatísticas no AnalysisRepository
-      // Por enquanto, retornar dados mock
-      return {
-        totalAnalyses: 0,
-        avgScore: 0,
-        lastUsed: null,
-        configVersion: 1
-      };
-    } catch (error) {
-      logger.error('Error getting config usage stats', {
-        organizationId,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      throw error;
-    }
+    // Implementar busca de estatísticas no AnalysisRepository
+    // Por enquanto, retornar dados mock
+    return {
+      totalAnalyses: 0,
+      avgScore: 0,
+      lastUsed: null,
+      configVersion: 1
+    };
   }
 }
 

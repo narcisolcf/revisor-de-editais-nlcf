@@ -3,15 +3,6 @@
  * LicitaReview Cloud Functions
  */
 import { Request, Response, NextFunction } from "express";
-import { UserContext } from "../types";
-declare global {
-    namespace Express {
-        interface Request {
-            user?: UserContext;
-            requestId?: string;
-        }
-    }
-}
 /**
  * Verify Firebase ID Token and extract user context
  */
@@ -62,4 +53,3 @@ export declare const PERMISSIONS: {
 };
 export type Role = typeof ROLES[keyof typeof ROLES];
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
-//# sourceMappingURL=auth.d.ts.map
