@@ -243,11 +243,11 @@ export declare const AnalysisSchema: z.ZodObject<{
             resolvedAt: z.ZodOptional<z.ZodDate>;
             resolution: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
+            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             status: "OPEN" | "ACKNOWLEDGED" | "FIXED" | "IGNORED" | "FALSE_POSITIVE";
             id: string;
             title: string;
-            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
-            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             description: string;
             confidence: number;
             impact: number;
@@ -266,10 +266,10 @@ export declare const AnalysisSchema: z.ZodObject<{
             ruleId?: string | undefined;
             resolution?: string | undefined;
         }, {
-            id: string;
-            title: string;
             category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
             severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
+            id: string;
+            title: string;
             description: string;
             confidence: number;
             impact: number;
@@ -300,9 +300,9 @@ export declare const AnalysisSchema: z.ZodObject<{
             expectedImprovement: z.ZodOptional<z.ZodNumber>;
             complianceImprovement: z.ZodDefault<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -310,9 +310,9 @@ export declare const AnalysisSchema: z.ZodObject<{
             estimatedEffort?: string | undefined;
             expectedImprovement?: number | undefined;
         }, {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -419,9 +419,9 @@ export declare const AnalysisSchema: z.ZodObject<{
         }>>;
     }, "strip", z.ZodTypeAny, {
         recommendations: {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -443,11 +443,11 @@ export declare const AnalysisSchema: z.ZodObject<{
             reliability?: number | undefined;
         };
         problems: {
+            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
+            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             status: "OPEN" | "ACKNOWLEDGED" | "FIXED" | "IGNORED" | "FALSE_POSITIVE";
             id: string;
             title: string;
-            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
-            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             description: string;
             confidence: number;
             impact: number;
@@ -499,9 +499,9 @@ export declare const AnalysisSchema: z.ZodObject<{
         } | undefined;
     }, {
         recommendations: {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -523,10 +523,10 @@ export declare const AnalysisSchema: z.ZodObject<{
             reliability?: number | undefined;
         };
         problems: {
-            id: string;
-            title: string;
             category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
             severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
+            id: string;
+            title: string;
             description: string;
             confidence: number;
             impact: number;
@@ -585,14 +585,14 @@ export declare const AnalysisSchema: z.ZodObject<{
         fallbackUsed: z.ZodDefault<z.ZodBoolean>;
         cacheHit: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        version: string;
         name: string;
+        version: string;
         fallbackUsed: boolean;
         cacheHit: boolean;
         cloudRunEndpoint?: string | undefined;
     }, {
-        version?: string | undefined;
         name?: string | undefined;
+        version?: string | undefined;
         cloudRunEndpoint?: string | undefined;
         fallbackUsed?: boolean | undefined;
         cacheHit?: boolean | undefined;
@@ -641,8 +641,8 @@ export declare const AnalysisSchema: z.ZodObject<{
     userId: string;
     configurationId: string;
     engine: {
-        version: string;
         name: string;
+        version: string;
         fallbackUsed: boolean;
         cacheHit: boolean;
         cloudRunEndpoint?: string | undefined;
@@ -662,9 +662,9 @@ export declare const AnalysisSchema: z.ZodObject<{
     templateId?: string | undefined;
     results?: {
         recommendations: {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -686,11 +686,11 @@ export declare const AnalysisSchema: z.ZodObject<{
             reliability?: number | undefined;
         };
         problems: {
+            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
+            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             status: "OPEN" | "ACKNOWLEDGED" | "FIXED" | "IGNORED" | "FALSE_POSITIVE";
             id: string;
             title: string;
-            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
-            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             description: string;
             confidence: number;
             impact: number;
@@ -777,8 +777,8 @@ export declare const AnalysisSchema: z.ZodObject<{
     userId: string;
     configurationId: string;
     engine: {
-        version?: string | undefined;
         name?: string | undefined;
+        version?: string | undefined;
         cloudRunEndpoint?: string | undefined;
         fallbackUsed?: boolean | undefined;
         cacheHit?: boolean | undefined;
@@ -801,9 +801,9 @@ export declare const AnalysisSchema: z.ZodObject<{
     templateId?: string | undefined;
     results?: {
         recommendations: {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -825,10 +825,10 @@ export declare const AnalysisSchema: z.ZodObject<{
             reliability?: number | undefined;
         };
         problems: {
-            id: string;
-            title: string;
             category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
             severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
+            id: string;
+            title: string;
             description: string;
             confidence: number;
             impact: number;
@@ -898,8 +898,8 @@ export declare const AnalysisHistoryEntrySchema: z.ZodObject<{
     id: string;
     description: string;
     documentId: string;
-    analysisId: string;
     timestamp: Date;
+    analysisId: string;
     changeType: "CANCELLED" | "STATUS_CHANGE" | "PROGRESS_UPDATE" | "ERROR_OCCURRED" | "RESULT_UPDATED";
     triggeredBy: string;
     metadata?: Record<string, any> | undefined;
@@ -910,8 +910,8 @@ export declare const AnalysisHistoryEntrySchema: z.ZodObject<{
     id: string;
     description: string;
     documentId: string;
-    analysisId: string;
     timestamp: Date;
+    analysisId: string;
     changeType: "CANCELLED" | "STATUS_CHANGE" | "PROGRESS_UPDATE" | "ERROR_OCCURRED" | "RESULT_UPDATED";
     triggeredBy: string;
     metadata?: Record<string, any> | undefined;
@@ -955,13 +955,13 @@ export declare const AnalysisStatisticsSchema: z.ZodObject<{
         count: z.ZodNumber;
         percentage: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        type: string;
         category: string;
+        type: string;
         count: number;
         percentage: number;
     }, {
-        type: string;
         category: string;
+        type: string;
         count: number;
         percentage: number;
     }>, "many">;
@@ -974,10 +974,10 @@ export declare const AnalysisStatisticsSchema: z.ZodObject<{
     id: string;
     generatedAt: Date;
     averageScore: number;
-    totalAnalyses: number;
     period: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
     startDate: Date;
     endDate: Date;
+    totalAnalyses: number;
     completedAnalyses: number;
     failedAnalyses: number;
     cancelledAnalyses: number;
@@ -990,8 +990,8 @@ export declare const AnalysisStatisticsSchema: z.ZodObject<{
         acceptable: number;
     };
     commonProblems: {
-        type: string;
         category: string;
+        type: string;
         count: number;
         percentage: number;
     }[];
@@ -1003,10 +1003,10 @@ export declare const AnalysisStatisticsSchema: z.ZodObject<{
     id: string;
     generatedAt: Date;
     averageScore: number;
-    totalAnalyses: number;
     period: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
     startDate: Date;
     endDate: Date;
+    totalAnalyses: number;
     completedAnalyses: number;
     failedAnalyses: number;
     cancelledAnalyses: number;
@@ -1019,8 +1019,8 @@ export declare const AnalysisStatisticsSchema: z.ZodObject<{
         acceptable: number;
     };
     commonProblems: {
-        type: string;
         category: string;
+        type: string;
         count: number;
         percentage: number;
     }[];

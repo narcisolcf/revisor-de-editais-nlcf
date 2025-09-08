@@ -320,7 +320,7 @@ export const TemplateUploader: React.FC<TemplateUploaderProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -428,7 +428,7 @@ export const TemplateUploader: React.FC<TemplateUploaderProps> = ({
                       <Label htmlFor="template-category">Categoria</Label>
                       <Select
                         value={templateMetadata.category}
-                        onValueChange={(value) => setTemplateMetadata(prev => ({ ...prev, category: value }))}
+                        onValueChange={(value: 'edital' | 'tr' | 'etp' | 'mapa_risco' | 'minuta') => setTemplateMetadata(prev => ({ ...prev, category: value }))}
                       >
                         <SelectTrigger>
                           <SelectValue />

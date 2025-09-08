@@ -45,6 +45,10 @@ const zod_1 = require("zod");
 const error_1 = require("../middleware/error");
 const auth_2 = require("../middleware/auth");
 const utils_1 = require("../utils");
+const security_1 = require("../middleware/security");
+const LoggingService_1 = require("../services/LoggingService");
+const MetricsService_1 = require("../services/MetricsService");
+const firestore_1 = require("firebase-admin/firestore");
 // Schemas de validação
 const StartAnalysisRequestSchema = zod_1.z.object({
     documentId: zod_1.z.string().min(1, 'Document ID is required'),
@@ -61,14 +65,41 @@ const AnalysisIdSchema = zod_1.z.object({
 const DocumentIdSchema = zod_1.z.object({
     documentId: zod_1.z.string().min(1, 'Document ID is required')
 });
-// Inicializar o orquestrador de análises
-const orchestrator = new AnalysisOrchestrator_1.AnalysisOrchestrator(firebase_1.firestore, process.env.CLOUD_RUN_SERVICE_URL || 'https://analysis-service-url', process.env.GOOGLE_CLOUD_PROJECT || 'default-project');
+// Inicializar o orquestrador de análises com configuração de autenticação
+const orchestrator = new AnalysisOrchestrator_1.AnalysisOrchestrator(firebase_1.firestore, process.env.CLOUD_RUN_SERVICE_URL || 'https://analysis-service-url', process.env.GOOGLE_CLOUD_PROJECT || 'default-project', {
+    projectId: process.env.GOOGLE_CLOUD_PROJECT,
+    serviceAccountEmail: process.env.CLOUD_RUN_SERVICE_ACCOUNT_EMAIL,
+    serviceAccountKeyFile: process.env.CLOUD_RUN_SERVICE_ACCOUNT_KEY_FILE,
+    audience: process.env.CLOUD_RUN_IAP_AUDIENCE,
+    scopes: ['https://www.googleapis.com/auth/cloud-platform']
+});
 // Helper functions - using imported utilities
 // Path validation handled inline with validateData
 const router = express.Router();
+// Inicializar serviços de segurança
+const db = (0, firestore_1.getFirestore)();
+const loggingService = new LoggingService_1.LoggingService('analysis-api');
+const metricsService = new MetricsService_1.MetricsService('analysis-api');
+// Inicializar middleware de segurança
+const securityManager = (0, security_1.initializeSecurity)(db, loggingService, metricsService, {
+    rateLimit: {
+        windowMs: 15 * 60 * 1000, // 15 minutos
+        maxRequests: 100 // máximo 100 requests por IP por janela
+    },
+    audit: {
+        enabled: true,
+        sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
+        excludePaths: []
+    }
+});
+// Aplicar middlewares de segurança
+router.use(security_1.securityHeaders);
+router.use(security_1.rateLimit);
+router.use(security_1.auditAccess);
+router.use(security_1.attackProtection);
 /**
  * POST /analysis/start
- * Inicia uma nova análise de documento
+ * Inicia uma nova análise com parâmetros aprimorados
  */
 router.post('/start', auth_2.authenticateUser, auth_2.requireOrganization, (0, auth_2.requirePermissions)([auth_1.PERMISSIONS.ANALYSIS_WRITE]), async (req, res) => {
     try {
@@ -91,7 +122,10 @@ router.post('/start', auth_2.authenticateUser, auth_2.requireOrganization, (0, a
         if (document?.organizationId !== organizationId) {
             return res.status(403).json((0, utils_1.createErrorResponse)('FORBIDDEN', 'Acesso negado ao documento', { documentId }, req.requestId || (0, utils_1.generateRequestId)()));
         }
-        // Iniciar análise via AnalysisOrchestrator
+        // Obter parâmetros de análise aprimorados
+        const enhancedParamsResult = await orchestrator.getEnhancedAnalysisParameters(organizationId);
+        const enhancedParams = enhancedParamsResult.success ? enhancedParamsResult.parameters : {};
+        // Iniciar análise via AnalysisOrchestrator com parâmetros aprimorados
         const analysisId = await orchestrator.startAnalysis({
             documentId,
             organizationId,
@@ -101,14 +135,16 @@ router.post('/start', auth_2.authenticateUser, auth_2.requireOrganization, (0, a
                 generateRecommendations: options?.includeRecommendations ?? true,
                 detailedMetrics: options?.detailedReport ?? false,
                 customRules: [],
-                ...options
+                ...enhancedParams
             },
-            priority: options?.priority || 'normal'
+            priority: options?.priority || enhancedParams.priority || 'normal'
         });
         res.status(202).json((0, utils_1.createSuccessResponse)({
             analysisId,
             status: 'queued',
-            message: 'Analysis started successfully'
+            message: 'Analysis started successfully',
+            enhancedParameters: enhancedParams,
+            cloudRunAvailable: await orchestrator.isCloudRunAvailable()
         }, req.requestId || (0, utils_1.generateRequestId)()));
         return;
     }

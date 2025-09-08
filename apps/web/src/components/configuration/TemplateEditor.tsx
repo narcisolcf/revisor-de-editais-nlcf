@@ -25,7 +25,6 @@ import { TemplateStructure, TemplateSection, ValidationRule } from '../../types/
 
 interface TemplateEditorProps {
   template: TemplateStructure;
-  organizationId: string;
   onClose: () => void;
   onSave: (template: TemplateStructure) => void;
 }
@@ -54,7 +53,6 @@ interface EditingRule {
 
 export const TemplateEditor: React.FC<TemplateEditorProps> = ({
   template,
-  _organizationId,
   onClose,
   onSave
 }) => {
@@ -248,7 +246,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -321,7 +319,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                     <Label htmlFor="category">Categoria</Label>
                     <Select
                       value={editingTemplate.metadata.category}
-                      onValueChange={(value) => setEditingTemplate({
+                      onValueChange={(value: 'edital' | 'tr' | 'etp' | 'mapa_risco' | 'minuta') => setEditingTemplate({
                         ...editingTemplate,
                         metadata: { ...editingTemplate.metadata, category: value }
                       })}
@@ -709,7 +707,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                           <Label htmlFor={`rule-type-${rule.id}`}>Tipo</Label>
                           <Select
                             value={rule.type}
-                            onValueChange={(value) => updateRule(rule.id, { type: value })}
+                            onValueChange={(value: 'presence' | 'format' | 'length' | 'regex' | 'custom') => updateRule(rule.id, { type: value })}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -750,7 +748,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                           <Label htmlFor={`rule-severity-${rule.id}`}>Severidade</Label>
                           <Select
                             value={rule.severity}
-                            onValueChange={(value) => updateRule(rule.id, { severity: value })}
+                            onValueChange={(value: 'error' | 'warning' | 'info') => updateRule(rule.id, { severity: value })}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -788,7 +786,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                         <Label htmlFor="new-rule-type">Tipo</Label>
                         <Select
                           value={newRule.type}
-                          onValueChange={(value) => setNewRule({ ...newRule, type: value })}
+                          onValueChange={(value: 'presence' | 'format' | 'length' | 'regex' | 'custom') => setNewRule({ ...newRule, type: value })}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -829,7 +827,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({
                         <Label htmlFor="new-rule-severity">Severidade</Label>
                         <Select
                           value={newRule.severity}
-                          onValueChange={(value) => setNewRule({ ...newRule, severity: value })}
+                          onValueChange={(value: 'error' | 'warning' | 'info') => setNewRule({ ...newRule, severity: value })}
                         >
                           <SelectTrigger>
                             <SelectValue />

@@ -105,20 +105,26 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       
       if (firstValidFile) {
         // Extrair texto do arquivo para classificação
-        DocumentService.extractTextFromFile(firstValidFile).then(({ text }) => {
-          classifyDocument(text, {
-            autoApply: false, // Não aplicar automaticamente no upload
-            onSuggestion: (result) => {
-              // Sugerir classificação baseada no resultado
-              if (result.confidence > 0.7) {
-                setClassification({
-                  tipoObjeto: result.documentType,
-                  tipoDocumento: result.documentType
-                });
-              }
-            }
+        // Classificação automática baseada no nome do arquivo
+        const fileName = firstValidFile.name.toLowerCase();
+        let tipoDocumento = 'edital'; // padrão
+        
+        if (fileName.includes('termo') && fileName.includes('referencia')) {
+          tipoDocumento = 'tr';
+        } else if (fileName.includes('contrato')) {
+          tipoDocumento = 'minuta_contrato';
+        } else if (fileName.includes('ata')) {
+          tipoDocumento = 'etp';
+        } else if (fileName.includes('proposta')) {
+          tipoDocumento = 'projeto_basico';
+        }
+        
+        setClassification({
+            tipoObjeto: 'aquisicao',
+            modalidadePrincipal: 'processo_licitatorio',
+            subtipo: 'processo_licitatorio',
+            tipoDocumento: tipoDocumento as any
           });
-        }).catch(console.error);
       }
     }
   }, [maxFiles]);

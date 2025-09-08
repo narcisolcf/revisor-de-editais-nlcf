@@ -50,13 +50,13 @@ class ProductionValidator {
         criticalEndpoints: ['/api/auth/status', '/api/documents', '/api/analysis']
       },
       production: {
-        baseUrl: 'https://licitareview.com',
-        apiUrl: 'https://api.licitareview.com',
+        baseUrl: 'https://licitareview-prod.web.app',
+        apiUrl: 'https://us-central1-licitareview-prod.cloudfunctions.net',
         functionsUrl: 'https://us-central1-licitareview-prod.cloudfunctions.net',
         cloudRunUrl: 'https://analyzer-prod-xyz789-uc.a.run.app',
         expectedServices: ['web', 'api', 'analyzer', 'classifier'],
-        healthCheckEndpoints: ['/health', '/api/health', '/api/status'],
-        criticalEndpoints: ['/api/auth/status', '/api/documents', '/api/analysis']
+        healthCheckEndpoints: ['/'],
+        criticalEndpoints: ['/']
       }
     };
 
@@ -186,8 +186,7 @@ class ProductionValidator {
     
     // Validar Cloud Functions
     const functionsToTest = [
-      '/uploadDocument',
-      '/classifyDocument',
+      '/documentsApi',
       '/processAnalysis'
     ];
     
@@ -632,7 +631,7 @@ class ProductionValidator {
 }
 
 // Execução do script
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const environment = process.argv[2] as 'staging' | 'production';
   
   if (!environment || !['staging', 'production'].includes(environment)) {

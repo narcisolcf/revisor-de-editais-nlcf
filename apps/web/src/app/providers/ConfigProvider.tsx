@@ -10,12 +10,12 @@ import React, { createContext, useContext, useReducer } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import type { 
-  OrganizationConfig, 
-  AnalysisWeights, 
+import {
+  OrganizationConfig,
+  AnalysisWeights,
   CustomRule,
-  AnalysisPreset 
-} from '@licitareview/types';
+  AnalysisPreset
+} from '@/types/config';
 import { configService } from '@/services/configService';
 import { useAuth } from './AuthProvider';
 
@@ -145,7 +145,7 @@ const configReducer = (state: ConfigState, action: ConfigAction): ConfigState =>
         ...state,
         currentConfig: {
           ...state.currentConfig,
-          presetType: action.payload,
+          preset: action.payload,
           weights: getPresetWeights(action.payload),
         },
         isDirty: true,
@@ -176,11 +176,10 @@ const configReducer = (state: ConfigState, action: ConfigAction): ConfigState =>
 // Helper function to get preset weights
 const getPresetWeights = (preset: AnalysisPreset): AnalysisWeights => {
   const presetWeights = {
-    [AnalysisPreset.RIGOROUS]: { structural: 15, legal: 60, clarity: 20, abnt: 5 },
-    [AnalysisPreset.STANDARD]: { structural: 25, legal: 25, clarity: 25, abnt: 25 },
-    [AnalysisPreset.TECHNICAL]: { structural: 35, legal: 25, clarity: 15, abnt: 25 },
-    [AnalysisPreset.FAST]: { structural: 30, legal: 40, clarity: 20, abnt: 10 },
-    [AnalysisPreset.CUSTOM]: { structural: 25, legal: 25, clarity: 25, abnt: 25 },
+    [AnalysisPreset.STRICT]: { structural: 0.15, legal: 0.6, clarity: 0.2, abnt: 0.05, budgetary: 0, formal: 0, general: 0 },
+    [AnalysisPreset.BALANCED]: { structural: 0.2, legal: 0.3, clarity: 0.2, abnt: 0.1, budgetary: 0.1, formal: 0.05, general: 0.05 },
+    [AnalysisPreset.LENIENT]: { structural: 0.25, legal: 0.25, clarity: 0.25, abnt: 0.25, budgetary: 0, formal: 0, general: 0 },
+    [AnalysisPreset.CUSTOM]: { structural: 0.25, legal: 0.25, clarity: 0.25, abnt: 0.25, budgetary: 0, formal: 0, general: 0 },
   };
   return presetWeights[preset];
 };
@@ -209,15 +208,11 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Fetch current organization config
   const { data: config, isLoading, error } = useQuery({
-    queryKey: ['config', 'current', user?.organizationId],
+    queryKey: ['config', 'current', user?.uid],
     queryFn: () => configService.getCurrentConfig(),
-    enabled: !!user?.organizationId,
-    onSuccess: (data) => {
-      dispatch({ type: 'SET_CONFIG', payload: data });
-    },
-    onError: (error) => {
-      dispatch({ type: 'SET_ERROR', payload: error.message });
-    },
+    enabled: !!user?.uid,
+
+
   });
 
   // Save configuration mutation
@@ -226,7 +221,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({
       configService.updateConfig(config.id, config),
     onSuccess: (savedConfig) => {
       dispatch({ type: 'SET_CONFIG', payload: savedConfig });
-      queryClient.invalidateQueries(['config']);
+      queryClient.invalidateQueries({ queryKey: ['config'] });
       toast.success('Configuration saved successfully');
     },
     onError: (error) => {
@@ -291,12 +286,12 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({
 
     validateWeights: async (weights: AnalysisWeights): Promise<boolean> => {
       const result = await validateWeightsMutation.mutateAsync(weights);
-      return result.isValid;
+      return (result as any).isValid;
     },
 
     testRule: async (pattern: string, text: string): Promise<boolean> => {
       const result = await testRuleMutation.mutateAsync({ pattern, text });
-      return result.matches;
+      return (result as any).matches;
     },
 
     // Utility functions

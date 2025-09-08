@@ -31,7 +31,7 @@ interface AnalysisProgressProps {
   documentId: string;
   isAnalyzing: boolean;
   onCancel?: () => void;
-  onComplete?: () => void;
+  onComplete?: (analysis: any) => void;
   className?: string;
 }
 
@@ -237,7 +237,20 @@ export const AnalysisProgress: React.FC<AnalysisProgressProps> = ({
 
       // Análise concluída
       if (onComplete) {
-        onComplete();
+        // Simular resultado da análise
+        const mockAnalysisResult = {
+          id: documentId,
+          status: 'completed',
+          overallScore: Math.round(75 + Math.random() * 20), // Score entre 75-95
+          completedAt: new Date().toISOString(),
+          results: {
+            structural: { score: Math.round(80 + Math.random() * 15) },
+            legal: { score: Math.round(70 + Math.random() * 20) },
+            clarity: { score: Math.round(75 + Math.random() * 20) },
+            abnt: { score: Math.round(85 + Math.random() * 10) }
+          }
+        };
+        onComplete(mockAnalysisResult);
       }
     };
 

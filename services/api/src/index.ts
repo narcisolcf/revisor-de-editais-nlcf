@@ -10,6 +10,7 @@
 
 // API Functions
 export { comissoesApi } from "./api/comissoes-api";
+export { documentsApi } from "./api/documents";
 export { healthCheck } from "./api/health";
 export { processAnalysis } from "./api/process-analysis";
 export { organizationConfig } from "./api/organization-config";

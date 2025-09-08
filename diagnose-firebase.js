@@ -1,7 +1,16 @@
-const admin = require('firebase-admin');
+import admin from 'firebase-admin';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Obter diretório atual para ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Inicializar Firebase Admin SDK
-const serviceAccount = require('./credentials/analisador-de-editais-firebase-adminsdk-fbsvc-2f209c7f43.json');
+const serviceAccount = JSON.parse(
+  readFileSync(join(__dirname, 'credentials/licitareview-prod-b6b067fdd7e4.json'), 'utf8')
+);
 
 console.log('🔍 Diagnóstico do Firebase - Analisador de Editais');
 console.log('=' .repeat(50));
@@ -111,11 +120,11 @@ async function main() {
 }
 
 // Executar diagnóstico
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-module.exports = {
+export {
   testFirebaseServices,
   showProjectInfo
 };

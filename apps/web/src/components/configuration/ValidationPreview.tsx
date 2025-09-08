@@ -48,10 +48,21 @@ import {
   TrendingUp,
   Clock
 } from 'lucide-react';
-import { useAnalysisConfig, type AnalysisWeights, type AnalysisRule } from '@/hooks/useAnalysisConfig';
+import { useAnalysisConfig, type AnalysisRule } from '@/hooks/useAnalysisConfig';
 import { useAdaptiveAnalysis } from '@/hooks/useAdaptiveAnalysis';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { config } from '@/config';
+
+interface AnalysisWeights {
+  structural: number;
+  legal: number;
+  clarity: number;
+  abnt: number;
+  general: number;
+  budgetary: number;
+  formal: number;
+}
 
 interface ValidationPreviewProps {
   weights: AnalysisWeights;
@@ -175,8 +186,8 @@ export const ValidationPreview: React.FC<ValidationPreviewProps> = ({
   documentType,
   className
 }) => {
-  const { organization } = useAuth();
-  const { runAnalysis } = useAdaptiveAnalysis();
+  const { userProfile } = useAuth();
+  const { executeAnalysis, isExecuting } = useAdaptiveAnalysis(config.organization.defaultId);
   
   // Estados principais
   const [selectedDocument, setSelectedDocument] = useState(sampleDocuments[0]);
@@ -327,22 +338,33 @@ export const ValidationPreview: React.FC<ValidationPreviewProps> = ({
       suggestions: ['Documento formalmente correto']
     });
     
-    // Aplica regras personalizadas
-    customRules.forEach((rule, index) => {
-      if (rule.isActive) {
-        validationResults.push({
-          id: `custom_${index}`,
-          category: rule.category,
-          description: `Regra personalizada: ${rule.name}`,
-          severity: rule.severity,
-          score: Math.random() * 0.4 + 0.6, // Score entre 0.6 e 1.0
-          weight: 0.05, // Peso fixo para regras personalizadas
-          finalScore: (Math.random() * 0.4 + 0.6) * 0.05,
-          suggestions: [rule.suggestion || 'Verificar conformidade com a regra'],
-          ruleId: rule.id
-        });
-      }
-    });
+    // Função para mapear severity do ProblemSeverity para ValidationResult
+  const mapSeverity = (severity: string): 'low' | 'medium' | 'high' | 'critical' => {
+    switch (severity) {
+      case 'BAIXA': return 'low';
+      case 'MEDIA': return 'medium';
+      case 'ALTA': return 'high';
+      case 'CRITICA': return 'critical';
+      default: return 'medium';
+    }
+  };
+
+  // Aplica regras personalizadas
+  customRules.forEach((rule, index) => {
+    if (true) { // Todas as regras são consideradas ativas
+      validationResults.push({
+        id: `custom_${index}`,
+        category: rule.category,
+        description: `Regra personalizada: ${rule.name}`,
+        severity: mapSeverity(rule.severity),
+        score: Math.random() * 0.4 + 0.6, // Score entre 0.6 e 1.0
+        weight: 0.05, // Peso fixo para regras personalizadas
+        finalScore: (Math.random() * 0.4 + 0.6) * 0.05,
+        suggestions: [rule.suggestion || 'Verificar conformidade com a regra'],
+        ruleId: rule.id
+      });
+    }
+  });
     
     // Calcula scores por categoria
     const categoryScores: Record<string, number> = {};
@@ -374,7 +396,7 @@ export const ValidationPreview: React.FC<ValidationPreviewProps> = ({
       overallScore: Math.min(overallScore, 1.0),
       categoryScores,
       validationResults,
-      appliedRules: customRules.filter(r => r.isActive).length,
+      appliedRules: customRules.length,
       totalChecks: validationResults.length,
       processingTime: Math.random() * 2000 + 1000, // Entre 1-3 segundos
       recommendations

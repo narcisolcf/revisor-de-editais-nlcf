@@ -185,7 +185,7 @@ const RULE_TEMPLATES: Partial<CustomRule>[] = [
 
 interface CustomRulesEditorProps {
   config: any;
-  onConfigChange: (config: any) => void;
+  onConfigChange: (id: string, config: any) => void;
   onProgressChange: (progress: number) => void;
 }
 
@@ -234,11 +234,11 @@ export const CustomRulesEditor: React.FC<CustomRulesEditorProps> = ({
   
   // Atualizar configuração quando regras mudarem
   useEffect(() => {
-    onConfigChange({
+    onConfigChange(config.id || 'default', {
       ...config,
       customRules: rules
     });
-  }, [rules, onConfigChange]);
+  }, [rules, onConfigChange, config]);
   
   // Função para criar nova regra
   const createRule = () => {

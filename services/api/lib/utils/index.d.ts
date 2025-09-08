@@ -5,6 +5,8 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 export * from './validation';
+import { LoggingService } from '../services/LoggingService';
+export declare const logger: LoggingService;
 /**
  * Interface para resposta de sucesso padronizada
  */

@@ -6,9 +6,17 @@ import { DocumentClassification, ClassificationNode } from '@/types/document';
 import { useClassificationTree } from '@/hooks/useClassificationData';
 import { useTranslation } from '@/hooks/useTranslation';
 
-// Componente gerencia estado interno - interface removida
+interface HierarchicalClassificationProps {
+  classification?: Partial<DocumentClassification>;
+  onClassificationChange?: (classification: Partial<DocumentClassification>) => void;
+  onValidationChange?: (isValid: boolean) => void;
+}
 
-export function HierarchicalClassification() {
+export function HierarchicalClassification({
+  classification: externalClassification,
+  onClassificationChange,
+  onValidationChange
+}: HierarchicalClassificationProps = {}) {
   const { t } = useTranslation();
   const [selectedNodes, setSelectedNodes] = useState<{
     tipoObjeto?: ClassificationNode;
@@ -39,10 +47,22 @@ export function HierarchicalClassification() {
   const subtipos = selectedNodes.modalidadePrincipal?.filhos || [];
   const documentos = selectedNodes.subtipo?.filhos || [];
 
-  // Inicialização básica quando os dados do Firebase estão disponíveis
+  // Inicialização com classificação externa
   useEffect(() => {
-    // Componente aguarda interação do usuário para seleção
-  }, [classificationTree]);
+    if (externalClassification && classificationTree.length > 0) {
+      const tipoObjeto = classificationTree.find(item => item.key === externalClassification.tipoObjeto);
+      const modalidadePrincipal = tipoObjeto?.filhos?.find(item => item.key === externalClassification.modalidadePrincipal);
+      const subtipo = modalidadePrincipal?.filhos?.find(item => item.key === externalClassification.subtipo);
+      const tipoDocumento = subtipo?.filhos?.find(item => item.key === externalClassification.tipoDocumento);
+      
+      setSelectedNodes({
+        tipoObjeto,
+        modalidadePrincipal,
+        subtipo,
+        tipoDocumento
+      });
+    }
+  }, [externalClassification, classificationTree]);
 
   // Handlers simplificados com debounce e guards robustos
   const handleTipoObjetoChange = (key: string) => {
@@ -134,28 +154,39 @@ export function HierarchicalClassification() {
   
   // Validacao interna removida - não é utilizada
 
-  // Callback de classificação removido - componente gerencia estado interno
+  // Callback de classificação e validação
   useEffect(() => {
+    const outgoing: Partial<DocumentClassification> = {};
+    
+    if (selectedNodes.tipoObjeto?.key) {
+      outgoing.tipoObjeto = selectedNodes.tipoObjeto.key as DocumentClassification['tipoObjeto'];
+    }
+    if (selectedNodes.modalidadePrincipal?.key) {
+      outgoing.modalidadePrincipal = selectedNodes.modalidadePrincipal.key as DocumentClassification['modalidadePrincipal'];
+    }
+    if (selectedNodes.subtipo?.key) {
+      outgoing.subtipo = selectedNodes.subtipo.key as DocumentClassification['subtipo'];
+    }
+    if (selectedNodes.tipoDocumento?.key) {
+      outgoing.tipoDocumento = selectedNodes.tipoDocumento.key as DocumentClassification['tipoDocumento'];
+    }
+    
+    // Chamar callback de mudança de classificação
+    if (onClassificationChange) {
+      onClassificationChange(outgoing);
+    }
+    
+    // Chamar callback de validação
+    const isValid = !!(outgoing.tipoObjeto && outgoing.modalidadePrincipal && outgoing.subtipo && outgoing.tipoDocumento);
+    if (onValidationChange) {
+      onValidationChange(isValid);
+    }
+    
     // Log interno para debug (desenvolvimento)
     if (import.meta.env.DEV) {
-      const outgoing: Partial<DocumentClassification> = {};
-      
-      if (selectedNodes.tipoObjeto?.key) {
-        outgoing.tipoObjeto = selectedNodes.tipoObjeto.key as DocumentClassification['tipoObjeto'];
-      }
-      if (selectedNodes.modalidadePrincipal?.key) {
-        outgoing.modalidadePrincipal = selectedNodes.modalidadePrincipal.key as DocumentClassification['modalidadePrincipal'];
-      }
-      if (selectedNodes.subtipo?.key) {
-        outgoing.subtipo = selectedNodes.subtipo.key as DocumentClassification['subtipo'];
-      }
-      if (selectedNodes.tipoDocumento?.key) {
-        outgoing.tipoDocumento = selectedNodes.tipoDocumento.key as DocumentClassification['tipoDocumento'];
-      }
-      
-      console.log('🏷️ Classification updated:', outgoing);
+      console.log('🏷️ Classification updated:', outgoing, 'Valid:', isValid);
     }
-  }, [selectedNodes]);
+  }, [selectedNodes, onClassificationChange, onValidationChange]);
 
   // Criar breadcrumb diretamente dos nós selecionados
   const breadcrumb = [

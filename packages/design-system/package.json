@@ -1,0 +1,77 @@
+{
+  "name": "@licitareview/design-system",
+  "version": "1.0.0",
+  "description": "Design System baseado em tokens DSGov para LicitaReview",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./tokens": {
+      "import": "./dist/tokens.mjs",
+      "require": "./dist/tokens.js",
+      "types": "./dist/tokens.d.ts"
+    },
+    "./components": {
+      "import": "./dist/components.mjs",
+      "require": "./dist/components.js",
+      "types": "./dist/components.d.ts"
+    },
+    "./themes": {
+      "import": "./dist/themes.mjs",
+      "require": "./dist/themes.js",
+      "types": "./dist/themes.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils.mjs",
+      "require": "./dist/utils.js",
+      "types": "./dist/utils.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "keywords": [
+    "design-system",
+    "dsgov",
+    "react",
+    "typescript",
+    "tailwind",
+    "tokens",
+    "components"
+  ],
+  "author": "LicitaReview Team",
+  "license": "MIT",
+  "dependencies": {
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-progress": "^1.0.3",
+    "@radix-ui/react-slot": "^1.0.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.294.0",
+    "tailwind-merge": "^2.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "tailwindcss": ">=3.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}

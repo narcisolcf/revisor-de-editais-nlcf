@@ -15,8 +15,8 @@ import ComissaoDetails from '../components/comissoes/ComissaoDetails';
 import { useComissoes } from '../hooks/useComissoes';
 import {
   Comissao,
-  ComissaoCreateRequest,
-  ComissaoUpdateRequest,
+  CreateComissaoRequest,
+  UpdateComissaoRequest,
   ComissaoFilters
 } from '../types/comissao';
 import { useToast } from '../components/ui/use-toast';
@@ -25,23 +25,29 @@ import { useToast } from '../components/ui/use-toast';
 const ORGANIZATION_ID = 'org-123';
 
 const Comissoes: React.FC = () => {
+  const [showForm, setShowForm] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [editingComissao, setEditingComissao] = useState<Comissao | null>(null);
+  const [selectedComissao, setSelectedComissao] = useState<Comissao | null>(null);
+  const [filters, setFilters] = useState<ComissaoFilters>({});
+
   const {
     comissoes,
     loading,
     error,
     pagination,
-    filters,
-    setFilters,
-    fetchComissoes,
     createComissao,
     updateComissao,
-    deleteComissao
-  } = useComissoes(ORGANIZATION_ID);
-
-  const [showForm, setShowForm] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [editingComissao, setEditingComissao] = useState<Comissao | null>(null);
-  const [selectedComissao, setSelectedComissao] = useState<Comissao | null>(null);
+    deleteComissao,
+    refetch: fetchComissoes
+  } = useComissoes({
+    organizationId: ORGANIZATION_ID,
+    filters,
+    pagination: {
+      page: 1,
+      limit: 20
+    }
+  });
   const { toast } = useToast();
 
   // Carrega as comissões na inicialização
@@ -57,7 +63,7 @@ const Comissoes: React.FC = () => {
     membrosTotal: comissoes.reduce((acc, c) => acc + (c.membros?.filter(m => m.ativo).length || 0), 0)
   };
 
-  const handleCreateComissao = async (data: ComissaoCreateRequest) => {
+  const handleCreateComissao = async (data: CreateComissaoRequest) => {
     try {
       await createComissao(data);
       setShowForm(false);
@@ -74,7 +80,7 @@ const Comissoes: React.FC = () => {
     }
   };
 
-  const handleUpdateComissao = async (data: ComissaoUpdateRequest) => {
+  const handleUpdateComissao = async (data: UpdateComissaoRequest) => {
     if (!editingComissao) return;
     
     try {
@@ -235,10 +241,7 @@ const Comissoes: React.FC = () => {
 
       {/* Tabela de Comissões */}
       <ComissoesTable
-        comissoes={comissoes}
-        loading={loading}
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
+        organizationId={ORGANIZATION_ID}
         onView={handleViewComissao}
         onEdit={handleEditComissao}
         onDelete={handleDeleteComissao}
@@ -254,6 +257,7 @@ const Comissoes: React.FC = () => {
           </DialogHeader>
           <ComissaoForm
             comissao={editingComissao}
+            organizationId={ORGANIZATION_ID}
             onSubmit={editingComissao ? handleUpdateComissao : handleCreateComissao}
             onCancel={handleCloseForm}
           />
@@ -264,10 +268,8 @@ const Comissoes: React.FC = () => {
       {showDetails && selectedComissao && (
         <ComissaoDetails
           comissao={selectedComissao}
-          organizationId={ORGANIZATION_ID}
-          onEdit={handleEditComissao}
+          onEdit={() => handleEditComissao(selectedComissao)}
           onClose={handleCloseDetails}
-          onUpdate={handleComissaoUpdate}
         />
       )}
     </div>

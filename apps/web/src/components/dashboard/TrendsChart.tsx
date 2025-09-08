@@ -39,6 +39,7 @@ interface TrendsChartProps {
   className?: string;
   isLoading?: boolean;
   height?: number;
+  description?: string;
 }
 
 interface CustomTooltipProps {

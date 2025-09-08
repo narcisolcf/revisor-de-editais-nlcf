@@ -15,32 +15,51 @@ exports.parameterEngineApi = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-const helmet_1 = __importDefault(require("helmet"));
-const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const zod_1 = require("zod");
+const firestore_1 = require("firebase-admin/firestore");
+const security_1 = require("../middleware/security");
+const LoggingService_1 = require("../services/LoggingService");
+const MetricsService_1 = require("../services/MetricsService");
 const firebase_1 = require("../config/firebase");
 const ParameterEngine_1 = require("../services/ParameterEngine");
 const auth_1 = require("../middleware/auth");
 const utils_1 = require("../utils");
 const config_1 = require("../config");
 const firebase_functions_1 = require("firebase-functions");
+// Inicializar serviços de segurança
+const db = (0, firestore_1.getFirestore)();
+const loggingService = new LoggingService_1.LoggingService('parameter-engine-api');
+const metricsService = new MetricsService_1.MetricsService('parameter-engine-api');
+// Inicializar middleware de segurança
+const securityManager = (0, security_1.initializeSecurity)(db, loggingService, metricsService, {
+    rateLimit: {
+        windowMs: config_1.config.rateLimitWindowMs || 15 * 60 * 1000, // 15 minutos
+        maxRequests: config_1.config.rateLimitMax || 100 // máximo 100 requests por IP por janela
+    },
+    audit: {
+        enabled: true,
+        sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
+        excludePaths: []
+    }
+});
 const app = (0, express_1.default)();
-// Middleware
-app.use((0, helmet_1.default)());
+// Middleware básico
 app.use((0, cors_1.default)({ origin: config_1.config.corsOrigin }));
 app.use(express_1.default.json({ limit: config_1.config.maxRequestSize }));
-app.use(utils_1.generateRequestId);
+// Aplicar middlewares de segurança
+app.use(security_1.securityHeaders);
+app.use(security_1.rateLimit);
+app.use(security_1.attackProtection);
+app.use(security_1.auditAccess);
+// Request ID middleware
+app.use((req, res, next) => {
+    req.requestId = (0, utils_1.generateRequestId)();
+    res.setHeader("X-Request-ID", req.requestId);
+    next();
+});
+// Authentication middleware
 app.use(auth_1.authenticateUser);
 app.use(auth_1.requireOrganization);
-// Rate limiting
-const limiter = (0, express_rate_limit_1.default)({
-    windowMs: config_1.config.rateLimitWindowMs,
-    max: config_1.config.rateLimitMax,
-    message: { error: "Too many requests, please try again later" },
-    standardHeaders: true,
-    legacyHeaders: false
-});
-app.use(limiter);
 // Initialize ParameterEngine
 const parameterEngine = new ParameterEngine_1.ParameterEngine(firebase_1.firestore, {
     enableAdaptiveWeights: true,

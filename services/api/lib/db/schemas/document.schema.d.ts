@@ -159,14 +159,14 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
             approvedAt: z.ZodOptional<z.ZodDate>;
             comments: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            required: boolean;
             userId: string;
+            required: boolean;
             role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
         }, {
-            required: boolean;
             userId: string;
+            required: boolean;
             role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
@@ -174,8 +174,8 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
         approvers: {
-            required: boolean;
             userId: string;
+            required: boolean;
             role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
@@ -189,8 +189,8 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         assignedTo?: string | undefined;
         dueDate?: Date | undefined;
         approvers?: {
-            required: boolean;
             userId: string;
+            required: boolean;
             role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
@@ -254,8 +254,8 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
     parentDocumentId: z.ZodOptional<z.ZodString>;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    organizationId: string;
     status: "UPLOADED" | "PROCESSING" | "ARCHIVED" | "ANALYZED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "DELETED";
+    organizationId: string;
     documentType: "EDITAL" | "TERMO_REFERENCIA" | "PROJETO_BASICO" | "ATA_SESSAO" | "CONTRATO" | "RECURSO" | "IMPUGNACAO" | "ESCLARECIMENTO";
     id: string;
     title: string;
@@ -279,9 +279,17 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         extractedText?: string | undefined;
     };
     keywords: string[];
+    category?: string | undefined;
+    security?: {
+        accessLevel: "PUBLIC" | "INTERNAL" | "RESTRICTED" | "CONFIDENTIAL";
+        encryptionStatus: boolean;
+        allowedRoles: string[];
+        allowedUsers: string[];
+        auditRequired: boolean;
+        dataClassification?: string | undefined;
+    } | undefined;
     metadata?: Record<string, any> | undefined;
     parentDocumentId?: string | undefined;
-    category?: string | undefined;
     description?: string | undefined;
     processing?: {
         progress: number;
@@ -315,8 +323,8 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
     workflow?: {
         priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
         approvers: {
-            required: boolean;
             userId: string;
+            required: boolean;
             role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
@@ -334,14 +342,6 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         averageReviewTime?: number | undefined;
         lastViewed?: Date | undefined;
         lastDownloaded?: Date | undefined;
-    } | undefined;
-    security?: {
-        accessLevel: "PUBLIC" | "INTERNAL" | "RESTRICTED" | "CONFIDENTIAL";
-        encryptionStatus: boolean;
-        allowedRoles: string[];
-        allowedUsers: string[];
-        auditRequired: boolean;
-        dataClassification?: string | undefined;
     } | undefined;
 }, {
     organizationId: string;
@@ -363,6 +363,15 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         encoding?: string | undefined;
         extractedText?: string | undefined;
     };
+    category?: string | undefined;
+    security?: {
+        accessLevel?: "PUBLIC" | "INTERNAL" | "RESTRICTED" | "CONFIDENTIAL" | undefined;
+        encryptionStatus?: boolean | undefined;
+        allowedRoles?: string[] | undefined;
+        allowedUsers?: string[] | undefined;
+        auditRequired?: boolean | undefined;
+        dataClassification?: string | undefined;
+    } | undefined;
     status?: "UPLOADED" | "PROCESSING" | "ARCHIVED" | "ANALYZED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "DELETED" | undefined;
     metadata?: Record<string, any> | undefined;
     version?: string | undefined;
@@ -370,7 +379,6 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
     tags?: string[] | undefined;
     createdAt?: Date | undefined;
     updatedAt?: Date | undefined;
-    category?: string | undefined;
     description?: string | undefined;
     processing?: {
         completedAt?: Date | undefined;
@@ -408,8 +416,8 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         assignedTo?: string | undefined;
         dueDate?: Date | undefined;
         approvers?: {
-            required: boolean;
             userId: string;
+            required: boolean;
             role: string;
             approvedAt?: Date | undefined;
             comments?: string | undefined;
@@ -424,14 +432,6 @@ export declare const DocumentMetadataSchema: z.ZodObject<{
         averageReviewTime?: number | undefined;
         lastViewed?: Date | undefined;
         lastDownloaded?: Date | undefined;
-    } | undefined;
-    security?: {
-        accessLevel?: "PUBLIC" | "INTERNAL" | "RESTRICTED" | "CONFIDENTIAL" | undefined;
-        encryptionStatus?: boolean | undefined;
-        allowedRoles?: string[] | undefined;
-        allowedUsers?: string[] | undefined;
-        auditRequired?: boolean | undefined;
-        dataClassification?: string | undefined;
     } | undefined;
 }>;
 export declare const AnalysisResultSchema: z.ZodObject<{
@@ -517,11 +517,11 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             resolvedAt: z.ZodOptional<z.ZodDate>;
             resolution: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
+            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             status: "OPEN" | "ACKNOWLEDGED" | "FIXED" | "IGNORED" | "FALSE_POSITIVE";
             id: string;
             title: string;
-            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
-            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             description: string;
             confidence: number;
             impact: number;
@@ -540,10 +540,10 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             ruleId?: string | undefined;
             resolution?: string | undefined;
         }, {
-            id: string;
-            title: string;
             category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
             severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
+            id: string;
+            title: string;
             description: string;
             confidence: number;
             impact: number;
@@ -574,9 +574,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             expectedImprovement: z.ZodOptional<z.ZodNumber>;
             complianceImprovement: z.ZodDefault<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -584,9 +584,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             estimatedEffort?: string | undefined;
             expectedImprovement?: number | undefined;
         }, {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -671,9 +671,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
         }>>;
     }, "strip", z.ZodTypeAny, {
         recommendations: {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -682,11 +682,11 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             expectedImprovement?: number | undefined;
         }[];
         problems: {
+            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
+            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             status: "OPEN" | "ACKNOWLEDGED" | "FIXED" | "IGNORED" | "FALSE_POSITIVE";
             id: string;
             title: string;
-            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
-            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             description: string;
             confidence: number;
             impact: number;
@@ -730,9 +730,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
         } | undefined;
     }, {
         recommendations: {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -741,10 +741,10 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             complianceImprovement?: boolean | undefined;
         }[];
         problems: {
-            id: string;
-            title: string;
             category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
             severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
+            id: string;
+            title: string;
             description: string;
             confidence: number;
             impact: number;
@@ -811,9 +811,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
         patternsMatched: z.ZodNumber;
         sectionsAnalyzed: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
+        duration: number;
         completedAt: Date;
         startedAt: Date;
-        duration: number;
         engine: string;
         engineVersion: string;
         rulesApplied: number;
@@ -825,9 +825,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             apiCallsCount?: number | undefined;
         } | undefined;
     }, {
+        duration: number;
         completedAt: Date;
         startedAt: Date;
-        duration: number;
         rulesApplied: number;
         patternsMatched: number;
         sectionsAnalyzed: number;
@@ -859,13 +859,28 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     createdAt: z.ZodDefault<z.ZodDate>;
     createdBy: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    organizationId: string;
     status: "COMPLETED" | "FAILED" | "CANCELLED" | "RUNNING";
+    organizationId: string;
     id: string;
     createdBy: string;
     createdAt: Date;
     documentId: string;
     analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
+    analysis: {
+        duration: number;
+        completedAt: Date;
+        startedAt: Date;
+        engine: string;
+        engineVersion: string;
+        rulesApplied: number;
+        patternsMatched: number;
+        sectionsAnalyzed: number;
+        resourceUsage?: {
+            cpuTime?: number | undefined;
+            memoryUsed?: number | undefined;
+            apiCallsCount?: number | undefined;
+        } | undefined;
+    };
     configurationId: string;
     scores: {
         structural: number;
@@ -882,9 +897,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     };
     results: {
         recommendations: {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -893,11 +908,11 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             expectedImprovement?: number | undefined;
         }[];
         problems: {
+            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
+            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             status: "OPEN" | "ACKNOWLEDGED" | "FIXED" | "IGNORED" | "FALSE_POSITIVE";
             id: string;
             title: string;
-            category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
-            severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
             description: string;
             confidence: number;
             impact: number;
@@ -940,21 +955,6 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             passiveVoicePercentage?: number | undefined;
         } | undefined;
     };
-    analysis: {
-        completedAt: Date;
-        startedAt: Date;
-        duration: number;
-        engine: string;
-        engineVersion: string;
-        rulesApplied: number;
-        patternsMatched: number;
-        sectionsAnalyzed: number;
-        resourceUsage?: {
-            cpuTime?: number | undefined;
-            memoryUsed?: number | undefined;
-            apiCallsCount?: number | undefined;
-        } | undefined;
-    };
     error?: {
         code: string;
         message: string;
@@ -968,6 +968,21 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     createdBy: string;
     documentId: string;
     analysisType: "CUSTOM" | "FULL" | "QUICK" | "COMPLIANCE_ONLY";
+    analysis: {
+        duration: number;
+        completedAt: Date;
+        startedAt: Date;
+        rulesApplied: number;
+        patternsMatched: number;
+        sectionsAnalyzed: number;
+        engine?: string | undefined;
+        engineVersion?: string | undefined;
+        resourceUsage?: {
+            cpuTime?: number | undefined;
+            memoryUsed?: number | undefined;
+            apiCallsCount?: number | undefined;
+        } | undefined;
+    };
     configurationId: string;
     scores: {
         structural: number;
@@ -984,9 +999,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     };
     results: {
         recommendations: {
+            category: string;
             id: string;
             title: string;
-            category: string;
             description: string;
             priority: "LOW" | "HIGH" | "MEDIUM" | "CRITICAL";
             actionRequired: string;
@@ -995,10 +1010,10 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             complianceImprovement?: boolean | undefined;
         }[];
         problems: {
-            id: string;
-            title: string;
             category: "ESTRUTURAL" | "JURIDICO" | "CLAREZA" | "ABNT" | "CONFORMIDADE" | "COMPLETUDE";
             severity: "CRITICA" | "ALTA" | "MEDIA" | "BAIXA";
+            id: string;
+            title: string;
             description: string;
             confidence: number;
             impact: number;
@@ -1042,29 +1057,14 @@ export declare const AnalysisResultSchema: z.ZodObject<{
             passiveVoicePercentage?: number | undefined;
         } | undefined;
     };
-    analysis: {
-        completedAt: Date;
-        startedAt: Date;
-        duration: number;
-        rulesApplied: number;
-        patternsMatched: number;
-        sectionsAnalyzed: number;
-        engine?: string | undefined;
-        engineVersion?: string | undefined;
-        resourceUsage?: {
-            cpuTime?: number | undefined;
-            memoryUsed?: number | undefined;
-            apiCallsCount?: number | undefined;
-        } | undefined;
-    };
-    status?: "COMPLETED" | "FAILED" | "CANCELLED" | "RUNNING" | undefined;
-    createdAt?: Date | undefined;
     error?: {
         code: string;
         message: string;
         details?: Record<string, any> | undefined;
         stack?: string | undefined;
     } | undefined;
+    status?: "COMPLETED" | "FAILED" | "CANCELLED" | "RUNNING" | undefined;
+    createdAt?: Date | undefined;
     templateId?: string | undefined;
 }>;
 export declare const DocumentVersionSchema: z.ZodObject<{
@@ -1316,9 +1316,9 @@ export declare const ReviewCommentSchema: z.ZodObject<{
     lastModifiedBy: z.ZodOptional<z.ZodString>;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
+    status: "OPEN" | "ACKNOWLEDGED" | "RESOLVED" | "DISMISSED";
     organizationId: string;
     type: "GENERAL" | "SUGGESTION" | "ISSUE" | "APPROVAL" | "QUESTION";
-    status: "OPEN" | "ACKNOWLEDGED" | "RESOLVED" | "DISMISSED";
     id: string;
     content: string;
     createdBy: string;

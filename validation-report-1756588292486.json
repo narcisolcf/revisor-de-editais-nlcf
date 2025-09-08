@@ -1,0 +1,160 @@
+{
+  "timestamp": "2025-08-30T21:11:32.484Z",
+  "environment": "https://licitareview-prod.web.app",
+  "totalTime": 3850,
+  "summary": {
+    "successCount": 7,
+    "errorCount": 8,
+    "warningCount": 1
+  },
+  "results": [
+    {
+      "name": "Health Check /",
+      "status": "error",
+      "message": "Falha na conexão: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      "details": {
+        "url": "https://licitareview-prod.web.app/",
+        "error": "Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+      },
+      "duration": 206
+    },
+    {
+      "name": "Endpoint /",
+      "status": "success",
+      "message": "Respondendo corretamente (200)",
+      "details": {
+        "status": 200
+      },
+      "duration": 16
+    },
+    {
+      "name": "Cloud Function /uploadDocument",
+      "status": "error",
+      "message": "HTTP 404: Not Found",
+      "details": {
+        "url": "https://us-central1-licitareview-prod.cloudfunctions.net/uploadDocument",
+        "status": 404
+      },
+      "duration": 515
+    },
+    {
+      "name": "Cloud Function /classifyDocument",
+      "status": "error",
+      "message": "HTTP 404: Not Found",
+      "details": {
+        "url": "https://us-central1-licitareview-prod.cloudfunctions.net/classifyDocument",
+        "status": 404
+      },
+      "duration": 410
+    },
+    {
+      "name": "Cloud Function /processAnalysis",
+      "status": "error",
+      "message": "HTTP 403: Forbidden",
+      "details": {
+        "url": "https://us-central1-licitareview-prod.cloudfunctions.net/processAnalysis",
+        "status": 403
+      },
+      "duration": 306
+    },
+    {
+      "name": "Cloud Run Service",
+      "status": "error",
+      "message": "HTTP 404: Not Found",
+      "details": {
+        "status": 404
+      },
+      "duration": 579
+    },
+    {
+      "name": "Database Connection",
+      "status": "error",
+      "message": "HTTP 404: Not Found",
+      "details": {
+        "status": 404
+      },
+      "duration": 225
+    },
+    {
+      "name": "SSL Certificate licitareview-prod.web.app",
+      "status": "success",
+      "message": "Certificado SSL válido",
+      "details": {
+        "url": "https://licitareview-prod.web.app"
+      },
+      "duration": 17
+    },
+    {
+      "name": "SSL Certificate us-central1-licitareview-prod.cloudfunctions.net",
+      "status": "success",
+      "message": "Certificado SSL válido",
+      "details": {
+        "url": "https://us-central1-licitareview-prod.cloudfunctions.net"
+      },
+      "duration": 225
+    },
+    {
+      "name": "SSL Certificate analyzer-prod-xyz789-uc.a.run.app",
+      "status": "success",
+      "message": "Certificado SSL válido",
+      "details": {
+        "url": "https://analyzer-prod-xyz789-uc.a.run.app"
+      },
+      "duration": 211
+    },
+    {
+      "name": "Homepage Load",
+      "status": "success",
+      "message": "Resposta em 17ms (limite: 3000ms)",
+      "details": {
+        "duration": 17,
+        "limit": 3000
+      },
+      "duration": 17
+    },
+    {
+      "name": "API Response",
+      "status": "success",
+      "message": "Resposta em 222ms (limite: 2000ms)",
+      "details": {
+        "duration": 222,
+        "limit": 2000
+      },
+      "duration": 222
+    },
+    {
+      "name": "Cloud Run Response",
+      "status": "success",
+      "message": "Resposta em 221ms (limite: 5000ms)",
+      "details": {
+        "duration": 221,
+        "limit": 5000
+      },
+      "duration": 221
+    },
+    {
+      "name": "Environment Variables",
+      "status": "warning",
+      "message": "Não foi possível verificar variáveis de ambiente",
+      "details": {
+        "status": 404
+      }
+    },
+    {
+      "name": "Upload Endpoint",
+      "status": "error",
+      "message": "Falha no endpoint de upload: 404",
+      "details": {
+        "status": 404
+      }
+    },
+    {
+      "name": "Analysis Endpoint",
+      "status": "error",
+      "message": "Falha no endpoint de análise: 404",
+      "details": {
+        "status": 404
+      }
+    }
+  ]
+}

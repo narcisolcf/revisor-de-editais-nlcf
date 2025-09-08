@@ -7,21 +7,32 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const comissoes_1 = require("../comissoes");
 const auth_1 = require("../../middleware/auth");
-const express_rate_limit_1 = require("express-rate-limit");
-const router = (0, express_1.Router)();
-// Rate limiting for comissões endpoints
-const comissoesRateLimit = (0, express_rate_limit_1.rateLimit)({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: {
-        success: false,
-        error: 'Too many requests, please try again later'
+const security_1 = require("../../middleware/security");
+const LoggingService_1 = require("../../services/LoggingService");
+const MetricsService_1 = require("../../services/MetricsService");
+const firestore_1 = require("firebase-admin/firestore");
+// Inicializar serviços de segurança
+const db = (0, firestore_1.getFirestore)();
+const loggingService = new LoggingService_1.LoggingService('comissoes-routes');
+const metricsService = new MetricsService_1.MetricsService('comissoes-routes');
+// Inicializar middleware de segurança
+const securityManager = (0, security_1.initializeSecurity)(db, loggingService, metricsService, {
+    rateLimit: {
+        windowMs: 15 * 60 * 1000, // 15 minutos
+        maxRequests: 100 // máximo 100 requests por IP por janela
     },
-    standardHeaders: true,
-    legacyHeaders: false
+    audit: {
+        enabled: true,
+        sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
+        excludePaths: []
+    }
 });
-// Apply middleware to all routes
-router.use(comissoesRateLimit);
+const router = (0, express_1.Router)();
+// Aplicar middlewares de segurança
+router.use(security_1.securityHeaders);
+router.use(security_1.rateLimit);
+router.use(security_1.attackProtection);
+router.use(security_1.auditAccess);
 router.use(auth_1.authenticateUser);
 // Main CRUD routes
 router.get('/', comissoes_1.listComissoes);

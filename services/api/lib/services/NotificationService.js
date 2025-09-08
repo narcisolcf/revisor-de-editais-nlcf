@@ -105,6 +105,25 @@ class NotificationService {
         await this.sendNotification(payload);
     }
     /**
+     * Notifica sobre progresso da análise
+     */
+    async notifyAnalysisProgress(organizationId, analysisId, percentage, currentStep) {
+        const payload = {
+            userId: organizationId, // usando organizationId como userId temporariamente
+            organizationId,
+            type: 'system_alert',
+            title: 'Progresso da Análise',
+            message: `Análise em progresso: ${percentage}% - ${currentStep}`,
+            data: {
+                analysisId,
+                percentage,
+                currentStep
+            },
+            priority: 'low'
+        };
+        await this.sendNotification(payload);
+    }
+    /**
      * Notifica sobre upload de documento
      */
     async notifyDocumentUploaded(userId, organizationId, documentId, documentName) {

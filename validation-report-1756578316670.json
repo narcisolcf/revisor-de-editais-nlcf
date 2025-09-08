@@ -1,0 +1,203 @@
+{
+  "timestamp": "2025-08-30T18:25:16.669Z",
+  "environment": "https://licitareview.com",
+  "totalTime": 2522,
+  "summary": {
+    "successCount": 2,
+    "errorCount": 15,
+    "warningCount": 3
+  },
+  "results": [
+    {
+      "name": "Health Check /health",
+      "status": "error",
+      "message": "Falha na conexão: request to https://licitareview.com/health failed, reason: getaddrinfo ENOTFOUND licitareview.com",
+      "details": {
+        "url": "https://licitareview.com/health",
+        "error": "request to https://licitareview.com/health failed, reason: getaddrinfo ENOTFOUND licitareview.com"
+      },
+      "duration": 93
+    },
+    {
+      "name": "Health Check /api/health",
+      "status": "error",
+      "message": "Falha na conexão: request to https://licitareview.com/api/health failed, reason: getaddrinfo ENOTFOUND licitareview.com",
+      "details": {
+        "url": "https://licitareview.com/api/health",
+        "error": "request to https://licitareview.com/api/health failed, reason: getaddrinfo ENOTFOUND licitareview.com"
+      },
+      "duration": 3
+    },
+    {
+      "name": "Health Check /api/status",
+      "status": "error",
+      "message": "Falha na conexão: request to https://licitareview.com/api/status failed, reason: getaddrinfo ENOTFOUND licitareview.com",
+      "details": {
+        "url": "https://licitareview.com/api/status",
+        "error": "request to https://licitareview.com/api/status failed, reason: getaddrinfo ENOTFOUND licitareview.com"
+      },
+      "duration": 1
+    },
+    {
+      "name": "Endpoint /api/auth/status",
+      "status": "error",
+      "message": "Falha na conexão: request to https://licitareview.com/api/auth/status failed, reason: getaddrinfo ENOTFOUND licitareview.com",
+      "details": {
+        "url": "https://licitareview.com/api/auth/status",
+        "error": "request to https://licitareview.com/api/auth/status failed, reason: getaddrinfo ENOTFOUND licitareview.com"
+      },
+      "duration": 1
+    },
+    {
+      "name": "Endpoint /api/documents",
+      "status": "error",
+      "message": "Falha na conexão: request to https://licitareview.com/api/documents failed, reason: getaddrinfo ENOTFOUND licitareview.com",
+      "details": {
+        "url": "https://licitareview.com/api/documents",
+        "error": "request to https://licitareview.com/api/documents failed, reason: getaddrinfo ENOTFOUND licitareview.com"
+      },
+      "duration": 2
+    },
+    {
+      "name": "Endpoint /api/analysis",
+      "status": "error",
+      "message": "Falha na conexão: request to https://licitareview.com/api/analysis failed, reason: getaddrinfo ENOTFOUND licitareview.com",
+      "details": {
+        "url": "https://licitareview.com/api/analysis",
+        "error": "request to https://licitareview.com/api/analysis failed, reason: getaddrinfo ENOTFOUND licitareview.com"
+      },
+      "duration": 1
+    },
+    {
+      "name": "Cloud Function /uploadDocument",
+      "status": "error",
+      "message": "HTTP 404: Not Found",
+      "details": {
+        "url": "https://us-central1-licitareview-prod.cloudfunctions.net/uploadDocument",
+        "status": 404
+      },
+      "duration": 525
+    },
+    {
+      "name": "Cloud Function /classifyDocument",
+      "status": "error",
+      "message": "HTTP 404: Not Found",
+      "details": {
+        "url": "https://us-central1-licitareview-prod.cloudfunctions.net/classifyDocument",
+        "status": 404
+      },
+      "duration": 226
+    },
+    {
+      "name": "Cloud Function /processAnalysis",
+      "status": "error",
+      "message": "HTTP 403: Forbidden",
+      "details": {
+        "url": "https://us-central1-licitareview-prod.cloudfunctions.net/processAnalysis",
+        "status": 403
+      },
+      "duration": 530
+    },
+    {
+      "name": "Cloud Run Service",
+      "status": "error",
+      "message": "HTTP 404: Not Found",
+      "details": {
+        "status": 404
+      },
+      "duration": 569
+    },
+    {
+      "name": "Database Connection",
+      "status": "error",
+      "message": "Falha na conexão: request to https://api.licitareview.com/api/db/health failed, reason: getaddrinfo ENOTFOUND api.licitareview.com",
+      "details": {
+        "error": "request to https://api.licitareview.com/api/db/health failed, reason: getaddrinfo ENOTFOUND api.licitareview.com"
+      },
+      "duration": 119
+    },
+    {
+      "name": "SSL Certificate licitareview.com",
+      "status": "warning",
+      "message": "Não foi possível verificar SSL: request to https://licitareview.com/ failed, reason: getaddrinfo ENOTFOUND licitareview.com",
+      "details": {
+        "url": "https://licitareview.com",
+        "error": "request to https://licitareview.com/ failed, reason: getaddrinfo ENOTFOUND licitareview.com"
+      },
+      "duration": 4
+    },
+    {
+      "name": "SSL Certificate api.licitareview.com",
+      "status": "warning",
+      "message": "Não foi possível verificar SSL: request to https://api.licitareview.com/ failed, reason: getaddrinfo ENOTFOUND api.licitareview.com",
+      "details": {
+        "url": "https://api.licitareview.com",
+        "error": "request to https://api.licitareview.com/ failed, reason: getaddrinfo ENOTFOUND api.licitareview.com"
+      },
+      "duration": 2
+    },
+    {
+      "name": "SSL Certificate analyzer-prod-xyz789-uc.a.run.app",
+      "status": "success",
+      "message": "Certificado SSL válido",
+      "details": {
+        "url": "https://analyzer-prod-xyz789-uc.a.run.app"
+      },
+      "duration": 226
+    },
+    {
+      "name": "Homepage Load",
+      "status": "error",
+      "message": "Falha no teste de performance: request to https://licitareview.com/ failed, reason: getaddrinfo ENOTFOUND licitareview.com",
+      "details": {
+        "error": "request to https://licitareview.com/ failed, reason: getaddrinfo ENOTFOUND licitareview.com",
+        "limit": 3000
+      },
+      "duration": 3
+    },
+    {
+      "name": "API Response",
+      "status": "error",
+      "message": "Falha no teste de performance: request to https://api.licitareview.com/api/health failed, reason: getaddrinfo ENOTFOUND api.licitareview.com",
+      "details": {
+        "error": "request to https://api.licitareview.com/api/health failed, reason: getaddrinfo ENOTFOUND api.licitareview.com",
+        "limit": 2000
+      },
+      "duration": 2
+    },
+    {
+      "name": "Cloud Run Response",
+      "status": "success",
+      "message": "Resposta em 202ms (limite: 5000ms)",
+      "details": {
+        "duration": 202,
+        "limit": 5000
+      },
+      "duration": 202
+    },
+    {
+      "name": "Environment Variables",
+      "status": "warning",
+      "message": "Erro ao verificar variáveis: request to https://api.licitareview.com/api/config/check failed, reason: getaddrinfo ENOTFOUND api.licitareview.com",
+      "details": {
+        "error": "request to https://api.licitareview.com/api/config/check failed, reason: getaddrinfo ENOTFOUND api.licitareview.com"
+      }
+    },
+    {
+      "name": "Upload Endpoint",
+      "status": "error",
+      "message": "Erro no teste de upload: request to https://api.licitareview.com/api/upload/test failed, reason: getaddrinfo ENOTFOUND api.licitareview.com",
+      "details": {
+        "error": "request to https://api.licitareview.com/api/upload/test failed, reason: getaddrinfo ENOTFOUND api.licitareview.com"
+      }
+    },
+    {
+      "name": "Analysis Endpoint",
+      "status": "error",
+      "message": "Erro no teste de análise: request to https://api.licitareview.com/api/analysis/test failed, reason: getaddrinfo ENOTFOUND api.licitareview.com",
+      "details": {
+        "error": "request to https://api.licitareview.com/api/analysis/test failed, reason: getaddrinfo ENOTFOUND api.licitareview.com"
+      }
+    }
+  ]
+}

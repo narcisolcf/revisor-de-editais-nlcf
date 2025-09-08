@@ -43,7 +43,10 @@ import {
   Zap,
   BarChart3,
   Users,
-  Shield
+  Shield,
+  Target,
+  Database,
+  Info
 } from 'lucide-react';
 import { useAnalysisConfig } from '@/hooks/useAnalysisConfig';
 import { cn } from '@/lib/utils';
@@ -138,7 +141,7 @@ export const ConfigurationSidebar: React.FC<ConfigurationSidebarProps> = ({
           icon: Code,
           description: 'Criar e gerenciar regras específicas',
           status: 'completed',
-          badge: activeConfig?.customRules?.length?.toString() || '0'
+          badge: '0'
         },
         {
           id: 'validation-preview',

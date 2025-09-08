@@ -74,7 +74,7 @@ export const AdaptiveAnalysisResults: React.FC<AdaptiveAnalysisResultsProps> = (
     result.problems.forEach(problem => {
       const category = problem.categoria || 'general';
       if (grouped[category]) {
-        grouped[category].push(problem);
+        grouped[category].push(problem as any);
       }
     });
 
@@ -425,12 +425,12 @@ export const AdaptiveAnalysisResults: React.FC<AdaptiveAnalysisResultsProps> = (
                               {renderSeverityIcon(problem.gravidade)}
                               {renderSeverityBadge(problem.gravidade)}
                               <span className="text-sm text-gray-600">
-                                {problem.localizacao || 'Documento geral'}
+                                {String(problem.localizacao) || 'Documento geral'}
                               </span>
                             </div>
                             
                             <h4 className="font-medium text-gray-900 mb-2">
-                              {problem.descricao}
+                              {String(problem.descricao)}
                             </h4>
                             
                             {problem.sugestaoCorrecao && (
@@ -439,7 +439,7 @@ export const AdaptiveAnalysisResults: React.FC<AdaptiveAnalysisResultsProps> = (
                                   <CheckCircle className="w-4 h-4 text-blue-600" />
                                   <span className="text-sm font-medium text-blue-800">Sugestão de Correção:</span>
                                 </div>
-                                <p className="text-sm text-blue-700">{problem.sugestaoCorrecao}</p>
+                                <p className="text-sm text-blue-700">{String(problem.sugestaoCorrecao)}</p>
                               </div>
                             )}
                           </div>

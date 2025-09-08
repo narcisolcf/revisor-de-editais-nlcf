@@ -18,7 +18,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CommonSchemas = void 0;
+exports.CommonSchemas = exports.logger = void 0;
 exports.generateRequestId = generateRequestId;
 exports.createSuccessResponse = createSuccessResponse;
 exports.createErrorResponse = createErrorResponse;
@@ -39,6 +39,9 @@ const uuid_1 = require("uuid");
 const zod_1 = require("zod");
 // Re-exportar validação
 __exportStar(require("./validation"), exports);
+// Re-exportar logger
+const LoggingService_1 = require("../services/LoggingService");
+exports.logger = new LoggingService_1.LoggingService('utils');
 /**
  * Gerar ID único para requisições
  */

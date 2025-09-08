@@ -36,6 +36,12 @@ import {
 interface AuthenticatedRequest extends express.Request {
   user: UserContext;
   requestId: string;
+  services?: {
+    db: FirebaseFirestore.Firestore;
+    loggingService: LoggingService;
+    metricsService: MetricsService;
+    securityManager: any;
+  };
 }
 import {
   initializeSecurity,
@@ -57,40 +63,87 @@ import {
 } from "../utils";
 import { config } from "../config";
 
-// Inicializar serviços
-const db = getFirestore();
-const loggingService = new LoggingService('documents-api');
-const metricsService = new MetricsService('documents-api');
+const app = express();
 
-// Inicializar middleware de segurança
-const securityManager = initializeSecurity(db, loggingService, metricsService, {
-  rateLimit: {
-    windowMs: config.rateLimitWindowMs || 15 * 60 * 1000, // 15 minutos
-    maxRequests: config.rateLimitMax || 100 // máximo 100 requests por IP por janela
-  },
-  audit: {
-    enabled: true,
-    sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
-    excludePaths: []
-  }
+/**
+ * GET /health
+ * Health check endpoint (sem middlewares)
+ */
+app.get("/health", (req: express.Request, res: express.Response) => {
+  res.status(200).json({
+    success: true,
+    service: "documentsApi",
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    version: "1.0.0"
+  });
 });
 
-const app = express();
+// Inicializar serviços (lazy loading)
+let db: FirebaseFirestore.Firestore;
+let loggingService: LoggingService;
+let metricsService: MetricsService;
+let securityManager: any;
+
+function initializeServices() {
+  if (!db) {
+    db = getFirestore();
+    loggingService = new LoggingService('documents-api');
+    metricsService = new MetricsService('documents-api');
+    
+    // Inicializar middleware de segurança
+    securityManager = initializeSecurity(db, loggingService, metricsService, {
+      rateLimit: {
+        windowMs: config.rateLimitWindowMs || 15 * 60 * 1000, // 15 minutos
+        maxRequests: config.rateLimitMax || 100 // máximo 100 requests por IP por janela
+      },
+      audit: {
+        enabled: true,
+        sensitiveFields: ['password', 'token', 'apiKey', 'secret'],
+        excludePaths: []
+      }
+    });
+  }
+  return { db, loggingService, metricsService, securityManager };
+}
 
 // Middleware básico
 app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json({ limit: config.maxRequestSize }));
 
-// Aplicar middlewares de segurança
-app.use(securityHeaders);
-app.use(rateLimit);
-app.use(attackProtection);
-app.use(auditAccess);
+// Middleware para inicializar serviços sob demanda
+app.use((req, res, next) => {
+  // Pular inicialização para health check
+  if (req.path === '/health') {
+    return next();
+  }
+  
+  // Inicializar serviços para outras rotas
+  const services = initializeServices();
+  (req as any).services = services;
+  next();
+});
+
+// Aplicar middlewares de segurança (apenas para rotas que não sejam /health)
+ app.use((req, res, next) => {
+   if (req.path === '/health') {
+     return next();
+   }
+   
+   const services = initializeServices();
+   securityHeaders(req, res, () => {
+     services.securityManager.rateLimit(req, res, () => {
+       services.securityManager.attackProtection(req, res, () => {
+         services.securityManager.auditAccess(req, res, next);
+       });
+     });
+   });
+ });
 
 // Request ID middleware
 app.use((req, res, next) => {
-  req.requestId = generateRequestId();
-  res.setHeader("X-Request-ID", req.requestId);
+  (req as any).requestId = generateRequestId();
+  res.setHeader("X-Request-ID", (req as any).requestId);
   next();
 });
 
@@ -1013,6 +1066,8 @@ function getStatusDescription(status: DocumentStatus): string {
       return 'Status desconhecido';
   }
 }
+
+
 
 // Error handling middleware
 app.use((error: Error, req: express.Request, res: express.Response) => {

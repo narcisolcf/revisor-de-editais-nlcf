@@ -146,8 +146,8 @@ export declare const ComissaoSchema: z.ZodEffects<z.ZodObject<{
         quorumMinimo?: number | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    organizationId: string;
     status: StatusComissao;
+    organizationId: string;
     id: string;
     createdBy: string;
     createdAt: Date;
@@ -174,8 +174,8 @@ export declare const ComissaoSchema: z.ZodEffects<z.ZodObject<{
         quorumMinimo?: number | undefined;
     } | undefined;
 }, {
-    organizationId: string;
     status: StatusComissao;
+    organizationId: string;
     id: string;
     createdBy: string;
     createdAt: Date;
@@ -202,8 +202,8 @@ export declare const ComissaoSchema: z.ZodEffects<z.ZodObject<{
         quorumMinimo?: number | undefined;
     } | undefined;
 }>, {
-    organizationId: string;
     status: StatusComissao;
+    organizationId: string;
     id: string;
     createdBy: string;
     createdAt: Date;
@@ -230,8 +230,8 @@ export declare const ComissaoSchema: z.ZodEffects<z.ZodObject<{
         quorumMinimo?: number | undefined;
     } | undefined;
 }, {
-    organizationId: string;
     status: StatusComissao;
+    organizationId: string;
     id: string;
     createdBy: string;
     createdAt: Date;

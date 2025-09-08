@@ -255,7 +255,7 @@ async function updateDocumentStatus(documentId, status, additionalData = {}) {
         });
     }
     catch (retryError) {
-        logger.error('Failed to update document status after retries', { documentId, status, error: retryError });
+        logger.error('Failed to update document status after retries', retryError instanceof Error ? retryError : new Error(String(retryError)), { documentId, status });
         throw retryError;
     }
 }

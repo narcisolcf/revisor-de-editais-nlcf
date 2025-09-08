@@ -61,10 +61,8 @@ const tipoColors = {
 
 const ComissaoDetails: React.FC<ComissaoDetailsProps> = ({
   comissao: initialComissao,
-  organizationId,
   onEdit,
-  onClose,
-  onUpdate
+  onClose
 }) => {
   const [comissao, setComissao] = useState<Comissao>(initialComissao);
   const [loading, setLoading] = useState(false);
@@ -82,7 +80,7 @@ const ComissaoDetails: React.FC<ComissaoDetailsProps> = ({
 
     try {
       setLoading(true);
-      await comissoesService.update(organizationId, comissao.id, {
+      await comissoesService.update(comissao.organizationId, comissao.id, {
         status: 'Encerrada' as StatusComissao,
         dataDeEncerramento: new Date()
       });
@@ -94,7 +92,6 @@ const ComissaoDetails: React.FC<ComissaoDetailsProps> = ({
       };
       
       setComissao(comissaoAtualizada);
-      onUpdate?.(comissaoAtualizada);
       
       toast({
         title: "Sucesso",
@@ -117,7 +114,6 @@ const ComissaoDetails: React.FC<ComissaoDetailsProps> = ({
       membros: novosMembros
     };
     setComissao(comissaoAtualizada);
-    onUpdate?.(comissaoAtualizada);
   };
 
   const StatusIcon = statusIcons[comissao.status];
@@ -129,7 +125,7 @@ const ComissaoDetails: React.FC<ComissaoDetailsProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div>
-                <DialogTitle className="text-xl">{comissao.nome}</DialogTitle>
+                <DialogTitle className="text-xl">{comissao.nomeDaComissao}</DialogTitle>
                 <div className="flex items-center space-x-2 mt-2">
                   <Badge className={tipoColors[comissao.tipo]}>
                     {comissao.tipo}
@@ -146,7 +142,7 @@ const ComissaoDetails: React.FC<ComissaoDetailsProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onEdit(comissao)}
+                onClick={() => onEdit()}
                 disabled={comissao.status === 'Encerrada'}
               >
                 <Edit className="h-4 w-4 mr-2" />
@@ -285,7 +281,7 @@ const ComissaoDetails: React.FC<ComissaoDetailsProps> = ({
           <TabsContent value="membros">
             <MembrosManager
               comissaoId={comissao.id}
-              organizationId={organizationId}
+              organizationId={comissao.organizationId}
               membros={comissao.membros || []}
               onMembrosChange={handleMembrosChange}
               readonly={comissao.status === 'Encerrada'}

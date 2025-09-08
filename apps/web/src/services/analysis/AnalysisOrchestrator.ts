@@ -192,8 +192,7 @@ export class AnalysisOrchestrator {
       if (this.config.enableFallback) {
         return await this.fallbackSystem.executeWithFallback(
           () => analyzer.analyzeWithFallback(context),
-          context,
-          error as Error
+          context
         );
       }
       throw error;
@@ -254,8 +253,7 @@ export class AnalysisOrchestrator {
         }
         throw new Error('Nenhum analisador disponível');
       },
-      context,
-      error
+      context
     );
 
     // Criar resultado básico
@@ -342,9 +340,16 @@ export class AnalysisOrchestrator {
     overallResult: AnalysisResult,
     categoryResults: Record<string, AnalysisResult>,
     totalProcessingTime: number,
-    cacheStats: { hits: number; misses: number; hitRate: number },
+    cacheStats: { size: number; entryCount: number; hitRate: number } | { hits: number; misses: number; hitRate: number },
     fallbackStats: { totalFallbacks: number; successfulFallbacks: number; failedFallbacks: number }
   ): ComprehensiveAnalysisResult {
+    // Converter cacheStats para o formato esperado
+    const normalizedCacheStats = 'hits' in cacheStats ? cacheStats : {
+      hits: cacheStats.entryCount,
+      misses: Math.max(0, cacheStats.size - cacheStats.entryCount),
+      hitRate: cacheStats.hitRate
+    };
+
     return {
       overallScore: overallResult.score,
       overallConfidence: overallResult.confidence,
@@ -357,7 +362,7 @@ export class AnalysisOrchestrator {
         clarity: categoryResults.clarity,
         abnt: categoryResults.abnt
       },
-      cacheStats,
+      cacheStats: normalizedCacheStats,
       fallbackStats
     };
   }

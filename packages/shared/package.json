@@ -1,0 +1,75 @@
+{
+  "name": "@revisor-editais/shared",
+  "version": "0.1.0",
+  "description": "Utilitários e validadores compartilhados para o Revisor de Editais",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.cjs",
+      "types": "./dist/utils/index.d.ts"
+    },
+    "./validators": {
+      "import": "./dist/validators/index.js",
+      "require": "./dist/validators/index.cjs",
+      "types": "./dist/validators/index.d.ts"
+    },
+    "./constants": {
+      "import": "./dist/constants/index.js",
+      "require": "./dist/constants/index.cjs",
+      "types": "./dist/constants/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "require": "./dist/types/index.cjs",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix"
+  },
+  "keywords": [
+    "utilities",
+    "validators",
+    "shared",
+    "revisor-editais",
+    "typescript"
+  ],
+  "author": "Revisor de Editais Team",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.22.4",
+    "date-fns": "^3.6.0",
+    "clsx": "^2.1.0",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/lodash-es": "^4.17.12",
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

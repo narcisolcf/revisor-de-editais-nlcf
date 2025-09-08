@@ -1,6 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AnalysisConfigService } from '@/services/AnalysisConfigService';
+
+// Instância do serviço
+const analysisConfigService = new AnalysisConfigService();
 import { toast } from '@/hooks/use-toast';
 
 export interface AnalysisParameter {
@@ -87,11 +90,11 @@ export const useAnalysisConfig = (organizationId: string) => {
     isLoading: isLoadingConfigs,
     error: configsError,
     refetch: refetchConfigs
-  } = useQuery({
+  } = useQuery<OrganizationConfig[]>({
     queryKey: ['analysis-configs', organizationId, filters],
-    queryFn: () => AnalysisConfigService.getOrganizationConfigs(organizationId, filters),
+    queryFn: () => analysisConfigService.getOrganizationConfigs(organizationId, filters),
     staleTime: 5 * 60 * 1000, // 5 minutos
-    cacheTime: 30 * 60 * 1000, // 30 minutos
+    gcTime: 30 * 60 * 1000, // 30 minutos
     enabled: !!organizationId
   });
 
@@ -100,9 +103,9 @@ export const useAnalysisConfig = (organizationId: string) => {
     data: activeConfig,
     isLoading: isLoadingActiveConfig,
     error: activeConfigError
-  } = useQuery({
+  } = useQuery<OrganizationConfig | null>({
     queryKey: ['active-analysis-config', organizationId],
-    queryFn: () => AnalysisConfigService.getActiveConfig(organizationId),
+    queryFn: () => analysisConfigService.getActiveConfig(organizationId),
     staleTime: 2 * 60 * 1000, // 2 minutos
     enabled: !!organizationId
   });
@@ -112,16 +115,16 @@ export const useAnalysisConfig = (organizationId: string) => {
     data: templates,
     isLoading: isLoadingTemplates,
     error: templatesError
-  } = useQuery({
+  } = useQuery<ConfigTemplate[]>({
     queryKey: ['analysis-templates', filters.category],
-    queryFn: () => AnalysisConfigService.getTemplates(filters.category),
+    queryFn: () => analysisConfigService.getTemplates(filters.category),
     staleTime: 10 * 60 * 1000, // 10 minutos
   });
 
   // Mutation para criar nova configuração
   const createConfigMutation = useMutation({
     mutationFn: (config: Omit<OrganizationConfig, 'id' | 'createdAt' | 'updatedAt'>) =>
-      AnalysisConfigService.createConfig(config),
+      analysisConfigService.createConfig(config),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['analysis-configs', organizationId] });
       toast({
@@ -142,7 +145,7 @@ export const useAnalysisConfig = (organizationId: string) => {
   // Mutation para atualizar configuração
   const updateConfigMutation = useMutation({
     mutationFn: ({ id, config }: { id: string; config: Partial<OrganizationConfig> }) =>
-      AnalysisConfigService.updateConfig(id, config),
+      analysisConfigService.updateConfig(id, config),
     onSuccess: (updatedConfig) => {
       queryClient.invalidateQueries({ queryKey: ['analysis-configs', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['active-analysis-config', organizationId] });
@@ -172,7 +175,7 @@ export const useAnalysisConfig = (organizationId: string) => {
 
   // Mutation para deletar configuração
   const deleteConfigMutation = useMutation({
-    mutationFn: (id: string) => AnalysisConfigService.deleteConfig(id),
+    mutationFn: (id: string) => analysisConfigService.deleteConfig(id),
     onSuccess: (deletedId) => {
       queryClient.invalidateQueries({ queryKey: ['analysis-configs', organizationId] });
       
@@ -200,7 +203,7 @@ export const useAnalysisConfig = (organizationId: string) => {
   // Mutation para ativar/desativar configuração
   const toggleConfigStatusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
-      AnalysisConfigService.updateConfig(id, { isActive }),
+      analysisConfigService.updateConfig(id, { isActive }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['analysis-configs', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['active-analysis-config', organizationId] });
@@ -217,7 +220,7 @@ export const useAnalysisConfig = (organizationId: string) => {
   // Mutation para aplicar template
   const applyTemplateMutation = useMutation({
     mutationFn: ({ templateId, organizationId }: { templateId: string; organizationId: string }) =>
-      AnalysisConfigService.applyTemplate(templateId, organizationId),
+      analysisConfigService.applyTemplate(templateId, organizationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['analysis-configs', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['active-analysis-config', organizationId] });
@@ -239,7 +242,7 @@ export const useAnalysisConfig = (organizationId: string) => {
 
   // Mutation para duplicar configuração
   const duplicateConfigMutation = useMutation({
-    mutationFn: (id: string) => AnalysisConfigService.duplicateConfig(id),
+    mutationFn: (id: string) => analysisConfigService.duplicateConfig(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['analysis-configs', organizationId] });
       
@@ -292,15 +295,15 @@ export const useAnalysisConfig = (organizationId: string) => {
   }, [organizationId]);
 
   // Computed values
-  const enabledConfigs = configs?.filter(c => c.enabled) || [];
-  const disabledConfigs = configs?.filter(c => !c.enabled) || [];
-  const configsByCategory = configs?.reduce((acc, config) => {
+  const enabledConfigs = (configs && Array.isArray(configs)) ? configs.filter(c => c.isActive) : [];
+  const disabledConfigs = (configs && Array.isArray(configs)) ? configs.filter(c => !c.isActive) : [];
+  const configsByCategory = (configs && Array.isArray(configs)) ? configs.reduce((acc, config) => {
     config.parameters.forEach(param => {
       if (!acc[param.category]) acc[param.category] = [];
       acc[param.category].push(param);
     });
     return acc;
-  }, {} as Record<string, AnalysisParameter[]>) || {};
+  }, {} as Record<string, AnalysisParameter[]>) : {};
 
   // Auto-sync com backend
   useEffect(() => {
@@ -356,7 +359,7 @@ export const useAnalysisConfig = (organizationId: string) => {
     // Utilities
     refetchConfigs,
     hasActiveConfig: !!activeConfig,
-    totalConfigs: configs?.length || 0,
+    totalConfigs: (configs && Array.isArray(configs)) ? configs.length : 0,
     totalTemplates: templates?.length || 0
   };
 };

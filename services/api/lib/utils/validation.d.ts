@@ -75,7 +75,7 @@ export declare const AnalysisRequestSchema: z.ZodObject<{
     }>>;
 }, "strip", z.ZodTypeAny, {
     documentId: string;
-    priority: "low" | "normal" | "high";
+    priority: "low" | "high" | "normal";
     analysisType: "basic" | "detailed" | "comprehensive";
     options?: {
         generateRecommendations: boolean;
@@ -89,7 +89,7 @@ export declare const AnalysisRequestSchema: z.ZodObject<{
         includeAI?: boolean | undefined;
         detailedMetrics?: boolean | undefined;
     } | undefined;
-    priority?: "low" | "normal" | "high" | undefined;
+    priority?: "low" | "high" | "normal" | undefined;
     analysisType?: "basic" | "detailed" | "comprehensive" | undefined;
 }>;
 export declare const UUIDSchema: z.ZodString;

@@ -178,8 +178,8 @@ export declare const DocumentSchema: z.ZodObject<{
     updatedAt: z.ZodDefault<z.ZodDate>;
     expiresAt: z.ZodOptional<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
-    organizationId: string;
     status: DocumentStatus;
+    organizationId: string;
     id: string;
     title: string;
     content: string;
@@ -332,8 +332,8 @@ export declare const CreateDocumentRequestSchema: z.ZodObject<Omit<{
     updatedAt: z.ZodDefault<z.ZodDate>;
     expiresAt: z.ZodOptional<z.ZodDate>;
 }, "id" | "createdAt" | "updatedAt">, "strip", z.ZodTypeAny, {
-    organizationId: string;
     status: DocumentStatus;
+    organizationId: string;
     title: string;
     content: string;
     classification: {
@@ -477,8 +477,8 @@ export declare const UpdateDocumentRequestSchema: z.ZodObject<Omit<{
     updatedAt: z.ZodOptional<z.ZodDefault<z.ZodDate>>;
     expiresAt: z.ZodOptional<z.ZodOptional<z.ZodDate>>;
 }, "id" | "createdAt">, "strip", z.ZodTypeAny, {
-    organizationId?: string | undefined;
     status?: DocumentStatus | undefined;
+    organizationId?: string | undefined;
     title?: string | undefined;
     content?: string | undefined;
     classification?: {
@@ -511,8 +511,8 @@ export declare const UpdateDocumentRequestSchema: z.ZodObject<Omit<{
     updatedAt?: Date | undefined;
     expiresAt?: Date | undefined;
 }, {
-    organizationId?: string | undefined;
     status?: DocumentStatus | undefined;
+    organizationId?: string | undefined;
     title?: string | undefined;
     content?: string | undefined;
     classification?: {
@@ -558,38 +558,38 @@ export declare const DocumentSummarySchema: z.ZodObject<{
         size: z.ZodNumber;
         type: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        type: string;
         name: string;
+        type: string;
         size: number;
     }, {
-        type: string;
         name: string;
+        type: string;
         size: number;
     }>;
 }, "strip", z.ZodTypeAny, {
-    organizationId: string;
     status: DocumentStatus;
+    organizationId: string;
     documentType: DocumentType;
     id: string;
     title: string;
     createdAt: Date;
     updatedAt: Date;
     fileInfo: {
-        type: string;
         name: string;
+        type: string;
         size: number;
     };
 }, {
-    organizationId: string;
     status: DocumentStatus;
+    organizationId: string;
     documentType: DocumentType;
     id: string;
     title: string;
     createdAt: Date;
     updatedAt: Date;
     fileInfo: {
-        type: string;
         name: string;
+        type: string;
         size: number;
     };
 }>;

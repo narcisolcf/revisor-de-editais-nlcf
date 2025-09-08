@@ -57,9 +57,9 @@ export declare const AnalysisFindingSchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     foundAt: z.ZodDefault<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
-    title: string;
     category: ProblemCategory;
     severity: ProblemSeverity;
+    title: string;
     description: string;
     impactScore: number;
     isResolved: boolean;
@@ -72,9 +72,9 @@ export declare const AnalysisFindingSchema: z.ZodObject<{
     resolvedAt?: Date | undefined;
     resolvedBy?: string | undefined;
 }, {
-    title: string;
     category: ProblemCategory;
     severity: ProblemSeverity;
+    title: string;
     description: string;
     impactScore: number;
     id?: string | undefined;
@@ -130,9 +130,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
         metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
         foundAt: z.ZodDefault<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
-        title: string;
         category: ProblemCategory;
         severity: ProblemSeverity;
+        title: string;
         description: string;
         impactScore: number;
         isResolved: boolean;
@@ -145,9 +145,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
         resolvedAt?: Date | undefined;
         resolvedBy?: string | undefined;
     }, {
-        title: string;
         category: ProblemCategory;
         severity: ProblemSeverity;
+        title: string;
         description: string;
         impactScore: number;
         id?: string | undefined;
@@ -170,8 +170,8 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     completedAt: z.ZodOptional<z.ZodDate>;
     error: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    status: "error" | "pending" | "processing" | "completed";
     organizationId: string;
-    status: "pending" | "processing" | "completed" | "error";
     id: string;
     createdAt: Date;
     documentId: string;
@@ -185,9 +185,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     };
     weightedScore: number;
     findings: {
-        title: string;
         category: ProblemCategory;
         severity: ProblemSeverity;
+        title: string;
         description: string;
         impactScore: number;
         isResolved: boolean;
@@ -221,9 +221,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     };
     weightedScore: number;
     findings: {
-        title: string;
         category: ProblemCategory;
         severity: ProblemSeverity;
+        title: string;
         description: string;
         impactScore: number;
         id?: string | undefined;
@@ -240,9 +240,9 @@ export declare const AnalysisResultSchema: z.ZodObject<{
     appliedConfigId: string;
     appliedConfigHash: string;
     executionTimeSeconds: number;
-    status?: "pending" | "processing" | "completed" | "error" | undefined;
-    createdAt?: Date | undefined;
     error?: string | undefined;
+    status?: "error" | "pending" | "processing" | "completed" | undefined;
+    createdAt?: Date | undefined;
     analysisMetadata?: Record<string, any> | undefined;
     completedAt?: Date | undefined;
 }>;
@@ -273,7 +273,7 @@ export declare const AnalysisRequestSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     organizationId: string;
     documentId: string;
-    priority: "low" | "normal" | "high";
+    priority: "low" | "high" | "normal";
     analysisType: "quick" | "standard" | "deep";
     requestedBy: string;
     requestedAt: Date;
@@ -295,7 +295,7 @@ export declare const AnalysisRequestSchema: z.ZodObject<{
         extractKeyMetrics?: boolean | undefined;
     } | undefined;
     configId?: string | undefined;
-    priority?: "low" | "normal" | "high" | undefined;
+    priority?: "low" | "high" | "normal" | undefined;
     analysisType?: "quick" | "standard" | "deep" | undefined;
     requestedAt?: Date | undefined;
 }>;
@@ -361,9 +361,9 @@ export declare const getCategoryRating: (score: number) => string;
 export declare const getSeverityColor: (severity: ProblemSeverity) => string;
 export declare const getSeverityWeight: (severity: ProblemSeverity) => number;
 export declare const groupFindingsBySeverity: (findings: AnalysisFinding[]) => Record<ProblemSeverity, {
-    title: string;
     category: ProblemCategory;
     severity: ProblemSeverity;
+    title: string;
     description: string;
     impactScore: number;
     isResolved: boolean;
@@ -377,9 +377,9 @@ export declare const groupFindingsBySeverity: (findings: AnalysisFinding[]) => R
     resolvedBy?: string | undefined;
 }[]>;
 export declare const groupFindingsByCategory: (findings: AnalysisFinding[]) => Record<ProblemCategory, {
-    title: string;
     category: ProblemCategory;
     severity: ProblemSeverity;
+    title: string;
     description: string;
     impactScore: number;
     isResolved: boolean;

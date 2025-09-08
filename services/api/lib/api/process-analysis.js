@@ -102,8 +102,14 @@ exports.processAnalysis = functions
             },
             priority: queuePayload.analysisRequest.priority || 'normal'
         };
-        // Inicializar o AnalysisOrchestrator
-        const orchestrator = new AnalysisOrchestrator_1.AnalysisOrchestrator(config_1.firestore, process.env.CLOUD_RUN_SERVICE_URL || 'https://analysis-service-url', process.env.GOOGLE_CLOUD_PROJECT || 'licitareview');
+        // Inicializar o AnalysisOrchestrator com configuração de autenticação
+        const orchestrator = new AnalysisOrchestrator_1.AnalysisOrchestrator(config_1.firestore, process.env.CLOUD_RUN_SERVICE_URL || 'https://analysis-service-url', process.env.GOOGLE_CLOUD_PROJECT || 'licitareview', {
+            projectId: process.env.GOOGLE_CLOUD_PROJECT,
+            serviceAccountEmail: process.env.CLOUD_RUN_SERVICE_ACCOUNT_EMAIL,
+            serviceAccountKeyFile: process.env.CLOUD_RUN_SERVICE_ACCOUNT_KEY_FILE,
+            audience: process.env.CLOUD_RUN_IAP_AUDIENCE,
+            scopes: ['https://www.googleapis.com/auth/cloud-platform']
+        });
         // Processar a análise
         await orchestrator.processAnalysis(analysisId, analysisRequest);
         // Remover tarefa da fila após processamento bem-sucedido

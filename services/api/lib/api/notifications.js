@@ -16,6 +16,7 @@ const crypto_1 = __importDefault(require("crypto"));
 const firebase_1 = require("../config/firebase");
 const auth_1 = require("../middleware/auth");
 const utils_1 = require("../utils");
+const zod_1 = require("zod");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 // Request ID middleware
@@ -23,6 +24,145 @@ app.use((req, res, next) => {
     req.requestId = (0, utils_1.generateRequestId)();
     res.setHeader("X-Request-ID", req.requestId);
     next();
+});
+// Validation schemas
+const listNotificationsSchema = zod_1.z.object({
+    page: zod_1.z.string().optional().transform(val => val ? parseInt(val) : 1),
+    limit: zod_1.z.string().optional().transform(val => val ? parseInt(val) : 20),
+    unreadOnly: zod_1.z.string().optional().transform(val => val === 'true'),
+    type: zod_1.z.string().optional()
+});
+const markAsReadSchema = zod_1.z.object({
+    notificationIds: zod_1.z.array(zod_1.z.string()).min(1)
+});
+/**
+ * GET /notifications
+ * List user notifications with pagination and filters
+ */
+app.get("/", auth_1.authenticateUser, async (req, res) => {
+    try {
+        const validation = listNotificationsSchema.safeParse(req.query);
+        if (!validation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Invalid query parameters", { errors: validation.error.errors }, req.requestId));
+        }
+        const { page, limit, unreadOnly, type } = validation.data;
+        const userId = req.user.uid;
+        // Build query
+        let query = firebase_1.firestore
+            .collection("notifications")
+            .where("userId", "==", userId)
+            .orderBy("createdAt", "desc");
+        if (unreadOnly) {
+            query = query.where("readAt", "==", null);
+        }
+        if (type) {
+            query = query.where("type", "==", type);
+        }
+        // Apply pagination
+        const offset = (page - 1) * limit;
+        query = query.offset(offset).limit(limit);
+        const snapshot = await query.get();
+        const notifications = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || doc.data().createdAt,
+            readAt: doc.data().readAt?.toDate?.()?.toISOString() || doc.data().readAt
+        }));
+        // Get total count for pagination
+        let countQuery = firebase_1.firestore
+            .collection("notifications")
+            .where("userId", "==", userId);
+        if (unreadOnly) {
+            countQuery = countQuery.where("readAt", "==", null);
+        }
+        if (type) {
+            countQuery = countQuery.where("type", "==", type);
+        }
+        const countSnapshot = await countQuery.count().get();
+        const total = countSnapshot.data().count;
+        res.json((0, utils_1.createSuccessResponse)({
+            notifications,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+                hasNext: page * limit < total,
+                hasPrev: page > 1
+            }
+        }, req.requestId));
+    }
+    catch (error) {
+        firebase_functions_1.logger.error("Error listing notifications:", error);
+        res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to list notifications", { error: error instanceof Error ? error.message : String(error) }, req.requestId));
+    }
+});
+/**
+ * PATCH /notifications/mark-read
+ * Mark notifications as read
+ */
+app.patch("/mark-read", auth_1.authenticateUser, async (req, res) => {
+    try {
+        const validation = markAsReadSchema.safeParse(req.body);
+        if (!validation.success) {
+            return res.status(400).json((0, utils_1.createErrorResponse)("VALIDATION_ERROR", "Invalid request body", { errors: validation.error.errors }, req.requestId));
+        }
+        const { notificationIds } = validation.data;
+        const userId = req.user.uid;
+        const now = new Date();
+        // Verify all notifications belong to the user
+        const notificationsSnapshot = await firebase_1.firestore
+            .collection("notifications")
+            .where("userId", "==", userId)
+            .where("__name__", "in", notificationIds)
+            .get();
+        if (notificationsSnapshot.size !== notificationIds.length) {
+            return res.status(404).json((0, utils_1.createErrorResponse)("NOT_FOUND", "Some notifications not found or don't belong to user", {}, req.requestId));
+        }
+        // Update notifications in batch
+        const batch = firebase_1.firestore.batch();
+        notificationsSnapshot.docs.forEach(doc => {
+            if (!doc.data().readAt) {
+                batch.update(doc.ref, { readAt: now });
+            }
+        });
+        await batch.commit();
+        firebase_functions_1.logger.info(`Marked ${notificationIds.length} notifications as read`, {
+            userId,
+            notificationIds
+        });
+        res.json((0, utils_1.createSuccessResponse)({
+            markedAsRead: notificationIds.length,
+            readAt: now.toISOString()
+        }, req.requestId));
+    }
+    catch (error) {
+        firebase_functions_1.logger.error("Error marking notifications as read:", error);
+        res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to mark notifications as read", { error: error instanceof Error ? error.message : String(error) }, req.requestId));
+    }
+});
+/**
+ * GET /notifications/unread-count
+ * Get count of unread notifications for user
+ */
+app.get("/unread-count", auth_1.authenticateUser, async (req, res) => {
+    try {
+        const userId = req.user.uid;
+        const countSnapshot = await firebase_1.firestore
+            .collection("notifications")
+            .where("userId", "==", userId)
+            .where("readAt", "==", null)
+            .count()
+            .get();
+        const unreadCount = countSnapshot.data().count;
+        res.json((0, utils_1.createSuccessResponse)({
+            unreadCount
+        }, req.requestId));
+    }
+    catch (error) {
+        firebase_functions_1.logger.error("Error getting unread count:", error);
+        res.status(500).json((0, utils_1.createErrorResponse)("INTERNAL_ERROR", "Failed to get unread count", { error: error instanceof Error ? error.message : String(error) }, req.requestId));
+    }
 });
 /**
  * POST /notifications/send

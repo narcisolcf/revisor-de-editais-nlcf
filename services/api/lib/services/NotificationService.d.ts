@@ -4,7 +4,7 @@
 export interface NotificationPayload {
     userId: string;
     organizationId: string;
-    type: 'analysis_complete' | 'analysis_failed' | 'document_uploaded' | 'system_alert';
+    type: 'analysis_complete' | 'analysis_failed' | 'document_uploaded' | 'system_alert' | 'low_satisfaction_alert';
     title: string;
     message: string;
     data?: Record<string, any>;
@@ -53,6 +53,10 @@ export declare class NotificationService {
      * Notifica sobre falha na análise
      */
     notifyAnalysisFailure(userId: string, organizationId: string, analysisId: string, documentName: string, error: string): Promise<void>;
+    /**
+     * Notifica sobre progresso da análise
+     */
+    notifyAnalysisProgress(organizationId: string, analysisId: string, percentage: number, currentStep: string): Promise<void>;
     /**
      * Notifica sobre upload de documento
      */

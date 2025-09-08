@@ -157,6 +157,9 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
      * Create new analysis
      */
     async createAnalysis(data) {
+        console.log('=== createAnalysis INPUT ===');
+        console.log('data.request?.options?.customRules:', data.request?.options?.customRules);
+        console.log('isArray:', Array.isArray(data.request?.options?.customRules));
         const analysisData = {
             ...data,
             processing: {
@@ -173,16 +176,23 @@ class AnalysisRepository extends BaseRepository_1.BaseRepository {
             },
             request: {
                 priority: 'NORMAL',
+                timeout: 300,
+                ...data.request,
                 options: {
                     includeAI: true,
                     generateRecommendations: true,
                     detailedMetrics: false,
-                    customRules: []
-                },
-                timeout: 300,
-                ...data.request
+                    ...data.request?.options,
+                    // Garantir que customRules seja sempre um array
+                    customRules: Array.isArray(data.request?.options?.customRules)
+                        ? data.request.options.customRules
+                        : []
+                }
             }
         };
+        console.log('=== createAnalysis PROCESSED ===');
+        console.log('analysisData.request.options.customRules:', analysisData.request.options.customRules);
+        console.log('isArray:', Array.isArray(analysisData.request.options.customRules));
         return this.create(analysisData);
     }
     /**

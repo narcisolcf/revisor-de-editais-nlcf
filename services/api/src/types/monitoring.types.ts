@@ -43,8 +43,7 @@ export enum AlertStatus {
 export enum HealthStatus {
   HEALTHY = 'healthy',
   DEGRADED = 'degraded',
-  UNHEALTHY = 'unhealthy',
-  UNKNOWN = 'unknown'
+  UNHEALTHY = 'unhealthy'
 }
 
 // ============================================================================

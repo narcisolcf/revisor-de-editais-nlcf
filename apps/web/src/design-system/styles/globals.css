@@ -1,0 +1,330 @@
+/**
+ * Estilos Globais DSGov
+ * Importações de fontes e estilos base do Design System Governamental
+ */
+
+/* Importação das fontes DSGov */
+@import url('https://fonts.googleapis.com/css2?family=Rawline:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap');
+
+/* Reset e estilos base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  /* Configuração base para rem */
+  font-size: 16px;
+  
+  /* Suavização de fontes */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Configuração de scroll suave */
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Rawline', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: theme('colors.text-primary');
+  background-color: theme('colors.surface');
+  
+  /* Prevenção de overflow horizontal */
+  overflow-x: hidden;
+  
+  /* Configuração de texto */
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Estilos para elementos de mídia */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Estilos para inputs e formulários */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Remove estilos padrão de botões */
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Estilos para links */
+a {
+  color: theme('colors.text-link');
+  text-decoration: none;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a:hover {
+  color: theme('colors.blue.vivid-10');
+  text-decoration: underline;
+}
+
+/* Estilos para foco acessível */
+*:focus {
+  outline: 2px solid theme('colors.border-focus');
+  outline-offset: 2px;
+}
+
+/* Remove outline para elementos que usam focus-visible */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Estilos para elementos com focus-visible */
+*:focus-visible {
+  outline: 2px solid theme('colors.border-focus');
+  outline-offset: 2px;
+}
+
+/* Estilos para elementos desabilitados */
+[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Estilos para elementos ocultos acessíveis */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Estilos para skip links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: theme('colors.primary');
+  color: theme('colors.text-inverse');
+  padding: theme('spacing.02') theme('spacing.04');
+  border-radius: theme('borderRadius.md');
+  text-decoration: none;
+  z-index: theme('zIndex.tooltip');
+  transition: top 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Estilos para scrollbars (webkit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: theme('colors.gray.5');
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.gray.30');
+  border-radius: theme('borderRadius.full');
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.gray.40');
+}
+
+/* Estilos para seleção de texto */
+::selection {
+  background-color: theme('colors.blue.vivid-60');
+  color: theme('colors.text-primary');
+}
+
+::-moz-selection {
+  background-color: theme('colors.blue.vivid-60');
+  color: theme('colors.text-primary');
+}
+
+/* Estilos para elementos de código */
+code,
+pre {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.875rem;
+}
+
+code {
+  background-color: theme('colors.gray.5');
+  padding: theme('spacing.01') theme('spacing.02');
+  border-radius: theme('borderRadius.sm');
+  color: theme('colors.text-primary');
+}
+
+pre {
+  background-color: theme('colors.gray.5');
+  padding: theme('spacing.04');
+  border-radius: theme('borderRadius.lg');
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Estilos para tabelas */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  text-align: left;
+  padding: theme('spacing.03') theme('spacing.04');
+  border-bottom: 1px solid theme('colors.border-muted');
+}
+
+th {
+  font-weight: theme('fontWeight.semibold');
+  background-color: theme('colors.gray.2');
+}
+
+/* Estilos para listas */
+ul,
+ol {
+  padding-left: theme('spacing.06');
+}
+
+li {
+  margin-bottom: theme('spacing.01');
+}
+
+/* Estilos para citações */
+blockquote {
+  border-left: 4px solid theme('colors.border-focus');
+  padding-left: theme('spacing.04');
+  margin: theme('spacing.04') 0;
+  font-style: italic;
+  color: theme('colors.text-secondary');
+}
+
+/* Estilos para separadores */
+hr {
+  border: none;
+  height: 1px;
+  background-color: theme('colors.border-muted');
+  margin: theme('spacing.08') 0;
+}
+
+/* Configurações de impressão */
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+  
+  a[href]:after {
+    content: " (" attr(href) ")";
+  }
+  
+  abbr[title]:after {
+    content: " (" attr(title) ")";
+  }
+  
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+  
+  thead {
+    display: table-header-group;
+  }
+  
+  tr,
+  img {
+    page-break-inside: avoid;
+  }
+  
+  img {
+    max-width: 100% !important;
+  }
+  
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+  
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+}
+
+/* Configurações para modo escuro */
+@media (prefers-color-scheme: dark) {
+  /* Implementação futura para tema escuro */
+}
+
+/* Configurações para redução de movimento */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Configurações para alto contraste */
+@media (prefers-contrast: high) {
+  * {
+    border-color: currentColor;
+  }
+  
+  button,
+  input,
+  select,
+  textarea {
+    border: 2px solid currentColor;
+  }
+}

@@ -30,7 +30,8 @@
     "logs": "firebase functions:log"
   },
   "dependencies": {
-    "@revisor-de-editais/types": "file:../../packages/types",
+    "@revisor-editais/domain": "file:../../packages/domain",
+    "@revisor-editais/shared": "file:../../packages/shared",
     "axios": "^1.6.0",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",

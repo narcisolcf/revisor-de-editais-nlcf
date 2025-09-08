@@ -31,7 +31,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 // Importar componentes do dashboard
-import { MetricsCards } from '@/components/dashboard/MetricsCards';
+import MetricsCards from '@/components/dashboard/MetricsCards';
 import { TrendsChart } from '@/components/dashboard/TrendsChart';
 import { DocumentsTable } from '@/components/dashboard/DocumentsTable';
 import { IssuesBreakdown } from '@/components/dashboard/IssuesBreakdown';
@@ -600,7 +600,8 @@ const DashboardPage: React.FC = () => {
             />
           </TabsContent>
         </Tabs>
-        </AnimatedContainer>
+      </AnimatedContainer>
+      </AnimatedContainer>
       </DashboardErrorBoundary>
     );
   };

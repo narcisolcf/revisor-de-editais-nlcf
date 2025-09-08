@@ -1,0 +1,56 @@
+{
+  "name": "@licitareview/domain",
+  "version": "1.0.0",
+  "description": "LicitaReview Domain Layer - Entidades e regras de negócio",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./entities": {
+      "import": "./dist/entities/index.mjs",
+      "require": "./dist/entities/index.js",
+      "types": "./dist/entities/index.d.ts"
+    },
+    "./value-objects": {
+      "import": "./dist/value-objects/index.mjs",
+      "require": "./dist/value-objects/index.js",
+      "types": "./dist/value-objects/index.d.ts"
+    },
+    "./errors": {
+      "import": "./dist/errors/index.mjs",
+      "require": "./dist/errors/index.js",
+      "types": "./dist/errors/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix"
+  },
+  "dependencies": {
+    "zod": "^3.22.4",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.7",
+
+    "@types/node": "^20.10.0",
+    "eslint": "^8.55.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.2"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

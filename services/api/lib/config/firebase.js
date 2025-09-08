@@ -56,6 +56,7 @@ exports.collections = {
     documents: exports.firestore.collection("documents"),
     organizations: exports.firestore.collection("organizations"),
     analysisResults: exports.firestore.collection("analysisResults"),
+    analysis: exports.firestore.collection("analysis"),
     configs: exports.firestore.collection("organizationConfigs"),
     users: exports.firestore.collection("users"),
     auditLogs: exports.firestore.collection("auditLogs"),

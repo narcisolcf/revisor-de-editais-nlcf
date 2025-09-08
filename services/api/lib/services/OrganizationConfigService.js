@@ -41,7 +41,7 @@ class OrganizationConfigService {
             });
             return config;
         }, (error) => {
-            firebase_functions_1.logger.error('Request interceptor error', { error: error.message });
+            firebase_functions_1.logger.error('Request interceptor error', new Error(error.message));
             return Promise.reject(error);
         });
         // Interceptor para logging de responses
@@ -79,7 +79,7 @@ class OrganizationConfigService {
             // Buscar parâmetros customizados
             const customParams = await this.customParamsRepo.findByOrganization(organizationId);
             // Construir configuração de análise
-            const config = await this.buildAnalysisConfig(organization, customParams);
+            const config = this.buildAnalysisConfig(organization, customParams);
             // Armazenar no cache
             this.configCache.set(organizationId, {
                 config,
@@ -93,9 +93,8 @@ class OrganizationConfigService {
             return config;
         }
         catch (error) {
-            firebase_functions_1.logger.error('Error getting analysis config', {
-                organizationId,
-                error: error instanceof Error ? error.message : 'Unknown error'
+            firebase_functions_1.logger.error('Error getting analysis config', error instanceof Error ? error : new Error(String(error)), {
+                organizationId
             });
             throw error;
         }
@@ -114,9 +113,8 @@ class OrganizationConfigService {
             firebase_functions_1.logger.info('Config synced with analyzer service', { organizationId });
         }
         catch (error) {
-            firebase_functions_1.logger.error('Error syncing config with analyzer', {
-                organizationId,
-                error: error instanceof Error ? error.message : 'Unknown error'
+            firebase_functions_1.logger.error('Error syncing config with analyzer', error instanceof Error ? error : new Error(String(error)), {
+                organizationId
             });
             throw error;
         }
@@ -130,9 +128,8 @@ class OrganizationConfigService {
             return response.data;
         }
         catch (error) {
-            firebase_functions_1.logger.error('Error validating config', {
-                organizationId: config.organizationId,
-                error: error instanceof Error ? error.message : 'Unknown error'
+            firebase_functions_1.logger.error('Error validating config', error instanceof Error ? error : new Error(String(error)), {
+                organizationId: config.organizationId
             });
             throw error;
         }
@@ -146,9 +143,7 @@ class OrganizationConfigService {
             return response.data;
         }
         catch (error) {
-            firebase_functions_1.logger.error('Error getting available presets', {
-                error: error instanceof Error ? error.message : 'Unknown error'
-            });
+            firebase_functions_1.logger.error('Error getting available presets', error instanceof Error ? error : new Error(String(error)), {});
             throw error;
         }
     }
@@ -200,7 +195,7 @@ class OrganizationConfigService {
             ];
         }
         catch (error) {
-            firebase_functions_1.logger.error('Error getting presets:', { error: String(error), organizationId });
+            firebase_functions_1.logger.error('Error getting presets', error instanceof Error ? error : new Error(String(error)), { organizationId });
             throw error;
         }
     }
@@ -234,7 +229,7 @@ class OrganizationConfigService {
             return preset;
         }
         catch (error) {
-            firebase_functions_1.logger.error('Error creating preset:', { error: String(error), organizationId });
+            firebase_functions_1.logger.error('Error creating preset', error instanceof Error ? error : new Error(String(error)), { organizationId });
             throw error;
         }
     }
@@ -259,7 +254,7 @@ class OrganizationConfigService {
             };
         }
         catch (error) {
-            firebase_functions_1.logger.error('Error getting usage stats:', { error: String(error), organizationId });
+            firebase_functions_1.logger.error('Error getting usage stats', error instanceof Error ? error : new Error(String(error)), { organizationId });
             throw error;
         }
     }
@@ -284,14 +279,14 @@ class OrganizationConfigService {
             firebase_functions_1.logger.info('Configuration synced with analyzer', { organizationId });
         }
         catch (error) {
-            firebase_functions_1.logger.error('Error syncing with analyzer:', { error: String(error), organizationId });
+            firebase_functions_1.logger.error('Error syncing with analyzer', error instanceof Error ? error : new Error(String(error)), { organizationId });
             throw error;
         }
     }
     /**
      * Constrói configuração de análise baseada nos dados da organização
      */
-    async buildAnalysisConfig(organization, customParams) {
+    buildAnalysisConfig(organization, customParams) {
         // Pesos padrão baseados no tipo de organização
         const defaultWeights = this.getDefaultWeightsByType(organization.organizationType);
         // Aplicar pesos customizados se existirem
@@ -376,7 +371,6 @@ class OrganizationConfigService {
     /**
      * Obtém estatísticas de uso de configurações
      */
-    // eslint-disable-next-line no-unused-vars
     async getConfigUsageStats(organizationId) {
         // Implementar busca de estatísticas no AnalysisRepository
         // Por enquanto, retornar dados mock

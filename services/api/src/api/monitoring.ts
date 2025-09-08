@@ -38,8 +38,7 @@ import {
 } from '../types/monitoring.types';
 import { z } from 'zod';
 
-// Import tipos estendidos do Express
-import '../types/express';
+// Tipos estendidos do Express são carregados automaticamente
 
 // Inicializar serviços
 const db = getFirestore();

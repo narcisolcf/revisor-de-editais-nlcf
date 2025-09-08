@@ -71,9 +71,41 @@ import {
   AlertCircle,
   Info
 } from 'lucide-react';
-import { useAnalysisConfig, type AnalysisTemplate, type AnalysisWeights } from '@/hooks/useAnalysisConfig';
-import { useAuth } from '@/hooks/useAuth';
+import { useAnalysisConfig } from '@/hooks/useAnalysisConfig';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+
+// Definição dos tipos
+interface AnalysisWeights {
+  structural: number;
+  legal: number;
+  clarity: number;
+  abnt: number;
+  general: number;
+  budgetary: number;
+  formal: number;
+}
+
+// Definição do tipo AnalysisTemplate
+interface AnalysisTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: 'edital' | 'tr' | 'contrato' | 'projeto' | 'geral';
+  documentType: string;
+  organizationId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  isDefault: boolean;
+  isPublic: boolean;
+  usageCount: number;
+  rating: number;
+  weights: AnalysisWeights;
+  parameters: any[];
+  rules: any[];
+  customRules: any[];
+}
 
 interface TemplateManagerProps {
   onTemplateSelect?: (template: AnalysisTemplate) => void;
@@ -88,7 +120,7 @@ interface TemplateFormData {
   category: 'edital' | 'tr' | 'contrato' | 'projeto' | 'geral';
   weights: AnalysisWeights;
   customRules: string[];
-  parameters: Record<string, any>;
+  parameters: any[];
   isPublic: boolean;
 }
 
@@ -114,8 +146,8 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
   selectedTemplateId,
   className
 }) => {
-  const { user, organization } = useAuth();
-  const { configuration, saveConfiguration } = useAnalysisConfig(organization?.id || '');
+  const { userProfile } = useAuth();
+  const { configs, activeConfig } = useAnalysisConfig(userProfile?.organizationName || '');
   
   // Estados principais
   const [templates, setTemplates] = useState<AnalysisTemplate[]>([]);
@@ -134,15 +166,16 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
     documentType: 'edital',
     category: 'edital',
     weights: {
-      structural: 0.20,
-      legal: 0.25,
-      clarity: 0.20,
-      abnt: 0.15,
-      budgetary: 0.10,
-      formal: 0.10
-    },
+          structural: 0.20,
+          legal: 0.25,
+          clarity: 0.20,
+          abnt: 0.15,
+          general: 0.10,
+          budgetary: 0.05,
+          formal: 0.05
+        },
     customRules: [],
-    parameters: {},
+    parameters: [],
     isPublic: false
   });
   
@@ -154,14 +187,14 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
   // Carrega templates
   useEffect(() => {
     loadTemplates();
-  }, [organization?.id]);
+  }, [userProfile?.organizationName]);
   
   const loadTemplates = async () => {
-    if (!organization?.id) return;
+    if (!userProfile?.organizationName) return;
     
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/templates/${organization.id}`);
+      const response = await fetch(`/api/templates/${userProfile.organizationName}`);
       if (response.ok) {
         const data = await response.json();
         setTemplates(data);
@@ -207,16 +240,17 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
   
   // Cria novo template
   const handleCreateTemplate = async () => {
-    if (!organization?.id || !user?.id) return;
+    if (!userProfile?.uid) return;
     
     setIsSaving(true);
     try {
       const newTemplate: Omit<AnalysisTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usageCount' | 'rating'> = {
-        ...formData,
-        organizationId: organization.id,
-        createdBy: user.id,
-        isDefault: false
-      };
+          ...formData,
+          organizationId: userProfile?.organizationName || '',
+          createdBy: userProfile.uid,
+          isDefault: false,
+          rules: []
+        };
       
       const response = await fetch('/api/templates', {
         method: 'POST',
@@ -299,12 +333,12 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
   
   // Duplica template
   const handleDuplicateTemplate = async (template: AnalysisTemplate) => {
-    if (!user?.id) return;
+    if (!userProfile?.uid) return;
     
     const duplicatedTemplate = {
       ...template,
       name: `${template.name} (Cópia)`,
-      createdBy: user.id,
+      createdBy: userProfile?.uid || '',
       isDefault: false,
       isPublic: false
     };
@@ -379,7 +413,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
       const exportData = {
         ...template,
         exportedAt: new Date().toISOString(),
-        exportedBy: user?.name || 'Usuário',
+        exportedBy: userProfile?.displayName || 'Usuário',
         version: '1.0'
       };
       
@@ -413,7 +447,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
   // Importa template
   const handleImportTemplate = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !organization?.id || !user?.id) return;
+    if (!file || !userProfile?.uid) return;
     
     setIsImporting(true);
     try {
@@ -427,8 +461,8 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
       
       const newTemplate = {
         ...importedData,
-        organizationId: organization.id,
-        createdBy: user.id,
+        organizationId: userProfile?.organizationName || '',
+        createdBy: userProfile.uid,
         isDefault: false,
         name: `${importedData.name} (Importado)`
       };
@@ -516,11 +550,12 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
         legal: 0.25,
         clarity: 0.20,
         abnt: 0.15,
-        budgetary: 0.10,
-        formal: 0.10
+        general: 0.10,
+        budgetary: 0.05,
+        formal: 0.05
       },
       customRules: [],
-      parameters: {},
+      parameters: [],
       isPublic: false
     });
   };
@@ -733,6 +768,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                 {key === 'legal' && 'Jurídico'}
                 {key === 'clarity' && 'Clareza'}
                 {key === 'abnt' && 'ABNT'}
+                {key === 'general' && 'Geral'}
                 {key === 'budgetary' && 'Orçamentário'}
                 {key === 'formal' && 'Formal'}
               </Label>
@@ -742,7 +778,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                 min="0"
                 max="1"
                 step="0.01"
-                value={value}
+                value={value as number}
                 onChange={(e) => setFormData(prev => ({
                   ...prev,
                   weights: {
@@ -757,7 +793,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
         
         <div className="text-sm text-gray-600">
           <Info className="inline h-4 w-4 mr-1" />
-          A soma dos pesos deve ser igual a 1.0. Atual: {Object.values(formData.weights).reduce((sum, w) => sum + w, 0).toFixed(2)}
+          A soma dos pesos deve ser igual a 1.0. Atual: {(Object.values(formData.weights).reduce((sum, w) => (sum as number) + (w as number), 0) as number).toFixed(2)}
         </div>
       </div>
     </div>
