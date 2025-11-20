@@ -23,6 +23,7 @@ from google.cloud import firestore
 from services.analysis_engine import AnalysisEngine
 from services.classification_service import classify_document_type
 from services.conformity_checker import check_conformity
+from services.ocr_service import OCRService
 
 # Configurar logging estruturado
 logging.basicConfig(
@@ -45,6 +46,8 @@ except Exception as e:
 
 # Inicializar serviços
 analysis_engine = AnalysisEngine()
+ocr_service = OCRService()
+ocr_service.initialize()
 
 # Métricas
 REQUEST_COUNT = 0
@@ -224,6 +227,135 @@ def classify_document():
         logger.error(f"❌ Classification error: {e}")
         logger.error(traceback.format_exc())
         return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/ocr/extract', methods=['POST'])
+def ocr_extract():
+    """
+    ✅ Endpoint de OCR Avançado com Google Vision API.
+
+    Extrai texto, tabelas, layout e formulários de documentos.
+    """
+    global REQUEST_COUNT, SUCCESS_COUNT, ERROR_COUNT
+    REQUEST_COUNT += 1
+
+    try:
+        # Aceitar tanto multipart/form-data quanto JSON
+        if request.files and 'file' in request.files:
+            # Upload de arquivo
+            file = request.files['file']
+            file_content = file.read()
+            filename = file.filename
+
+            # Opções de extração (da query string ou form data)
+            extract_tables = request.form.get('extract_tables', 'true').lower() == 'true'
+            detect_layout = request.form.get('detect_layout', 'true').lower() == 'true'
+            extract_forms = request.form.get('extract_forms', 'true').lower() == 'true'
+
+        elif request.is_json:
+            # JSON com conteúdo base64
+            data = request.get_json()
+            import base64
+
+            file_content = base64.b64decode(data.get('file_content', ''))
+            filename = data.get('filename', 'document.pdf')
+            extract_tables = data.get('extract_tables', True)
+            detect_layout = data.get('detect_layout', True)
+            extract_forms = data.get('extract_forms', True)
+        else:
+            ERROR_COUNT += 1
+            raise BadRequest('File or JSON data required')
+
+        logger.info(f"🔍 OCR extraction for: {filename}")
+
+        # Executar OCR avançado
+        ocr_result = ocr_service.extract_full(
+            file_content=file_content,
+            filename=filename,
+            extract_tables=extract_tables,
+            detect_layout=detect_layout,
+            extract_forms=extract_forms
+        )
+
+        # Converter tabelas para formato JSON-friendly
+        tables_json = []
+        for table in ocr_result.tables:
+            tables_json.append({
+                'rows': table.rows,
+                'cols': table.cols,
+                'cells': [
+                    {
+                        'row': c.row,
+                        'col': c.col,
+                        'text': c.text,
+                        'confidence': c.confidence
+                    } for c in table.cells
+                ],
+                'confidence': table.confidence,
+                'position': table.position
+            })
+
+        # Converter layout blocks
+        layout_json = [
+            {
+                'type': block.type,
+                'text': block.text,
+                'confidence': block.confidence,
+                'position': block.position
+            } for block in ocr_result.layout_blocks
+        ]
+
+        # Converter form fields
+        forms_json = [
+            {
+                'field_name': field.field_name,
+                'field_value': field.field_value,
+                'field_type': field.field_type,
+                'confidence': field.confidence
+            } for field in ocr_result.form_fields
+        ]
+
+        result = {
+            'success': True,
+            'text': ocr_result.text,
+            'confidence': ocr_result.confidence,
+            'language': ocr_result.language,
+            'tables': tables_json,
+            'layout_blocks': layout_json,
+            'form_fields': forms_json,
+            'metadata': ocr_result.metadata,
+            'processing_time': ocr_result.processing_time,
+            'method': ocr_result.method,
+            'stats': {
+                'text_length': len(ocr_result.text),
+                'tables_count': len(tables_json),
+                'layout_blocks_count': len(layout_json),
+                'form_fields_count': len(forms_json)
+            }
+        }
+
+        SUCCESS_COUNT += 1
+        logger.info(
+            f"✅ OCR complete: {len(ocr_result.text)} chars, "
+            f"{len(tables_json)} tables, {len(forms_json)} forms"
+        )
+
+        return jsonify(result), 200
+
+    except BadRequest as e:
+        ERROR_COUNT += 1
+        logger.error(f"❌ Bad request: {e}")
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        ERROR_COUNT += 1
+        logger.error(f"❌ OCR error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+@app.route('/ocr/stats', methods=['GET'])
+def ocr_stats():
+    """Retorna estatísticas do serviço OCR."""
+    stats = ocr_service.get_stats()
+    return jsonify(stats), 200
 
 @app.errorhandler(404)
 def not_found(error):
