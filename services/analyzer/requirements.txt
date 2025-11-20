@@ -14,15 +14,20 @@ python-multipart==0.0.6
 # AI/ML Dependencies
 openai==1.5.0
 google-cloud-vision==3.4.5
-google-cloud-aiplatform==1.38.1
+google-cloud-aiplatform==1.70.0  # Atualizado para suporte RAG
+google-generativeai==0.3.2  # Para Gemini models
+vertexai>=1.60.0  # Vertex AI SDK com RAG support
 
 # Database
 google-cloud-firestore==2.13.1
+google-cloud-storage==2.18.2  # Para GCS integration com RAG
 
 # Utilities
 python-dateutil==2.8.2
 requests==2.31.0
 tenacity==8.2.3
+tiktoken==0.5.2  # Para contagem de tokens
+redis==5.0.1  # Para cache
 
 # Development
 pytest==7.4.3
