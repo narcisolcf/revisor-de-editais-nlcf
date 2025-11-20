@@ -37,55 +37,12 @@ import { DocumentsTable } from '@/components/dashboard/DocumentsTable';
 import { IssuesBreakdown } from '@/components/dashboard/IssuesBreakdown';
 import { PerformanceMetrics } from '@/components/dashboard/PerformanceMetrics';
 import { QuickActions } from '@/components/dashboard/QuickActions';
+import ReportExporter from '@/components/dashboard/ReportExporter';
 
-// Tipos de dados
-interface DashboardMetrics {
-  totalDocuments: number;
-  averageScore: number;
-  averageProcessingTime: number;
-  successRate: number;
-  trends: {
-    documents: number;
-    score: number;
-    processingTime: number;
-    successRate: number;
-  };
-}
+// Importar hook customizado de Analytics
+import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 
-interface Document {
-  id: string;
-  name: string;
-  type: string;
-  status: 'completed' | 'processing' | 'failed';
-  score: number;
-  createdAt: Date;
-  processingTime: number;
-}
-
-interface Issue {
-  id: string;
-  type: 'critical' | 'warning' | 'info';
-  category: string;
-  title: string;
-  description: string;
-  count: number;
-  percentage: number;
-  trend: 'up' | 'down' | 'stable';
-  trendValue: number;
-}
-
-interface PerformanceMetric {
-  id: string;
-  name: string;
-  value: number;
-  unit: string;
-  target?: number;
-  status: 'good' | 'warning' | 'critical';
-  trend: 'up' | 'down' | 'stable';
-  trendValue: number;
-  description: string;
-}
-
+// Tipos de dados (compatibilidade com componentes existentes)
 interface SystemHealth {
   cpu: number;
   memory: number;
@@ -96,167 +53,32 @@ interface SystemHealth {
 }
 
 const DashboardPage: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('overview');
+  const [lastUpdate, setLastUpdate] = useState(new Date());
 
-  // Dados mock - em produção, estes viriam de APIs
-  const [metrics] = useState<DashboardMetrics>({
-    totalDocuments: 1247,
-    averageScore: 87.3,
-    averageProcessingTime: 2.4,
-    successRate: 94.2,
-    trends: {
-      documents: 12.5,
-      score: 3.2,
-      processingTime: -8.1,
-      successRate: 1.8
-    }
+  // ✅ DADOS REAIS DO FIRESTORE via Hook Customizado
+  const {
+    metrics,
+    recentAnalyses,
+    trendData,
+    issues,
+    performanceMetrics,
+    loading,
+    error,
+    refresh,
+    exportData,
+  } = useDashboardAnalytics({
+    recentAnalysesLimit: 15,
+    trendMonths: 6,
+    enableRealtime: true,
+    autoRefresh: true,
+    refreshInterval: 60000, // 1 minuto
   });
 
-  const [documents] = useState<Document[]>([
-    {
-      id: '1',
-      name: 'Edital_Licitacao_001_2024.pdf',
-      type: 'pdf',
-      status: 'completed',
-      score: 92.5,
-      createdAt: new Date('2024-01-15T10:30:00'),
-      processingTime: 1.8
-    },
-    {
-      id: '2',
-      name: 'Contrato_Servicos_TI.docx',
-      type: 'docx',
-      status: 'completed',
-      score: 88.7,
-      createdAt: new Date('2024-01-15T09:15:00'),
-      processingTime: 2.1
-    },
-    {
-      id: '3',
-      name: 'Planilha_Orcamento_2024.xlsx',
-      type: 'xlsx',
-      status: 'processing',
-      score: 0,
-      createdAt: new Date('2024-01-15T11:45:00'),
-      processingTime: 0
-    },
-    {
-      id: '4',
-      name: 'Edital_Obras_Publicas.pdf',
-      type: 'pdf',
-      status: 'failed',
-      score: 0,
-      createdAt: new Date('2024-01-15T08:20:00'),
-      processingTime: 0
-    },
-    {
-      id: '5',
-      name: 'Termo_Referencia_Consultoria.pdf',
-      type: 'pdf',
-      status: 'completed',
-      score: 95.2,
-      createdAt: new Date('2024-01-14T16:30:00'),
-      processingTime: 1.5
-    }
-  ]);
+  // Estado de refresh manual
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const [issues] = useState<Issue[]>([
-    {
-      id: '1',
-      type: 'critical',
-      category: 'Conformidade',
-      title: 'Cláusulas Obrigatórias Ausentes',
-      description: 'Documentos sem cláusulas obrigatórias de sustentabilidade',
-      count: 23,
-      percentage: 18.4,
-      trend: 'down',
-      trendValue: 5.2
-    },
-    {
-      id: '2',
-      type: 'warning',
-      category: 'Prazos',
-      title: 'Prazos Inadequados',
-      description: 'Prazos de entrega muito curtos para o escopo',
-      count: 45,
-      percentage: 36.1,
-      trend: 'up',
-      trendValue: 2.8
-    },
-    {
-      id: '3',
-      type: 'warning',
-      category: 'Documentação',
-      title: 'Documentos Incompletos',
-      description: 'Faltam anexos ou documentos complementares',
-      count: 31,
-      percentage: 24.9,
-      trend: 'stable',
-      trendValue: 0
-    },
-    {
-      id: '4',
-      type: 'info',
-      category: 'Qualidade',
-      title: 'Critérios de Avaliação Vagos',
-      description: 'Critérios de avaliação pouco específicos',
-      count: 67,
-      percentage: 53.7,
-      trend: 'down',
-      trendValue: 8.3
-    }
-  ]);
-
-  const [performanceMetrics] = useState<PerformanceMetric[]>([
-    {
-      id: '1',
-      name: 'Tempo de Processamento',
-      value: 2.4,
-      unit: 's',
-      target: 3.0,
-      status: 'good',
-      trend: 'down',
-      trendValue: 8.1,
-      description: 'Tempo médio para processar um documento'
-    },
-    {
-      id: '2',
-      name: 'Taxa de Sucesso',
-      value: 94.2,
-      unit: '%',
-      target: 95.0,
-      status: 'warning',
-      trend: 'up',
-      trendValue: 1.8,
-      description: 'Percentual de documentos processados com sucesso'
-    },
-    {
-      id: '3',
-      name: 'Throughput',
-      value: 156,
-      unit: 'req/min',
-      target: 200,
-      status: 'good',
-      trend: 'up',
-      trendValue: 12.5,
-      description: 'Documentos processados por minuto'
-    },
-    {
-      id: '4',
-      name: 'Uso de Memória',
-      value: 2.1,
-      unit: 'GB',
-      target: 4.0,
-      status: 'good',
-      trend: 'stable',
-      trendValue: 0,
-      description: 'Consumo médio de memória do sistema'
-    }
-  ]);
-
+  // System health mock (pode ser substituído por dados reais futuramente)
   const [systemHealth] = useState<SystemHealth>({
     cpu: 45.2,
     memory: 67.8,
@@ -266,50 +88,25 @@ const DashboardPage: React.FC = () => {
     responseTime: 89
   });
 
-  // Dados para gráficos de tendência
-  const trendsData = {
-    documents: [
-      { name: 'Jan', value: 1120, processed: 1050, failed: 70 },
-      { name: 'Fev', value: 1180, processed: 1125, failed: 55 },
-      { name: 'Mar', value: 1247, processed: 1175, failed: 72 },
-      { name: 'Abr', value: 1320, processed: 1248, failed: 72 },
-      { name: 'Mai', value: 1285, processed: 1210, failed: 75 },
-      { name: 'Jun', value: 1350, processed: 1275, failed: 75 }
-    ],
-    processing: [
-      { name: 'Jan', avgTime: 2.8, maxTime: 5.2, minTime: 1.1 },
-      { name: 'Fev', avgTime: 2.6, maxTime: 4.8, minTime: 1.0 },
-      { name: 'Mar', avgTime: 2.4, maxTime: 4.5, minTime: 0.9 },
-      { name: 'Abr', avgTime: 2.3, maxTime: 4.2, minTime: 0.8 },
-      { name: 'Mai', avgTime: 2.2, maxTime: 4.0, minTime: 0.8 },
-      { name: 'Jun', avgTime: 2.1, maxTime: 3.8, minTime: 0.7 }
-    ],
-    scores: [
-      { name: 'Jan', avgScore: 84.2, maxScore: 98.5, minScore: 65.3 },
-      { name: 'Fev', avgScore: 85.1, maxScore: 97.8, minScore: 68.2 },
-      { name: 'Mar', avgScore: 86.5, maxScore: 98.2, minScore: 70.1 },
-      { name: 'Abr', avgScore: 87.3, maxScore: 98.7, minScore: 72.4 },
-      { name: 'Mai', avgScore: 88.1, maxScore: 99.1, minScore: 74.2 },
-      { name: 'Jun', avgScore: 87.9, maxScore: 98.9, minScore: 73.8 }
-    ]
-  };
-
+  // Atualizar timestamp ao carregar dados
   useEffect(() => {
-    // Simular carregamento inicial
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
+    if (!loading) {
+      setLastUpdate(new Date());
+    }
+  }, [loading]);
 
-    return () => clearTimeout(timer);
-  }, []);
-
+  // Handler para refresh manual
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    // Simular carregamento
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setLastUpdate(new Date());
-    setIsRefreshing(false);
-  }, []);
+    try {
+      await refresh();
+      setLastUpdate(new Date());
+    } catch (error) {
+      console.error('Erro ao atualizar:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refresh]);
 
   const handleUploadDocument = () => {
     console.log('Upload documento');
@@ -321,17 +118,41 @@ const DashboardPage: React.FC = () => {
     // Implementar navegação para relatórios
   };
 
-  const handleViewDocument = (document: Document) => {
+  const handleViewDocument = (document: any) => {
     console.log('Visualizar documento:', document.id);
     // Implementar visualização de documento
   };
 
-  const handleDownloadDocument = (document: Document) => {
+  const handleDownloadDocument = (document: any) => {
     console.log('Download documento:', document.id);
     // Implementar download de documento
   };
 
-  if (isLoading) {
+  const handleExportReport = async (format: 'csv' | 'pdf') => {
+    try {
+      await exportData(format);
+    } catch (error) {
+      console.error('Erro ao exportar relatório:', error);
+      alert('Erro ao exportar relatório. Tente novamente.');
+    }
+  };
+
+  // Exibir erro se houver
+  if (error) {
+    return (
+      <DashboardErrorBoundary>
+        <AnimatedContainer animation="fadeIn" className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <DashboardErrorFallback
+            title="Erro ao Carregar Dashboard"
+            description={error}
+          />
+        </AnimatedContainer>
+      </DashboardErrorBoundary>
+    );
+  }
+
+  // Loading state
+  if (loading) {
     return (
       <DashboardErrorBoundary>
         <AnimatedContainer animation="fadeIn" className="min-h-screen bg-gray-50">
@@ -415,10 +236,19 @@ const DashboardPage: React.FC = () => {
                   Sistema Online
                 </Badge>
               </PulseAnimation>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
+
+              <ReportExporter
+                metrics={metrics}
+                recentAnalyses={recentAnalyses}
+                trendData={trendData}
+                issues={issues}
+                performanceMetrics={performanceMetrics}
+                organizationName="LicitaReview"
+              />
+
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
               >
@@ -460,9 +290,20 @@ const DashboardPage: React.FC = () => {
                     </div>
                   }
                 >
-                  <MetricsCards 
-                    metrics={metrics} 
-                    isLoading={isLoading}
+                  <MetricsCards
+                    metrics={metrics || {
+                      totalDocuments: 0,
+                      averageScore: 0,
+                      averageProcessingTime: 0,
+                      successRate: 0,
+                      trends: {
+                        documents: 0,
+                        score: 0,
+                        processingTime: 0,
+                        successRate: 0
+                      }
+                    }}
+                    isLoading={loading}
                     isRefreshing={isRefreshing}
                   />
                 </DashboardErrorBoundary>
@@ -500,29 +341,29 @@ const DashboardPage: React.FC = () => {
                 }
               >
                 <TrendsChart
-                  data={trendsData.documents}
+                  data={trendData?.documents || []}
                   type="documents"
                   title="Documentos Processados"
                   description="Evolução mensal do processamento de documentos"
-                  isLoading={isLoading}
+                  isLoading={loading}
                   height={300}
                 />
               </DashboardErrorBoundary>
-              
-              <DashboardErrorBoundary 
+
+              <DashboardErrorBoundary
                 fallback={
-                  <DashboardErrorFallback 
+                  <DashboardErrorFallback
                     title="Erro no Gráfico"
                     description="Não foi possível carregar o gráfico de scores."
                   />
                 }
               >
                 <TrendsChart
-                  data={trendsData.scores}
+                  data={trendData?.scores || []}
                   type="scores"
                   title="Scores de Qualidade"
                   description="Evolução da qualidade dos documentos analisados"
-                  isLoading={isLoading}
+                  isLoading={loading}
                   height={300}
                 />
               </DashboardErrorBoundary>
@@ -539,10 +380,10 @@ const DashboardPage: React.FC = () => {
                 }
               >
                 <DocumentsTable
-                  documents={documents}
+                  documents={recentAnalyses}
                   onViewDocument={handleViewDocument}
                   onDownloadDocument={handleDownloadDocument}
-                  isLoading={isLoading}
+                  isLoading={loading}
                   pageSize={15}
                 />
               </DashboardErrorBoundary>
@@ -552,24 +393,24 @@ const DashboardPage: React.FC = () => {
           {/* Documentos */}
           <TabsContent value="documents" className="space-y-6">
             <DocumentsTable
-              documents={documents}
+              documents={recentAnalyses}
               showAll={true}
               onViewDocument={handleViewDocument}
               onDownloadDocument={handleDownloadDocument}
-              isLoading={isLoading}
+              isLoading={loading}
               pageSize={15}
             />
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <TrendsChart
-                data={trendsData.documents}
+                data={trendData?.documents || []}
                 type="documents"
                 title="Histórico de Processamento"
                 description="Documentos processados, bem-sucedidos e com falha"
               />
-              
+
               <TrendsChart
-                data={trendsData.processing}
+                data={trendData?.processing || []}
                 type="processing"
                 title="Tempo de Processamento"
                 description="Evolução dos tempos de processamento"
@@ -581,7 +422,7 @@ const DashboardPage: React.FC = () => {
           <TabsContent value="issues" className="space-y-6">
             <IssuesBreakdown
               issues={issues}
-              totalDocuments={metrics.totalDocuments}
+              totalDocuments={metrics?.totalDocuments || 0}
             />
           </TabsContent>
 
@@ -591,9 +432,9 @@ const DashboardPage: React.FC = () => {
               metrics={performanceMetrics}
               systemHealth={systemHealth}
             />
-            
+
             <TrendsChart
-              data={trendsData.processing}
+              data={trendData?.processing || []}
               type="processing"
               title="Performance do Sistema"
               description="Métricas de performance ao longo do tempo"
