@@ -14,7 +14,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, validator, model_validator
+from pydantic import field_validator, ConfigDict, BaseModel, Field, model_validator
 from pydantic.types import StrictStr, PositiveInt, confloat
 
 from .document_models import DocumentType
@@ -60,17 +60,7 @@ class AnalysisWeights(BaseModel):
         description="Peso para normas ABNT - padrões técnicos (0-100%)"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        validate_assignment = True
-        schema_extra = {
-            "example": {
-                "structural": 25.0,
-                "legal": 40.0,
-                "clarity": 25.0,
-                "abnt": 10.0
-            }
-        }
+    model_config = ConfigDict(validate_assignment=True)
     
     @model_validator(mode='after')
     def validate_weights_sum_to_100(self):
@@ -97,13 +87,14 @@ class AnalysisWeights(BaseModel):
         
         return values
     
-    @validator('structural', 'legal', 'clarity', 'abnt')
-    def validate_individual_weights(cls, v, field):
+    @field_validator('structural', 'legal', 'clarity', 'abnt')
+    @classmethod
+    def validate_individual_weights(cls, v):
         """Valida que cada peso individual está em faixa aceitável."""
         if v < 0:
-            raise ValueError(f"Peso {field.name} não pode ser negativo")
+            raise ValueError(f"Peso não pode ser negativo")
         if v > 100:
-            raise ValueError(f"Peso {field.name} não pode exceder 100%")
+            raise ValueError(f"Peso não pode exceder 100%")
         return round(v, 2)  # Limita a 2 casas decimais
     
     def get_dominant_category(self) -> str:
@@ -281,30 +272,24 @@ class CustomRule(BaseModel):
         description="Score de efetividade da regra baseado em feedback"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        use_enum_values = True
-        validate_assignment = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
     
-    @validator('pattern')
-    def validate_pattern(cls, v, values):
+    @model_validator(mode='after')
+    def validate_pattern(self):
         """Valida o padrão dependendo do tipo."""
-        pattern_type = values.get('pattern_type', 'regex')
-        
+        pattern_type = self.pattern_type if self.pattern_type else 'regex'
+
         if pattern_type == 'regex':
             import re
             try:
-                re.compile(v)
+                re.compile(self.pattern)
             except re.error as e:
                 raise ValueError(f"Padrão regex inválido: {e}")
         elif pattern_type == 'keyword':
-            if not v.strip():
+            if not self.pattern.strip():
                 raise ValueError("Keyword não pode estar vazia")
-        
-        return v
+
+        return self
     
     def test_pattern_match(self, text: str) -> bool:
         """
@@ -460,13 +445,7 @@ class OrganizationTemplate(BaseModel):
         description="Número de vezes que o template foi usado"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        use_enum_values = True
-        validate_assignment = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
     
     def get_required_sections(self) -> List[TemplateSection]:
         """Retorna apenas seções obrigatórias."""
@@ -610,28 +589,7 @@ class OrganizationConfig(BaseModel):
         description="Indica se a configuração está ativa"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        use_enum_values = True
-        validate_assignment = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
-        schema_extra = {
-            "example": {
-                "organization_id": "org_12345",
-                "organization_name": "Prefeitura Municipal de Example",
-                "weights": {
-                    "structural": 25.0,
-                    "legal": 40.0,
-                    "clarity": 25.0,
-                    "abnt": 10.0
-                },
-                "preset_type": "rigorous",
-                "custom_rules": [],
-                "templates": []
-            }
-        }
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
     
     @model_validator(mode='after')
     def validate_preset_consistency(self):
@@ -657,13 +615,12 @@ class OrganizationConfig(BaseModel):
         
         return values
     
-    @validator('updated_at')
-    def validate_updated_at(cls, v, values):
+    @model_validator(mode='after')
+    def validate_updated_at(self):
         """Garante que updated_at seja posterior ou igual a created_at."""
-        created_at = values.get('created_at')
-        if created_at and v < created_at:
+        if self.updated_at and self.created_at and self.updated_at < self.created_at:
             raise ValueError('updated_at deve ser posterior ou igual a created_at')
-        return v
+        return self
     
     def get_config_hash(self) -> str:
         """

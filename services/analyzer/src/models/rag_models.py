@@ -7,7 +7,7 @@ Define as estruturas de dados usadas pelos serviços RAG.
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field
 
 
 class CorpusStatus(str, Enum):
@@ -56,8 +56,7 @@ class RagCorpus(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class OrganizationKnowledgeBase(BaseModel):
@@ -131,8 +130,7 @@ class RagDocument(BaseModel):
     imported_at: datetime = Field(default_factory=datetime.utcnow)
     error_message: Optional[str] = None
 
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 # ==================== Retrieval Models ====================
@@ -225,8 +223,7 @@ class QueryResponse(BaseModel):
     retrieval_info: Dict[str, Any] = Field(default_factory=dict)
     generated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 # ==================== Import/Sync Models ====================
