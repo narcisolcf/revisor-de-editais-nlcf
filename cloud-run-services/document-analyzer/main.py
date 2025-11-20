@@ -24,6 +24,11 @@ from services.analysis_engine import AnalysisEngine
 from services.classification_service import classify_document_type
 from services.conformity_checker import check_conformity
 from services.ocr_service import OCRService
+from services.continuous_learning_service import (
+    collect_classification_feedback,
+    trigger_model_retraining,
+    get_ml_statistics
+)
 
 # Configurar logging estruturado
 logging.basicConfig(
@@ -356,6 +361,139 @@ def ocr_stats():
     """Retorna estatísticas do serviço OCR."""
     stats = ocr_service.get_stats()
     return jsonify(stats), 200
+
+# ========================================
+# ML & Continuous Learning Endpoints
+# ========================================
+
+@app.route('/ml/feedback', methods=['POST'])
+def ml_feedback():
+    """
+    ✅ Endpoint para coletar feedback de classificação (Aprendizado Contínuo).
+
+    Permite usuários corrigirem classificações e alimenta o sistema de
+    aprendizado contínuo para melhorar o modelo ao longo do tempo.
+    """
+    global REQUEST_COUNT, SUCCESS_COUNT, ERROR_COUNT
+    REQUEST_COUNT += 1
+
+    try:
+        data = request.get_json()
+        if not data:
+            ERROR_COUNT += 1
+            raise BadRequest('JSON data required')
+
+        # Validar campos obrigatórios
+        required_fields = ['document_id', 'content', 'predicted_type', 'confirmed_type', 'confidence']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            ERROR_COUNT += 1
+            raise BadRequest(f"Missing required fields: {', '.join(missing_fields)}")
+
+        if not db:
+            ERROR_COUNT += 1
+            raise InternalServerError('Firestore not available')
+
+        logger.info(f"📝 Coletando feedback ML para documento {data['document_id']}")
+
+        # Coletar feedback
+        example_id = collect_classification_feedback(
+            db=db,
+            document_id=data['document_id'],
+            content=data['content'],
+            predicted_type=data['predicted_type'],
+            confirmed_type=data['confirmed_type'],
+            confidence=data['confidence'],
+            user_id=data.get('user_id')
+        )
+
+        SUCCESS_COUNT += 1
+        return jsonify({
+            'success': True,
+            'example_id': example_id,
+            'message': 'Feedback coletado com sucesso'
+        }), 200
+
+    except BadRequest as e:
+        ERROR_COUNT += 1
+        logger.error(f"❌ Bad request: {e}")
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        ERROR_COUNT += 1
+        logger.error(f"❌ ML feedback error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+@app.route('/ml/retrain', methods=['POST'])
+def ml_retrain():
+    """
+    ✅ Endpoint para disparar re-treinamento do modelo ML.
+
+    Treina novo modelo com dados coletados via feedback. Requer dados suficientes.
+    """
+    global REQUEST_COUNT, SUCCESS_COUNT, ERROR_COUNT
+    REQUEST_COUNT += 1
+
+    try:
+        if not db:
+            ERROR_COUNT += 1
+            raise InternalServerError('Firestore not available')
+
+        logger.info("🔄 Iniciando re-treinamento do modelo ML...")
+
+        # Disparar re-treinamento
+        result = trigger_model_retraining(db)
+
+        if result:
+            SUCCESS_COUNT += 1
+            return jsonify({
+                'success': True,
+                'model_version': result['version'],
+                'accuracy': result['accuracy'],
+                'total_examples': result['total_examples'],
+                'message': 'Modelo re-treinado com sucesso'
+            }), 200
+        else:
+            ERROR_COUNT += 1
+            return jsonify({
+                'success': False,
+                'message': 'Dados insuficientes para re-treinamento ou falha no processo'
+            }), 400
+
+    except Exception as e:
+        ERROR_COUNT += 1
+        logger.error(f"❌ ML retraining error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+@app.route('/ml/stats', methods=['GET'])
+def ml_stats():
+    """
+    ✅ Endpoint para obter estatísticas do sistema ML.
+
+    Retorna informações sobre dados de treinamento, performance do modelo,
+    e métricas de aprendizado contínuo.
+    """
+    global REQUEST_COUNT, SUCCESS_COUNT
+    REQUEST_COUNT += 1
+
+    try:
+        if not db:
+            raise InternalServerError('Firestore not available')
+
+        logger.info("📊 Obtendo estatísticas ML...")
+
+        # Obter estatísticas
+        stats = get_ml_statistics(db)
+
+        SUCCESS_COUNT += 1
+        return jsonify(stats), 200
+
+    except Exception as e:
+        ERROR_COUNT += 1
+        logger.error(f"❌ ML stats error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
 @app.errorhandler(404)
 def not_found(error):
