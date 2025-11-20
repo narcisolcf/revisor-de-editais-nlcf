@@ -1,7 +1,7 @@
 {
   "name": "revisor-de-editais",
-  "version": "1.0.0",
-  "description": "Sistema inteligente de análise de documentos licitatórios com parâmetros personalizáveis por organização",
+  "version": "1.1.0",
+  "description": "Sistema inteligente de análise de documentos licitatórios com parâmetros personalizáveis por organização e Vertex AI RAG",
   "type": "module",
   "private": true,
   "workspaces": [
