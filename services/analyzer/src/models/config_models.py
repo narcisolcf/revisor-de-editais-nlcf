@@ -14,7 +14,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, validator, model_validator
 from pydantic.types import StrictStr, PositiveInt, confloat
 
 from .document_models import DocumentType
@@ -72,8 +72,8 @@ class AnalysisWeights(BaseModel):
             }
         }
     
-    @root_validator
-    def validate_weights_sum_to_100(cls, values):
+    @model_validator(mode='after')
+    def validate_weights_sum_to_100(self):
         """
         🚨 VALIDAÇÃO CRÍTICA: Garante que os pesos somem exatamente 100%.
         
@@ -228,17 +228,17 @@ class CustomRule(BaseModel):
     )
     pattern_type: str = Field(
         default="regex",
-        regex=r"^(regex|keyword|phrase|template)$",
+        pattern=r"^(regex|keyword|phrase|template)$",
         description="Tipo de padrão: regex, keyword, phrase, template"
     )
     severity: str = Field(
         ...,
-        regex=r"^(baixa|media|alta|critica)$",
+        pattern=r"^(baixa|media|alta|critica)$",
         description="Severidade do problema quando detectado"
     )
     category: str = Field(
         ...,
-        regex=r"^(estrutural|juridico|clareza|abnt|orcamentario|formal)$",
+        pattern=r"^(estrutural|juridico|clareza|abnt|orcamentario|formal)$",
         description="Categoria de análise onde a regra se aplica"
     )
     message: StrictStr = Field(
@@ -633,8 +633,8 @@ class OrganizationConfig(BaseModel):
             }
         }
     
-    @root_validator
-    def validate_preset_consistency(cls, values):
+    @model_validator(mode='after')
+    def validate_preset_consistency(self):
         """Valida consistência entre preset_type e weights."""
         preset_type = values.get('preset_type')
         weights = values.get('weights')

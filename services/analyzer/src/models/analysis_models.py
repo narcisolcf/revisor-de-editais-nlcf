@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, validator, model_validator
 from pydantic.types import StrictStr, PositiveInt, confloat
 
 from .config_models import OrganizationConfig, AnalysisWeights
@@ -82,8 +82,8 @@ class ConformityScore(BaseModel):
         """Configuração do modelo Pydantic."""
         validate_assignment = True
     
-    @root_validator
-    def validate_overall_score(cls, values):
+    @model_validator(mode='after')
+    def validate_overall_score(self):
         """Valida que o score geral está dentro da faixa esperada."""
         structural = values.get('structural', 0)
         legal = values.get('legal', 0)
@@ -301,7 +301,7 @@ class AnalysisRequest(BaseModel):
     )
     analysis_type: str = Field(
         default="standard",
-        regex=r"^(quick|standard|detailed|custom)$",
+        pattern=r"^(quick|standard|detailed|custom)$",
         description="Tipo de análise: quick, standard, detailed, custom"
     )
     custom_parameters: Dict[str, Any] = Field(
@@ -330,7 +330,7 @@ class AnalysisRequest(BaseModel):
     )
     priority: str = Field(
         default="normal",
-        regex=r"^(low|normal|high|urgent)$",
+        pattern=r"^(low|normal|high|urgent)$",
         description="Prioridade da análise"
     )
     
@@ -454,8 +454,8 @@ class AnalysisResult(BaseModel):
             datetime: lambda v: v.isoformat()
         }
     
-    @root_validator
-    def validate_weighted_score(cls, values):
+    @model_validator(mode='after')
+    def validate_weighted_score(self):
         """Valida que o weighted_score está consistente com os scores e pesos."""
         conformity_scores = values.get('conformity_scores')
         applied_config = values.get('applied_config')
@@ -631,7 +631,7 @@ class DocumentUploadResponse(BaseModel):
     )
     processing_status: str = Field(
         default="completed",
-        regex=r"^(processing|completed|failed)$",
+        pattern=r"^(processing|completed|failed)$",
         description="Status do processamento"
     )
     upload_timestamp: datetime = Field(

@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, validator, model_validator
 from pydantic.types import StrictStr, PositiveInt
 
 
@@ -80,7 +80,7 @@ class DocumentClassification(BaseModel):
     complexity_level: Optional[str] = Field(
         None,
         description="Nível de complexidade: simples, media, complexa",
-        regex=r"^(simples|media|complexa)$"
+        pattern=r"^(simples|media|complexa)$"
     )
     
     class Config:
@@ -133,9 +133,9 @@ class DocumentMetadata(BaseModel):
     file_name: StrictStr = Field(..., description="Nome original do arquivo")
     file_size: PositiveInt = Field(..., description="Tamanho do arquivo em bytes")
     file_type: StrictStr = Field(
-        ..., 
+        ...,
         description="Tipo MIME do arquivo",
-        regex=r"^[a-z-]+/[a-z0-9][a-z0-9!#$&\-\^]*$"
+        pattern=r"^[a-z-]+/[a-z0-9][a-z0-9!#$&\-\^]*$"
     )
     page_count: Optional[PositiveInt] = Field(
         None, 
@@ -258,12 +258,12 @@ class Document(BaseModel):
             datetime: lambda v: v.isoformat()
         }
     
-    @root_validator
-    def validate_organization_consistency(cls, values):
+    @model_validator(mode='after')
+    def validate_organization_consistency(self):
         """Valida consistência entre organization_id do documento e metadados."""
-        doc_org_id = values.get('organization_id')
-        metadata = values.get('metadata')
-        
+        doc_org_id = self.organization_id
+        metadata = self.metadata
+
         if metadata and metadata.organization_id:
             if doc_org_id != metadata.organization_id:
                 raise ValueError(
@@ -272,8 +272,8 @@ class Document(BaseModel):
         elif metadata:
             # Se não definido nos metadados, usar o do documento
             metadata.organization_id = doc_org_id
-            
-        return values
+
+        return self
     
     @validator('updated_at')
     def validate_updated_at(cls, v, values):
