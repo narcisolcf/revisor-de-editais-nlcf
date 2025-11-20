@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import field_validator, ConfigDict, BaseModel, Field, model_validator
 from pydantic.types import StrictStr, PositiveInt
 
 
@@ -80,13 +80,10 @@ class DocumentClassification(BaseModel):
     complexity_level: Optional[str] = Field(
         None,
         description="Nível de complexidade: simples, media, complexa",
-        regex=r"^(simples|media|complexa)$"
+        pattern=r"^(simples|media|complexa)$"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        use_enum_values = True
-        validate_assignment = True
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
         
     def to_hierarchy_string(self) -> str:
         """
@@ -133,9 +130,9 @@ class DocumentMetadata(BaseModel):
     file_name: StrictStr = Field(..., description="Nome original do arquivo")
     file_size: PositiveInt = Field(..., description="Tamanho do arquivo em bytes")
     file_type: StrictStr = Field(
-        ..., 
+        ...,
         description="Tipo MIME do arquivo",
-        regex=r"^[a-z-]+/[a-z0-9][a-z0-9!#$&\-\^]*$"
+        pattern=r"^[a-z-]+/[a-z0-9][a-z0-9!#$&\-\^]*$"
     )
     page_count: Optional[PositiveInt] = Field(
         None, 
@@ -176,7 +173,8 @@ class DocumentMetadata(BaseModel):
         description="Campos personalizados definidos pela organização"
     )
     
-    @validator('file_type')
+    @field_validator('file_type')
+    @classmethod
     def validate_file_type(cls, v):
         """Valida se o tipo de arquivo é suportado."""
         supported_types = [
@@ -250,20 +248,14 @@ class Document(BaseModel):
         description="ID do documento pai (para versionamento)"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        use_enum_values = True
-        validate_assignment = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
     
-    @root_validator
-    def validate_organization_consistency(cls, values):
+    @model_validator(mode='after')
+    def validate_organization_consistency(self):
         """Valida consistência entre organization_id do documento e metadados."""
-        doc_org_id = values.get('organization_id')
-        metadata = values.get('metadata')
-        
+        doc_org_id = self.organization_id
+        metadata = self.metadata
+
         if metadata and metadata.organization_id:
             if doc_org_id != metadata.organization_id:
                 raise ValueError(
@@ -272,16 +264,15 @@ class Document(BaseModel):
         elif metadata:
             # Se não definido nos metadados, usar o do documento
             metadata.organization_id = doc_org_id
-            
-        return values
+
+        return self
     
-    @validator('updated_at')
-    def validate_updated_at(cls, v, values):
+    @model_validator(mode='after')
+    def validate_updated_at(self):
         """Garante que updated_at seja posterior ou igual a created_at."""
-        created_at = values.get('created_at')
-        if created_at and v < created_at:
+        if self.updated_at and self.created_at and self.updated_at < self.created_at:
             raise ValueError('updated_at deve ser posterior ou igual a created_at')
-        return v
+        return self
     
     def update_content(self, new_content: str, updated_by: Optional[str] = None) -> None:
         """

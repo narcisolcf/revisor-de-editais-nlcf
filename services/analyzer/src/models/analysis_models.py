@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import field_validator, ConfigDict, BaseModel, Field, model_validator
 from pydantic.types import StrictStr, PositiveInt, confloat
 
 from .config_models import OrganizationConfig, AnalysisWeights
@@ -78,12 +78,10 @@ class ConformityScore(BaseModel):
         description="Pontuação geral calculada"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)
     
-    @root_validator
-    def validate_overall_score(cls, values):
+    @model_validator(mode='after')
+    def validate_overall_score(self):
         """Valida que o score geral está dentro da faixa esperada."""
         structural = values.get('structural', 0)
         legal = values.get('legal', 0)
@@ -228,29 +226,25 @@ class AnalysisFinding(BaseModel):
         description="Impacto estimado do problema (0-10)"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        use_enum_values = True
-        validate_assignment = True
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
     
-    @validator('impact_score')
-    def validate_impact_score_by_severity(cls, v, values):
+    @model_validator(mode='after')
+    def validate_impact_score_by_severity(self):
         """Ajusta impact_score baseado na severidade."""
-        severity = values.get('severity')
-        if severity:
+        if self.severity:
             severity_impacts = {
                 ProblemSeverity.BAIXA: (0, 3),
                 ProblemSeverity.MEDIA: (3, 6),
                 ProblemSeverity.ALTA: (6, 8),
                 ProblemSeverity.CRITICA: (8, 10)
             }
-            
-            min_impact, max_impact = severity_impacts[severity]
-            if not (min_impact <= v <= max_impact):
+
+            min_impact, max_impact = severity_impacts[self.severity]
+            if not (min_impact <= self.impact_score <= max_impact):
                 # Ajusta automaticamente se fora da faixa
-                return max(min_impact, min(v, max_impact))
-        
-        return v
+                self.impact_score = max(min_impact, min(self.impact_score, max_impact))
+
+        return self
     
     def get_severity_weight(self) -> float:
         """
@@ -301,7 +295,7 @@ class AnalysisRequest(BaseModel):
     )
     analysis_type: str = Field(
         default="standard",
-        regex=r"^(quick|standard|detailed|custom)$",
+        pattern=r"^(quick|standard|detailed|custom)$",
         description="Tipo de análise: quick, standard, detailed, custom"
     )
     custom_parameters: Dict[str, Any] = Field(
@@ -330,13 +324,11 @@ class AnalysisRequest(BaseModel):
     )
     priority: str = Field(
         default="normal",
-        regex=r"^(low|normal|high|urgent)$",
+        pattern=r"^(low|normal|high|urgent)$",
         description="Prioridade da análise"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)
     
     def get_cache_key(self) -> str:
         """
@@ -446,16 +438,10 @@ class AnalysisResult(BaseModel):
         description="Versão do modelo de análise utilizado"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        use_enum_values = True
-        validate_assignment = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
     
-    @root_validator
-    def validate_weighted_score(cls, values):
+    @model_validator(mode='after')
+    def validate_weighted_score(self):
         """Valida que o weighted_score está consistente com os scores e pesos."""
         conformity_scores = values.get('conformity_scores')
         applied_config = values.get('applied_config')
@@ -631,7 +617,7 @@ class DocumentUploadResponse(BaseModel):
     )
     processing_status: str = Field(
         default="completed",
-        regex=r"^(processing|completed|failed)$",
+        pattern=r"^(processing|completed|failed)$",
         description="Status do processamento"
     )
     upload_timestamp: datetime = Field(
@@ -652,28 +638,7 @@ class DocumentUploadResponse(BaseModel):
         description="Tempo estimado para análise em segundos"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        use_enum_values = True
-        validate_assignment = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
-        schema_extra = {
-            "example": {
-                "document_id": "doc_abc123def456",
-                "filename": "edital_pregao_001_2024.pdf",
-                "file_type": "application/pdf",
-                "file_size": 245760,
-                "extracted_text_length": 15420,
-                "document_type": "pregao",
-                "processing_status": "completed",
-                "upload_timestamp": "2024-01-15T14:30:00Z",
-                "preview_text": "EDITAL DE PREGÃO ELETRÔNICO Nº 001/2024...",
-                "detected_language": "pt-BR",
-                "estimated_analysis_time": 45
-            }
-        }
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
 
 
 class AnalysisResponse(BaseModel):
@@ -696,10 +661,7 @@ class AnalysisResponse(BaseModel):
         description="Metadados da API"
     )
     
-    class Config:
-        """Configuração do modelo Pydantic."""
-        use_enum_values = True
-        validate_assignment = True
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
     
     @property
     def overall_score(self) -> float:

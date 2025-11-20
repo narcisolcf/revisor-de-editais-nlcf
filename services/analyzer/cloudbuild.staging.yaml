@@ -1,0 +1,59 @@
+# Cloud Build configuration for Analyzer Service - STAGING
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/analyzer-rag-staging:$BUILD_ID'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/analyzer-rag-staging:latest'
+      - '.'
+    dir: 'services/analyzer'
+
+  # Push tagged image with build ID
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/analyzer-rag-staging:$BUILD_ID'
+
+  # Push latest tag
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/analyzer-rag-staging:latest'
+
+  # Deploy to Cloud Run - Staging
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'analyzer-rag-staging'
+      - '--image=gcr.io/$PROJECT_ID/analyzer-rag-staging:$BUILD_ID'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'  # For staging testing
+      - '--memory=2Gi'  # Less than production
+      - '--cpu=1'  # Less than production
+      - '--concurrency=40'  # Less than production
+      - '--max-instances=5'  # Limited for staging
+      - '--min-instances=0'  # Scale to zero when not used
+      - '--timeout=180'
+      - '--set-env-vars=^@^GCP_PROJECT_ID=${PROJECT_ID}@GCP_LOCATION=us-central1@GCS_RAG_BUCKET=${PROJECT_ID}-rag-corpus@RAG_CHUNK_SIZE=512@RAG_CHUNK_OVERLAP=100@RAG_EMBEDDING_MODEL=text-embedding-004@RAG_DEFAULT_MODEL=gemini-2.0-flash-001@RAG_DEFAULT_TEMPERATURE=0.3@RAG_DEFAULT_TOP_K=10@REDIS_ENABLED=false@CACHE_TTL_SECONDS=1800@LOG_LEVEL=DEBUG@SENTRY_ENVIRONMENT=staging@TEST_MODE=false@PYTHONPATH=/app/src'
+      - '--service-account=analyzer-rag-staging@${PROJECT_ID}.iam.gserviceaccount.com'
+      - '--labels=environment=staging,version=1-1-0,component=analyzer-rag'
+
+# Store images in Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/analyzer-rag-staging:$BUILD_ID'
+  - 'gcr.io/$PROJECT_ID/analyzer-rag-staging:latest'
+
+# Build options - smaller for staging
+options:
+  machineType: 'E2_HIGHCPU_4'  # Smaller than production
+  diskSizeGb: '50'
+  logging: CLOUD_LOGGING_ONLY
+
+# Timeout for the entire build
+timeout: '900s'  # 15 minutes
