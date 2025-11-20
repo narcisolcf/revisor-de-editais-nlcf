@@ -20,6 +20,7 @@ import {
   Plus,
   Eye
 } from 'lucide-react';
+import { safeOpen } from '@/lib/browser-utils';
 
 interface QuickAction {
   id: string;
@@ -296,22 +297,22 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-900">Links Úteis</h4>
           <div className="space-y-1">
-            <Button 
-              variant="link" 
-              size="sm" 
+            <Button
+              variant="link"
+              size="sm"
               className="h-auto p-0 text-blue-600 hover:text-blue-700"
-              onClick={() => window.open('/docs', '_blank')}
+              onClick={() => safeOpen('/docs', '_blank')}
             >
               <FileText className="w-3 h-3 mr-1" />
               Documentação
               <ExternalLink className="w-3 h-3 ml-1" />
             </Button>
-            
-            <Button 
-              variant="link" 
-              size="sm" 
+
+            <Button
+              variant="link"
+              size="sm"
               className="h-auto p-0 text-blue-600 hover:text-blue-700"
-              onClick={() => window.open('/support', '_blank')}
+              onClick={() => safeOpen('/support', '_blank')}
             >
               <Eye className="w-3 h-3 mr-1" />
               Suporte Técnico

@@ -15,6 +15,7 @@ import {
   IssueData,
   PerformanceMetricData,
 } from '@/services/AnalyticsService';
+import { safeOpen } from '@/lib/browser-utils';
 
 export interface ReportExporterProps {
   metrics: DashboardMetrics | null;
@@ -429,7 +430,7 @@ export const ReportExporter: React.FC<ReportExporterProps> = ({
     `;
 
     // Abrir em nova janela para impressão
-    const printWindow = window.open('', '_blank');
+    const printWindow = safeOpen('', '_blank');
     if (printWindow) {
       printWindow.document.write(htmlContent);
       printWindow.document.close();

@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo } from 'react';
 import { ErrorBoundaryProps, ErrorBoundaryState } from '@/types/error';
 import { createErrorRecord, sanitizeErrorForLogging } from '@/utils/errorUtils';
 import { monitoringService } from '@/services/monitoringService';
+import { isBrowser } from '@/lib/browser-utils';
 import ErrorFallback from './ErrorFallback';
 
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -58,9 +59,11 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     }
 
     // Auto-reset after 30 seconds to allow recovery
-    this.resetTimeoutId = window.setTimeout(() => {
-      this.resetError();
-    }, 30000);
+    if (isBrowser()) {
+      this.resetTimeoutId = window.setTimeout(() => {
+        this.resetError();
+      }, 30000);
+    }
   }
 
   componentWillUnmount() {
