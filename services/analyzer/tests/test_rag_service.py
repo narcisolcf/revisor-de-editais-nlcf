@@ -105,10 +105,18 @@ class TestRAGService:
     @pytest.mark.asyncio
     async def test_generate_with_rag(self, rag_service):
         """Testa geração com RAG."""
-        with patch('src.services.rag_service.GenerativeModel') as mock_model_class:
-            # Mock do modelo e resposta
+        with patch('src.services.rag_service.GenerativeModel') as mock_model_class, \
+             patch('src.services.rag_service.Tool'), \
+             patch('src.services.rag_service.rag'):
+
+            # Mock do grounding metadata
+            mock_grounding = Mock()
+            mock_grounding.grounding_chunks = []  # Empty list to avoid iteration error
+
+            # Mock da resposta do modelo
             mock_response = Mock()
             mock_response.text = "Resposta gerada com RAG"
+            mock_response.grounding_metadata = mock_grounding
 
             mock_model = Mock()
             mock_model.generate_content.return_value = mock_response

@@ -497,7 +497,7 @@ class MetadataExtractor:
         metadata = {
             'document_id': document.id,
             'document_title': document.title,
-            'file_type': document.file_type,
+            'file_type': document.metadata.file_type if document.metadata else 'unknown',
             'extracted_at': datetime.utcnow().isoformat(),
         }
 
@@ -585,9 +585,10 @@ class MetadataExtractor:
 
     def _extract_organ(self, document: Document) -> Optional[str]:
         """Extrai órgão responsável."""
-        # Tenta pegar de metadata existente
-        if hasattr(document, 'metadata'):
-            organ = document.metadata.get('organ') or document.metadata.get('organization')
+        # Tenta pegar de metadata existente (custom_fields)
+        if hasattr(document, 'metadata') and document.metadata:
+            custom_fields = getattr(document.metadata, 'custom_fields', {})
+            organ = custom_fields.get('organ') or custom_fields.get('organization')
             if organ:
                 return organ
 
