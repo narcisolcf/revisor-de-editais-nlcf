@@ -16,6 +16,9 @@ import NotFound from "./pages/NotFound";
 import QAClassification from "./pages/QAClassification";
 import LandingPage from "./pages/LandingPage";
 import Comissoes from "./pages/Comissoes";
+import Servicos from "./pages/Servicos";
+import Sobre from "./pages/Sobre";
+import Contato from "./pages/Contato";
 
 function App() {
   const queryClient = new QueryClient();
@@ -39,7 +42,10 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
-                
+                <Route path="/servicos" element={<Servicos />} />
+                <Route path="/sobre" element={<Sobre />} />
+                <Route path="/contato" element={<Contato />} />
+
                 {/* Protected Routes */}
                 <Route 
                   path="/dashboard" 
