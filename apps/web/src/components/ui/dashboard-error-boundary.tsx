@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AnimatedContainer } from '@/components/ui/animated-container';
+import { safeGetCurrentUrl, safeReload, safeNavigate, safeNavigator } from '@/lib/browser-utils';
 
 interface Props {
   children: ReactNode;
@@ -47,13 +48,14 @@ class DashboardErrorBoundary extends Component<Props, State> {
     });
 
     // Log do erro para monitoramento
+    const nav = safeNavigator();
     console.error('Dashboard Error Boundary caught an error:', {
       error,
       errorInfo,
       errorId: this.state.errorId,
       timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      url: window.location.href,
+      userAgent: nav?.userAgent || 'unknown',
+      url: safeGetCurrentUrl(),
     });
 
     // Callback personalizado para tratamento de erro
@@ -72,11 +74,11 @@ class DashboardErrorBoundary extends Component<Props, State> {
   };
 
   handleReload = () => {
-    window.location.reload();
+    safeReload();
   };
 
   handleGoHome = () => {
-    window.location.href = '/';
+    safeNavigate('/');
   };
 
   copyErrorDetails = () => {

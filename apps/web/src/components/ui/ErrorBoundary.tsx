@@ -3,6 +3,7 @@ import { AlertTriangle, RefreshCw, FileText, Copy, ChevronDown, ChevronUp } from
 import { Button } from './button';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
 import { Alert, AlertDescription } from './alert';
+import { safeGetCurrentUrl, safeNavigator } from '@/lib/browser-utils';
 
 interface Props {
   children: ReactNode;
@@ -71,13 +72,16 @@ export class ErrorBoundary extends Component<Props, State> {
     const { error, errorInfo } = this.state;
     if (!error || !errorInfo) return;
 
+    const nav = safeNavigator();
+    const currentUrl = safeGetCurrentUrl();
+
     const errorReport = `
 RELATÓRIO DE ERRO
 ================
 
 Timestamp: ${new Date().toISOString()}
-URL: ${window.location.href}
-User Agent: ${navigator.userAgent}
+URL: ${currentUrl}
+User Agent: ${nav?.userAgent || 'unknown'}
 
 ERROR MESSAGE:
 ${error.message}
@@ -212,8 +216,8 @@ ${JSON.stringify({
 
                         <div className="text-xs text-gray-600 pt-2 border-t">
                           <p><strong>Timestamp:</strong> {new Date().toLocaleString()}</p>
-                          <p><strong>URL:</strong> {window.location.href}</p>
-                          <p><strong>User Agent:</strong> {navigator.userAgent}</p>
+                          <p><strong>URL:</strong> {safeGetCurrentUrl()}</p>
+                          <p><strong>User Agent:</strong> {safeNavigator()?.userAgent || 'unknown'}</p>
                         </div>
                       </div>
                     )}

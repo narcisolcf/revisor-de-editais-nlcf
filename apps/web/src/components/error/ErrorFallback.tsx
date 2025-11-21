@@ -4,6 +4,7 @@ import { getErrorDisplayMessage } from '@/utils/errorUtils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, RefreshCw, Home, MessageCircle } from 'lucide-react';
+import { safeNavigate, safeReload } from '@/lib/browser-utils';
 import ErrorReportDialog from './ErrorReportDialog';
 
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({
@@ -16,7 +17,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   const displayMessage = error ? getErrorDisplayMessage(error) : 'Algo deu errado inesperadamente.';
 
   const handleGoHome = () => {
-    window.location.href = '/';
+    safeNavigate('/');
   };
 
   const handleReport = () => {
@@ -27,7 +28,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   };
 
   const handleReload = () => {
-    window.location.reload();
+    safeReload();
   };
 
   return (

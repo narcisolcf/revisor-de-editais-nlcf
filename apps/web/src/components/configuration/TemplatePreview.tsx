@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { 
-  Download, 
-  X, 
+import {
+  Download,
+  X,
   Zap,
   FileText,
   Target,
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { TemplateStructure } from '../../types/template';
 import { Label } from '../ui/label';
+import { safeGetCurrentUrl, safeNavigator } from '@/lib/browser-utils';
 
 interface TemplatePreviewProps {
   template: TemplateStructure;
@@ -114,15 +115,18 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   };
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
+    const nav = safeNavigator();
+    const currentUrl = safeGetCurrentUrl();
+
+    if (nav?.share) {
+      nav.share({
         title: template.metadata.name,
         text: template.metadata.description,
-        url: window.location.href
+        url: currentUrl
       });
-    } else {
+    } else if (nav?.clipboard) {
       // Fallback para copiar URL
-      navigator.clipboard.writeText(window.location.href);
+      nav.clipboard.writeText(currentUrl);
       alert('URL copiada para a área de transferência!');
     }
   };

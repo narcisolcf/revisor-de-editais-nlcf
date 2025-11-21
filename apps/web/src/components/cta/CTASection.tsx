@@ -6,6 +6,7 @@ import { CTAButtons } from './components/CTAButtons';
 import { GlassMockup } from './components/GlassMockup';
 import { FEATURES, STATS, FONTS, GRADIENTS } from './constants';
 import type { CTASectionProps, CTAButton } from './types';
+import { safeNavigate } from '@/lib/browser-utils';
 
 export function CTASection({ 
   onStartAnalysis, 
@@ -24,7 +25,7 @@ export function CTASection({
         if (onStartAnalysis) {
           onStartAnalysis();
         } else {
-          window.location.href = '/documentos';
+          safeNavigate('/documentos');
         }
       }
     },

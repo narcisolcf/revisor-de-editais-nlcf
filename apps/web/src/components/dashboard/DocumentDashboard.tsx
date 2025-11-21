@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { safeOpen, safeDocument } from '@/lib/browser-utils';
 
 interface DocumentDashboardProps {
   prefeituraId: string;
@@ -346,22 +347,25 @@ export const DocumentDashboard: React.FC<DocumentDashboardProps> = ({
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          window.open(document.urlStorage, '_blank');
+                          safeOpen(document.urlStorage, '_blank');
                         }}
                         title="Visualizar"
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      
+
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const link = window.document.createElement('a');
-                          link.href = document.urlStorage;
-                          link.download = document.nome;
-                          link.click();
+                          const doc = safeDocument();
+                          if (doc) {
+                            const link = doc.createElement('a');
+                            link.href = document.urlStorage;
+                            link.download = document.nome;
+                            link.click();
+                          }
                         }}
                         title="Download"
                       >

@@ -24,6 +24,7 @@ import { DocumentClassification, DocumentUpload } from '@/types/document';
 import { HierarchicalClassification } from '@/components/HierarchicalClassification';
 import { useSmartClassification } from '@/hooks/useSmartClassification';
 import { useToast } from '@/components/ui/use-toast';
+import { safeOpen } from '@/lib/browser-utils';
 
 interface DocumentUploaderProps {
   prefeituraId: string;
@@ -226,9 +227,9 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   // Preview do arquivo
   const previewFile = (file: FileWithPreview) => {
     if (file.uploadedDocument?.urlStorage) {
-      window.open(file.uploadedDocument.urlStorage, '_blank');
+      safeOpen(file.uploadedDocument.urlStorage, '_blank');
     } else if (file.preview) {
-      window.open(file.preview, '_blank');
+      safeOpen(file.preview, '_blank');
     }
   };
 

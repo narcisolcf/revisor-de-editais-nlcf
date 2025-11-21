@@ -131,6 +131,58 @@ export class TestHelpers {
   }
 
   /**
+   * Click com retry e wait - Previne TimeoutErrors
+   * @param selector - Seletor do elemento (preferir data-testid)
+   * @param options - Opções de timeout e retries
+   */
+  async safeClick(
+    selector: string,
+    options?: { timeout?: number; retries?: number }
+  ): Promise<void> {
+    const timeout = options?.timeout || 30000; // Aumentado de 5000ms para 30000ms
+    const retries = options?.retries || 3;
+
+    for (let i = 0; i < retries; i++) {
+      try {
+        // Aguardar elemento estar visível
+        await this.page.waitForSelector(selector, { state: 'visible', timeout });
+
+        // Aguardar elemento estar habilitado
+        await this.page.waitForSelector(selector, { state: 'attached', timeout });
+
+        // Realizar o click
+        await this.page.click(selector, { timeout });
+
+        return; // Sucesso, sair da função
+      } catch (error) {
+        if (i === retries - 1) {
+          // Última tentativa falhou, lançar erro
+          throw new Error(
+            `safeClick failed after ${retries} retries for selector: ${selector}\n` +
+            `Original error: ${error}`
+          );
+        }
+
+        // Aguardar com backoff exponencial antes de tentar novamente
+        const backoffMs = 1000 * (i + 1);
+        console.warn(
+          `safeClick attempt ${i + 1}/${retries} failed for ${selector}, ` +
+          `retrying in ${backoffMs}ms...`
+        );
+        await this.page.waitForTimeout(backoffMs);
+      }
+    }
+  }
+
+  /**
+   * Gera seletor seguro usando data-testid
+   * @param testId - ID do teste
+   */
+  getSafeSelector(testId: string): string {
+    return `[data-testid="${testId}"]`;
+  }
+
+  /**
    * Captura métricas de performance
    */
   async capturePerformanceMetrics() {
