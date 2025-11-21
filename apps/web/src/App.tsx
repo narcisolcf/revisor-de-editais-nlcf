@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,9 +19,15 @@ import Comissoes from "./pages/Comissoes";
 import Servicos from "./pages/Servicos";
 import Sobre from "./pages/Sobre";
 import Contato from "./pages/Contato";
+import { initializeApiClient } from "@/lib/api-config";
 
 function App() {
   const queryClient = new QueryClient();
+
+  // Inicializa API Client com interceptors e retry logic
+  useEffect(() => {
+    initializeApiClient();
+  }, []);
 
   const handleGlobalError = (error: Error, errorInfo: React.ErrorInfo) => {
     // Future: Send to monitoring service
