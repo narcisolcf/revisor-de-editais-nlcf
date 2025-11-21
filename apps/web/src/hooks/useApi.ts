@@ -5,13 +5,23 @@
  * Fornece interface simplificada para fazer requisições com tratamento robusto de erros.
  */
 
+import * as React from 'react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { apiClient, NetworkError } from '@/services/core/api';
 import { errorService } from '@/services/core/error';
 import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 import type { ApiResponse, RequestConfig } from '@/types/core/api';
 
-export interface UseApiOptions<T> extends Partial<RequestConfig> {
+export interface UseApiOptions<T> {
+  /** Método HTTP */
+  method?: RequestConfig['method'];
+  /** Headers customizados */
+  headers?: RequestConfig['headers'];
+  /** Timeout customizado */
+  timeout?: RequestConfig['timeout'];
+  /** Corpo da requisição */
+  body?: RequestConfig['body'];
   /** Se deve executar automaticamente ao montar */
   immediate?: boolean;
   /** Callback de sucesso */
@@ -190,10 +200,10 @@ export function useApi<T = unknown>(
             description: message,
             variant: 'destructive',
             action: enableRetryButton
-              ? {
-                  label: 'Tentar Novamente',
+              ? React.createElement(ToastAction, {
+                  altText: 'Tentar novamente',
                   onClick: () => retry()
-                }
+                }, 'Tentar Novamente')
               : undefined
           });
         }
@@ -318,9 +328,9 @@ function getErrorMessage(error: NetworkError): string {
  */
 export function useGet<T = unknown>(
   url: string,
-  options?: Omit<UseApiOptions<T>, 'method'>
+  options?: UseApiOptions<T>
 ): UseApiReturn<T> {
-  return useApi<T>(url, { ...options, method: 'GET' });
+  return useApi<T>(url, { ...options, method: 'GET' as const });
 }
 
 /**
@@ -328,9 +338,9 @@ export function useGet<T = unknown>(
  */
 export function usePost<T = unknown>(
   url: string,
-  options?: Omit<UseApiOptions<T>, 'method'>
+  options?: UseApiOptions<T>
 ): UseApiReturn<T> {
-  return useApi<T>(url, { ...options, method: 'POST' });
+  return useApi<T>(url, { ...options, method: 'POST' as const });
 }
 
 /**
@@ -338,9 +348,9 @@ export function usePost<T = unknown>(
  */
 export function usePut<T = unknown>(
   url: string,
-  options?: Omit<UseApiOptions<T>, 'method'>
+  options?: UseApiOptions<T>
 ): UseApiReturn<T> {
-  return useApi<T>(url, { ...options, method: 'PUT' });
+  return useApi<T>(url, { ...options, method: 'PUT' as const });
 }
 
 /**
@@ -348,9 +358,9 @@ export function usePut<T = unknown>(
  */
 export function usePatch<T = unknown>(
   url: string,
-  options?: Omit<UseApiOptions<T>, 'method'>
+  options?: UseApiOptions<T>
 ): UseApiReturn<T> {
-  return useApi<T>(url, { ...options, method: 'PATCH' });
+  return useApi<T>(url, { ...options, method: 'PATCH' as const });
 }
 
 /**
@@ -358,9 +368,9 @@ export function usePatch<T = unknown>(
  */
 export function useDelete<T = unknown>(
   url: string,
-  options?: Omit<UseApiOptions<T>, 'method'>
+  options?: UseApiOptions<T>
 ): UseApiReturn<T> {
-  return useApi<T>(url, { ...options, method: 'DELETE' });
+  return useApi<T>(url, { ...options, method: 'DELETE' as const });
 }
 
 export default useApi;
