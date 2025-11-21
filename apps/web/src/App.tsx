@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ErrorBoundary, ConsoleInterceptor } from "@/components/error";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { AppLayout } from "@/components/layout";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import DocumentReview from "./pages/DocumentReview";
@@ -52,48 +53,28 @@ function App() {
                 <Route path="/sobre" element={<Sobre />} />
                 <Route path="/contato" element={<Contato />} />
 
-                {/* Protected Routes */}
-                <Route 
-                  path="/dashboard" 
+                {/* Protected Routes with Layout */}
+                <Route
                   element={
                     <ProtectedRoute>
-                      <Navigate to="/documentos" replace />
+                      <AppLayout />
                     </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/documentos" 
-                  element={
-                    <ProtectedRoute>
-                      <DocumentReview />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/analise" 
-                  element={
-                    <ProtectedRoute>
-                      <DocumentAnalysisPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/qa/classification" 
-                  element={
-                    <ProtectedRoute requiredRole="analyst">
-                      <QAClassification />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/comissoes" 
-                  element={
-                    <ProtectedRoute>
-                      <Comissoes />
-                    </ProtectedRoute>
-                  } 
-                />
-                
+                  }
+                >
+                  <Route path="/dashboard" element={<Navigate to="/documentos" replace />} />
+                  <Route path="/documentos" element={<DocumentReview />} />
+                  <Route path="/analise" element={<DocumentAnalysisPage />} />
+                  <Route path="/comissoes" element={<Comissoes />} />
+                  <Route
+                    path="/qa/classification"
+                    element={
+                      <ProtectedRoute requiredRole="analyst">
+                        <QAClassification />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Route>
+
                 {/* Fallback */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
