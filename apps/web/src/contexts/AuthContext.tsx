@@ -24,6 +24,7 @@ import {
 } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { authSync, syncLogout, syncLogin } from '@/lib/auth-sync';
 
 // Types
 interface UserProfile {
@@ -227,7 +228,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await signOut(auth);
       setUserProfile(null);
-      
+
+      // Notifica outras tabs sobre logout
+      syncLogout();
+
       toast({
         title: 'Sucesso',
         description: 'Logout realizado com sucesso!'
@@ -272,6 +276,42 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     return unsubscribe;
   }, []);
+
+  // Auth sync entre múltiplas tabs
+  useEffect(() => {
+    // Notifica outras tabs quando fizer login
+    if (currentUser) {
+      syncLogin(currentUser.uid);
+    }
+
+    // Escuta logout de outras tabs
+    authSync.onLogout(() => {
+      console.log('[AuthContext] Recebeu logout de outra tab');
+      setCurrentUser(null);
+      setUserProfile(null);
+    });
+
+    // Escuta login de outras tabs
+    authSync.onLogin((userId) => {
+      console.log('[AuthContext] Recebeu login de outra tab:', userId);
+      // Força reload do auth state
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user && user.uid === userId) {
+          setCurrentUser(user);
+        }
+      });
+      return () => unsubscribe();
+    });
+
+    // Responde a verificações de sessão
+    authSync.onSessionCheck(() => {
+      return !!currentUser;
+    });
+
+    return () => {
+      // Cleanup não necessário (authSync é singleton)
+    };
+  }, [currentUser]);
 
   const value: AuthContextType = {
     currentUser,
