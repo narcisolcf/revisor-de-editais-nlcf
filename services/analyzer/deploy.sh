@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Deploy LicitaReview Analyzer Service with Vertex AI RAG
-# Version: 1.1.0
+# Version: 2.0.0
 
 set -e
 
-echo "🚀 Starting deployment of Analyzer Service v1.1.0 with RAG..."
+echo "🚀 Starting deployment of Analyzer Service v2.0.0 with RAG..."
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -135,7 +135,7 @@ echo -e "${YELLOW}Service Information:${NC}"
 echo "  📍 URL: $SERVICE_URL"
 echo "  🆔 Service: $SERVICE_NAME"
 echo "  🌍 Region: $REGION"
-echo "  📦 Version: v1.1.0"
+echo "  📦 Version: v2.0.0"
 echo ""
 echo -e "${YELLOW}Next Steps:${NC}"
 echo "  1. Test the service:"

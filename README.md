@@ -2,10 +2,12 @@
 
 > Sistema inteligente de análise de documentos licitatórios com parâmetros personalizáveis por organização
 
-[![CI/CD](https://github.com/costaefeitosa/revisor-de-editais/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/costaefeitosa/revisor-de-editais/actions)
-[![Coverage](https://codecov.io/gh/costaefeitosa/revisor-de-editais/branch/main/graph/badge.svg)](https://codecov.io/gh/costaefeitosa/revisor-de-editais)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-2.0.0-green.svg)](package.json)
+[![Python Tests](https://img.shields.io/badge/python%20tests-14%2F14%20passing-brightgreen.svg)](services/analyzer/tests/)
+[![Test Coverage](https://img.shields.io/badge/coverage-16%25%20(critical%2060--83%25)-yellow.svg)](services/analyzer/)
+[![E2E Tests](https://img.shields.io/badge/e2e%20tests-50%2B%20ready-blue.svg)](tests/e2e/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-success.svg)](.github/workflows/ci.yml)
 
 ## 🎯 **Diferencial Competitivo**
 

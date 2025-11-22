@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { TestHelpers } from '../utils/test-helpers';
-import { testDocuments, performanceLimits } from '../fixtures/test-data';
+import { testDocuments, performanceThresholds } from '../fixtures/test-data';
+import * as path from 'path';
+import * as fs from 'fs';
 
 /**
  * Testes E2E para validação de performance
@@ -21,10 +23,10 @@ test.describe('Validação de Performance', () => {
       // Upload do documento
       await page.goto('/upload');
       
-      const filePath = require('path').join(__dirname, '../fixtures/files/medium-document.pdf');
+      const filePath = path.join(__dirname, '../fixtures/files/medium-document.pdf');
       // Criar arquivo de teste de tamanho médio (2MB)
       const content = 'PDF content '.repeat(100000); // ~2MB
-      require('fs').writeFileSync(filePath, content);
+      fs.writeFileSync(filePath, content);
       
       try {
         // Upload
@@ -89,15 +91,15 @@ test.describe('Validação de Performance', () => {
         expect(metrics.memoryUsage).toBeLessThan(512); // Menos de 512MB
         
       } finally {
-        require('fs').unlinkSync(filePath);
+        fs.unlinkSync(filePath);
       }
     });
 
     test('análise de documento grande deve ser otimizada', async ({ page }) => {
       // Criar documento grande (5MB)
-      const filePath = require('path').join(__dirname, '../fixtures/files/large-document.pdf');
+      const filePath = path.join(__dirname, '../fixtures/files/large-document.pdf');
       const largeContent = 'Large PDF content '.repeat(250000); // ~5MB
-      require('fs').writeFileSync(filePath, largeContent);
+      fs.writeFileSync(filePath, largeContent);
       
       try {
         const startTime = Date.now();
@@ -136,7 +138,7 @@ test.describe('Validação de Performance', () => {
         expect(totalTime).toBeLessThan(45000);
         
       } finally {
-        require('fs').unlinkSync(filePath);
+        fs.unlinkSync(filePath);
       }
     });
 
@@ -155,8 +157,8 @@ test.describe('Validação de Performance', () => {
           await pageHelpers.login();
           
           // Upload de documento único para cada análise
-          const filePath = require('path').join(__dirname, `../fixtures/files/concurrent-test-${i}.pdf`);
-          require('fs').writeFileSync(filePath, `PDF content for analysis ${i}`);
+          const filePath = path.join(__dirname, `../fixtures/files/concurrent-test-${i}.pdf`);
+          fs.writeFileSync(filePath, `PDF content for analysis ${i}`);
           
           try {
             await newPage.goto('/upload');
@@ -187,7 +189,7 @@ test.describe('Validação de Performance', () => {
             return Date.now() - startTime;
             
           } finally {
-            require('fs').unlinkSync(filePath);
+            fs.unlinkSync(filePath);
             await newPage.close();
           }
         })();
@@ -356,9 +358,9 @@ test.describe('Validação de Performance', () => {
       await page.goto('/upload');
       
       // Criar arquivo de tamanho médio para testar progresso
-      const filePath = require('path').join(__dirname, '../fixtures/files/progress-test.pdf');
+      const filePath = path.join(__dirname, '../fixtures/files/progress-test.pdf');
       const content = 'PDF content for progress test '.repeat(50000); // ~1.5MB
-      require('fs').writeFileSync(filePath, content);
+      fs.writeFileSync(filePath, content);
       
       try {
         const fileInput = page.locator('[data-testid="file-input"]');
@@ -392,7 +394,7 @@ test.describe('Validação de Performance', () => {
         expect(progressUpdates).toBeGreaterThan(0);
         
       } finally {
-        require('fs').unlinkSync(filePath);
+        fs.unlinkSync(filePath);
       }
     });
   });
