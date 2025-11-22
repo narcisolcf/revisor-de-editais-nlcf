@@ -9,7 +9,7 @@ steps:
       - '-t'
       - 'gcr.io/$PROJECT_ID/analyzer-rag:latest'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/analyzer-rag:v1.1.0'
+      - 'gcr.io/$PROJECT_ID/analyzer-rag:v2.0.0'
       - '.'
     dir: 'services/analyzer'
 
@@ -29,7 +29,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'gcr.io/$PROJECT_ID/analyzer-rag:v1.1.0'
+      - 'gcr.io/$PROJECT_ID/analyzer-rag:v2.0.0'
 
   # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -55,7 +55,7 @@ steps:
 images:
   - 'gcr.io/$PROJECT_ID/analyzer-rag:$BUILD_ID'
   - 'gcr.io/$PROJECT_ID/analyzer-rag:latest'
-  - 'gcr.io/$PROJECT_ID/analyzer-rag:v1.1.0'
+  - 'gcr.io/$PROJECT_ID/analyzer-rag:v2.0.0'
 
 # Build options
 options:
